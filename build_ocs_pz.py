@@ -435,7 +435,7 @@ def floor_svg():
     # cable tray along aisle (top edge) + riser to server room
     tray_y = 1360
     o.append(f'<line x1="150" y1="{tray_y}" x2="{38.0 * U}" y2="{tray_y}" class="tray-l"/>')
-    o.append(f'<polyline points="{34.0 * U},{tray_y} {34.0 * U},{2670} {35.2 * U},{2670}" class="tray-l"/>')
+    o.append(f'<polyline points="{34.0 * U},{tray_y} {34.0 * U},{2640} {34.9 * U},{2640}" class="tray-l"/>')
     o.append(f'<text x="900" y="{tray_y + 80}" class="flr-t">케이블 트레이 (통로 상부, 광 10G 이중·Cat6A·PTP)</text>')
     # cabinets: near aisle side of each cell
     cabs = {"A-3-5": (1250, 1250), "A-3-4": (3050, 1250), "A-3-2": (3750, 1230), "A-3-3": (850, 1650), "A-3-1": (2150, 1650)}
@@ -446,18 +446,18 @@ def floor_svg():
         o.append(f'<text x="{cx}" y="{cy + 14}" class="cabf-t">CAB</text>')
         o.append(f'<line x1="{cx}" y1="{cy + (50 if cy < 1400 else -50)}" x2="{cx}" y2="{tray_y}" class="drop"/>')
     # AP positions
-    for ax, ay in ((850, 700), (2550, 700), (3850, 700), (615, 2270), (1845, 2270), (1500, 1560), (3000, 1560)):
+    for ax, ay in ((850, 880), (2550, 880), (3850, 880), (615, 2460), (1845, 2460), (1500, 1560), (3000, 1560)):
         o.append(f'<circle cx="{ax}" cy="{ay}" r="34" class="apf"/><text x="{ax}" y="{ay + 12}" class="apf-t">AP</text>')
-    # server room racks
-    o.append(f'<rect x="3600" y="2540" width="160" height="120" class="rackf"/><rect x="3800" y="2540" width="160" height="120" class="rackf"/>')
-    o.append('<text x="3680" y="2615" class="cabf-t">A</text><text x="3880" y="2615" class="cabf-t">B</text>')
-    o.append('<rect x="3990" y="2540" width="100" height="120" class="rackf2"/><text x="4040" y="2615" class="cabf-t" font-size="34">UPS</text>')
-    o.append('<rect x="3600" y="2740" width="200" height="90" class="rackf2"/><text x="3700" y="2798" class="cabf-t" font-size="34">CRAC</text>')
-    # control room desks
-    o.append('<rect x="3560" y="1800" width="480" height="40" class="vwf"/><text x="3800" y="1900" class="flr-s">비디오월</text>')
+    # server room racks — 엣지 서버·네트워크실(x 3450~4050, y 2430~2910) 가운데 정렬
+    o.append('<rect x="3510" y="2580" width="160" height="120" class="rackf"/><rect x="3700" y="2580" width="160" height="120" class="rackf"/>')
+    o.append('<text x="3590" y="2655" class="cabf-t">A</text><text x="3780" y="2655" class="cabf-t">B</text>')
+    o.append('<rect x="3890" y="2580" width="100" height="120" class="rackf2"/><text x="3940" y="2655" class="cabf-t" font-size="34">UPS</text>')
+    o.append('<rect x="3650" y="2750" width="200" height="90" class="rackf2"/><text x="3750" y="2808" class="cabf-t" font-size="34">CRAC</text>')
+    # control room — 로컬 DCC 관제실(x 3450~4050, y 1640~2380) 가운데 정렬
+    o.append('<rect x="3540" y="1840" width="420" height="40" class="vwf"/><text x="3750" y="1940" class="flr-s">비디오월</text>')
     for i in range(4):
-        o.append(f'<rect x="{3560 + i * 125}" y="1950" width="105" height="70" class="deskf"/>')
-    o.append('<text x="3800" y="2090" class="flr-s">OWS×2 · DWS×2</text>')
+        o.append(f'<rect x="{3510 + i * 125}" y="2010" width="105" height="70" class="deskf"/>')
+    o.append('<text x="3750" y="2150" class="flr-s">OWS×2 · DWS×2</text>')
     o.append(f'<line x1="0" y1="-110" x2="{W}" y2="-110" class="dim"/><text x="{W / 2}" y="-140" class="dim-t z">46.0 m</text>')
     o.append("</svg>")
     return "".join(o)
@@ -802,7 +802,7 @@ ROLES = [
 def roles_table():
     body = "".join(f'<tr><th scope="row"><a href="#hw-{sym}" class="tolink">{E(n)}</a></th><td class="u">{E(q)}</td><td>{E(r)}</td><td>{E(sw)}</td><td class="note">{E(why)}</td></tr>'
                    for n, sym, q, r, sw, why in ROLES)
-    return ('<div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>장비</th><th>수량</th><th>용도</th><th>올라가는 SW</th><th>나눈 이유</th></tr></thead>'
+    return ('<div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>장비</th><th>수량</th><th>용도</th><th>탑재 SW</th><th>나눈 이유</th></tr></thead>'
             f'<tbody>{body}</tbody></table></div>')
 
 
