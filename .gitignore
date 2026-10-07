@@ -1,6 +1,4 @@
-# 대외비 단가 (DMWorks 정가) — 절대 커밋하지 않음
-private_prices.py
-# 로컬 전체본 빌드 (대외비 단가 포함). 공개본은 docs/
+# 로컬 빌드 출력 (공개 페이지는 docs/)
 /*.html
 __pycache__/
 .DS_Store
