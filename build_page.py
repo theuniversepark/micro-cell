@@ -287,12 +287,13 @@ def page():
         grand += total
         n_rob = count(c["items"], "로봇")
         n_amr = count(c["items"], "이송")
-        n_cam = sum(i[6] for i in c["items"] if i[0] == "비전·센서" and i[7] in ("대", "세트"))
+        n_cam = sum(i[6] for i in c["items"] if i[1].startswith("CAM-"))
+        n_vis = sum(i[6] for i in c["items"] if i[0] == "비전·센서" and i[7] in ("대", "세트") and not i[1].startswith("CAM-"))
         ratio = total / c["budget"] * 100
         summary_rows.append(
             f'<tr><td><a href="#{c["slug"]}">{E(c["id"])}</a></td><td class="nm">{E(c["name"])}</td><td>{E(c["year"].split(" ")[0])}</td>'
             f'<td class="num">{E(c["area"].split(" ")[0])}</td><td class="num">{n_rob}</td><td class="num">{n_amr}</td>'
-            f'<td class="num">{n_cam}</td><td class="num">{k(c["budget"])}</td><td class="num">{k(total)}</td>'
+            f'<td class="num">{n_cam}</td><td class="num">{n_vis}</td><td class="num">{k(c["budget"])}</td><td class="num">{k(total)}</td>'
             f'<td class="num"><span class="meter"><span style="width:{min(ratio, 100):.0f}%"></span></span>{ratio:.0f}%</td></tr>')
         concept = "".join(f"<li>{E(t)}</li>" for t in c["concept"])
         sections.append(f'''
@@ -447,6 +448,7 @@ figcaption{{font-size:12px;color:var(--muted);margin-top:6px}}
 .tbl-title span{{font-weight:400;color:var(--muted);font-size:13px}}
 .refs li,.issues li{{margin:.35em 0}}
 .keytbl th[scope=row],.issuetbl th[scope=row]{{white-space:nowrap;color:var(--navy2);font-weight:700;background:var(--grp);text-align:left}}
+table.sum th.r{{text-align:right}}
 .keytbl td,.issuetbl td{{font-size:13px;line-height:1.55}}
 .issuetbl td:nth-child(3){{min-width:320px}}
 .refs code{{font-family:var(--mono);color:var(--teal);font-size:13px}}
@@ -459,7 +461,6 @@ html{{scroll-behavior:smooth}}
 <header class="mast"><div class="wrap">
   <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · A-3 정밀조립(Micro) Zone · 2026.10.07 작성 · 설계 추정본</p>
   <h1>정밀조립존 셀 구성 계획</h1>
-  <p>5개 Cell의 존 배치도·셀별 개념 배치도와 HW·SW 구성품(스펙·기능·용도·수량·단가)을 정리함. 근거는 협약 계획서·부록, 선정평가 발표자료, 세부 기획서, 9~10월 내부 결정사항임.</p>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
   <a href="#sum">요약</a><a href="#zone">존 배치도</a>
@@ -479,7 +480,7 @@ html{{scroll-behavior:smooth}}
     <div><b>{k(grand)}</b><span>구성품 추정 합계 (천원)</span></div>
   </div>
   <div class="tbl-wrap"><table class="sum">
-    <thead><tr><th>셀</th><th>명칭</th><th>구축</th><th>면적</th><th>로봇</th><th>AMR</th><th>카메라</th><th>협약(천원)</th><th>추정(천원)</th><th>예산 대비</th></tr></thead>
+    <thead><tr><th>셀</th><th>명칭</th><th>구축</th><th class="r">면적</th><th class="r">로봇</th><th class="r">AMR</th><th class="r">로봇 카메라</th><th class="r">공정 비전</th><th class="r">협약(천원)</th><th class="r">추정(천원)</th><th class="r">예산 대비</th></tr></thead>
     <tbody>{''.join(summary_rows)}</tbody>
   </table></div>
 </section>

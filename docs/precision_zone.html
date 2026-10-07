@@ -129,6 +129,7 @@ figcaption{font-size:12px;color:var(--muted);margin-top:6px}
 .tbl-title span{font-weight:400;color:var(--muted);font-size:13px}
 .refs li,.issues li{margin:.35em 0}
 .keytbl th[scope=row],.issuetbl th[scope=row]{white-space:nowrap;color:var(--navy2);font-weight:700;background:var(--grp);text-align:left}
+table.sum th.r{text-align:right}
 .keytbl td,.issuetbl td{font-size:13px;line-height:1.55}
 .issuetbl td:nth-child(3){min-width:320px}
 .refs code{font-family:var(--mono);color:var(--teal);font-size:13px}
@@ -145,7 +146,6 @@ html{scroll-behavior:smooth}
 <header class="mast"><div class="wrap">
   <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · A-3 정밀조립(Micro) Zone · 2026.10.07 작성 · 설계 추정본</p>
   <h1>정밀조립존 셀 구성 계획</h1>
-  <p>5개 Cell의 존 배치도·셀별 개념 배치도와 HW·SW 구성품(스펙·기능·용도·수량·단가)을 정리함. 근거는 협약 계획서·부록, 선정평가 발표자료, 세부 기획서, 9~10월 내부 결정사항임.</p>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
   <a href="#sum">요약</a><a href="#zone">존 배치도</a>
@@ -165,8 +165,8 @@ html{scroll-behavior:smooth}
     <div><b>13,062,000</b><span>구성품 추정 합계 (천원)</span></div>
   </div>
   <div class="tbl-wrap"><table class="sum">
-    <thead><tr><th>셀</th><th>명칭</th><th>구축</th><th>면적</th><th>로봇</th><th>AMR</th><th>카메라</th><th>협약(천원)</th><th>추정(천원)</th><th>예산 대비</th></tr></thead>
-    <tbody><tr><td><a href="#c35">A-3-5</a></td><td class="nm">이기종 마이크로장비 연동 협업 Cell</td><td>1차년도(&#x27;26)</td><td class="num">203.2㎡</td><td class="num">11</td><td class="num">4</td><td class="num">55</td><td class="num">2,800,000</td><td class="num">3,247,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>116%</td></tr><tr><td><a href="#c32">A-3-2</a></td><td class="nm">초소형 구동계 모듈 복합 조립 Cell</td><td>2차년도(&#x27;27)</td><td class="num">100.0㎡</td><td class="num">11</td><td class="num">4</td><td class="num">49</td><td class="num">3,000,000</td><td class="num">2,543,800</td><td class="num"><span class="meter"><span style="width:85%"></span></span>85%</td></tr><tr><td><a href="#c33">A-3-3</a></td><td class="nm">정밀 부품 정렬·삽입 Cell</td><td>2차년도(&#x27;27)</td><td class="num">143.5㎡</td><td class="num">11</td><td class="num">4</td><td class="num">51</td><td class="num">2,200,000</td><td class="num">2,340,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>106%</td></tr><tr><td><a href="#c31">A-3-1</a></td><td class="nm">비정형 미세 부품 자율 인식·결합 Cell</td><td>3차년도(&#x27;28)</td><td class="num">143.5㎡</td><td class="num">11</td><td class="num">4</td><td class="num">51</td><td class="num">2,300,000</td><td class="num">2,484,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>108%</td></tr><tr><td><a href="#c34">A-3-4</a></td><td class="nm">미세 Force 기반 초정밀 결합 보정 Cell</td><td>3차년도(&#x27;28)</td><td class="num">203.2㎡</td><td class="num">11</td><td class="num">4</td><td class="num">49</td><td class="num">2,300,000</td><td class="num">2,444,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>106%</td></tr></tbody>
+    <thead><tr><th>셀</th><th>명칭</th><th>구축</th><th class="r">면적</th><th class="r">로봇</th><th class="r">AMR</th><th class="r">로봇 카메라</th><th class="r">공정 비전</th><th class="r">협약(천원)</th><th class="r">추정(천원)</th><th class="r">예산 대비</th></tr></thead>
+    <tbody><tr><td><a href="#c35">A-3-5</a></td><td class="nm">이기종 마이크로장비 연동 협업 Cell</td><td>1차년도(&#x27;26)</td><td class="num">203.2㎡</td><td class="num">11</td><td class="num">4</td><td class="num">45</td><td class="num">10</td><td class="num">2,800,000</td><td class="num">3,247,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>116%</td></tr><tr><td><a href="#c32">A-3-2</a></td><td class="nm">초소형 구동계 모듈 복합 조립 Cell</td><td>2차년도(&#x27;27)</td><td class="num">100.0㎡</td><td class="num">11</td><td class="num">4</td><td class="num">45</td><td class="num">4</td><td class="num">3,000,000</td><td class="num">2,543,800</td><td class="num"><span class="meter"><span style="width:85%"></span></span>85%</td></tr><tr><td><a href="#c33">A-3-3</a></td><td class="nm">정밀 부품 정렬·삽입 Cell</td><td>2차년도(&#x27;27)</td><td class="num">143.5㎡</td><td class="num">11</td><td class="num">4</td><td class="num">45</td><td class="num">6</td><td class="num">2,200,000</td><td class="num">2,340,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>106%</td></tr><tr><td><a href="#c31">A-3-1</a></td><td class="nm">비정형 미세 부품 자율 인식·결합 Cell</td><td>3차년도(&#x27;28)</td><td class="num">143.5㎡</td><td class="num">11</td><td class="num">4</td><td class="num">45</td><td class="num">6</td><td class="num">2,300,000</td><td class="num">2,484,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>108%</td></tr><tr><td><a href="#c34">A-3-4</a></td><td class="nm">미세 Force 기반 초정밀 결합 보정 Cell</td><td>3차년도(&#x27;28)</td><td class="num">203.2㎡</td><td class="num">11</td><td class="num">4</td><td class="num">45</td><td class="num">4</td><td class="num">2,300,000</td><td class="num">2,444,800</td><td class="num"><span class="meter"><span style="width:100%"></span></span>106%</td></tr></tbody>
   </table></div>
 </section>
 
