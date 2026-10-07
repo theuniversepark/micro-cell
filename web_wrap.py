@@ -3,7 +3,7 @@ import glob
 import os
 import re
 
-PAGES = [("index.html", "목차"), ("precision_zone.html", "셀 구성 계획"), ("ocs_precision.html", "정밀조립존 OCS Cell")]
+PAGES = [("index.html", "목차"), ("precision_zone.html", "셀 구성 계획"), ("ocs_precision.html", "정밀조립존 OCS Cell"), ("dmworks_zones.html", "DMWorks 존별 옵션")]
 HEAD = '<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
 BAR_CSS = ('<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 20px;'
            'font:600 13px "Noto Sans KR",sans-serif}.webbar a{color:#C9D6F0;text-decoration:none}.webbar a.on{color:#00C2D1}'
@@ -24,7 +24,7 @@ BAR_CSS = ('<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4p
            ':root{color-scheme:light}}</style>')
 
 
-EXPORTS = ("precision_zone.html", "ocs_precision.html")
+EXPORTS = ("precision_zone.html", "ocs_precision.html", "dmworks_zones.html")
 
 
 def dl(name):
@@ -47,7 +47,7 @@ def wrap(path):
     open(path, "w", encoding="utf-8").write(HEAD + head + BAR_CSS + "\n</head>\n<body>\n" + bar(name) + "\n" + body + "\n</body>\n</html>\n")
 
 
-INDEX = """<title>정밀조립존 설계 페이지</title>
+INDEX = """<title>정밀조립존 설계 기획</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=IBM+Plex+Mono:wght@400&display=swap">
 <style>
 :root{--bg:#F5F7FB;--paper:#fff;--ink:#16213A;--muted:#5A6782;--rule:#D7DFEC;--navy:#10214B;--teal:#0090A0}
@@ -69,11 +69,12 @@ a.open{display:flex;flex-direction:column;gap:6px;color:var(--ink);text-decorati
 </style>
 </head>
 <body>
-<header class="mast"><div class="wrap"><p class="eb">총괄5-세부1 기술실증 테스트베드 · A-3 정밀조립(Micro) ZONE · 설계 추정본</p><h1>정밀조립존 설계 페이지</h1></div></header>
+<header class="mast"><div class="wrap"><p class="eb">총괄5-세부1 기술실증 테스트베드 · A-3 정밀조립(Micro) ZONE · 설계 추정본</p><h1>정밀조립존 설계 기획</h1></div></header>
 <main><div class="wrap">
 <div class="cards">
 <div class="card"><a class="open" href="precision_zone.html"><b>정밀조립존 셀 구성 계획</b><span>존 2D 배치도와 A-3-1~A-3-5 셀별 HW·SW 구성품(협동로봇·AMR·카메라·센서·PLC·그리퍼)·수량·단가</span><em>열기 →</em></a><p class="save"><a href="precision_zone.pdf" download>PDF 저장</a><a href="precision_zone.docx" download>Word 저장</a></p></div>
 <div class="card"><a class="open" href="ocs_precision.html"><b>정밀조립존 OCS Cell</b><span>AAS 기반 수집–저장 아키텍처, 장비 설치·연결 토폴로지, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록</span><em>열기 →</em></a><p class="save"><a href="ocs_precision.pdf" download>PDF 저장</a><a href="ocs_precision.docx" download>Word 저장</a></p></div>
+<div class="card"><a class="open" href="dmworks_zones.html"><b>DMWorks 존별 옵션 구성</b><span>이지로보틱스 DMWorks 3.0 정가표 기준, 존별 해야 할 일과 필요한 옵션·수량·정가·추정가(60% 할인 가정), 재견적 쟁점</span><em>열기 →</em></a><p class="save"><a href="dmworks_zones.pdf" download>PDF 저장</a><a href="dmworks_zones.docx" download>Word 저장</a></p></div>
 </div>
 <p class="foot">금액 단위 천원, VAT 별도 · 소스: <a href="https://github.com/theuniversepark/micro-cell">github.com/theuniversepark/micro-cell</a></p>
 </div></main>

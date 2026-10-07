@@ -13,6 +13,7 @@
 |---|---|
 | `docs/precision_zone.html` | 정밀조립존 셀 구성 계획 — 존 2D 배치도, A-3-1~A-3-5 셀별 HW·SW BOM(셀당 협동로봇 10·AMR 4·AMMR 1, 로봇별 카메라 3대) |
 | `docs/ocs_precision.html` | 정밀조립존 OCS Cell — AAS 기반 수집–저장 공통 아키텍처, 물리 연결 토폴로지, 설치 배치, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록 |
+| `docs/dmworks_zones.html` | DMWorks 존별 옵션 구성 — 정가표(2026.01) 기준 존별 해야 할 일·옵션·수량·정가·추정가, 재견적 쟁점 |
 
 ## 구조
 
@@ -24,6 +25,7 @@
 | `private_prices.py` | DMWorks 3.0 정가(이지로보틱스, 2026.01) 기반 단가 |
 | `privacy.py` | 단가 마스킹 스위치(`PUBLIC=1`이면 DMWorks 금액 0·비공개 표기), 출력 폴더(`OUT_DIR`) |
 | `web_wrap.py` | `docs/`를 독립 웹 페이지로 감쌈(doctype·이동 바) + `index.html` 생성 |
+| `build_dmworks.py` | DMWorks 존별 옵션 구성 페이지 생성 |
 | `export_docs.py` | `docs/*.pdf`(Chrome 인쇄, A3 가로)·`docs/*.docx`(도면 PNG + LibreOffice) 생성 — 웹의 PDF·Word 저장 버튼용 |
 | `build.sh` | 전체 빌드 |
 

@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DMWorks 존별 옵션 구성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 도면 시트 — 좌측 정렬 문서 + 도면 그림, 표는 가로 스크롤 컨테이너 */
+:root{
+  --navy:#10214B; --navy2:#1B3A73; --cyan:#00C2D1; --teal:#0090A0; --amber:#E07A1F;
+  --bg:#F5F7FB; --paper:#FFFFFF; --ink:#13203F; --muted:#56637F; --rule:#D5DCEA;
+  --area:#EAF2FB; --eq:#FFFFFF; --eqline:#1B3A73; --robot:#1B3A73; --reachf:#1B3A73;
+  --hum:#7B4FC4; --amr:#0090A0; --cam:#E07A1F; --aisle:#E4F6F8; --cellbg:#FBFCFE;
+  --blk-cell:#DCE6F5; --blk-common:#E3F4F1; --blk-service:#ECEEF2; --grp:#EEF2F9;
+  --font:"Malgun Gothic","Noto Sans KR","Apple SD Gothic Neo",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A1430; --paper:#101C3D; --ink:#E6ECF8; --muted:#9AA8C6; --rule:#26365F;
+  --area:#15264D; --eq:#0F1B3A; --eqline:#7FA6E8; --robot:#5B8DE0; --reachf:#5B8DE0;
+  --hum:#A585E6; --amr:#00C2D1; --cam:#F2994A; --aisle:#0E2A3A; --cellbg:#0E1936;
+  --blk-cell:#1A2E5C; --blk-common:#123A3A; --blk-service:#1C2440; --grp:#16244A; --teal:#00C2D1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1430; --paper:#101C3D; --ink:#E6ECF8; --muted:#9AA8C6; --rule:#26365F;
+  --area:#15264D; --eq:#0F1B3A; --eqline:#7FA6E8; --robot:#5B8DE0; --reachf:#5B8DE0;
+  --hum:#A585E6; --amr:#00C2D1; --cam:#F2994A; --aisle:#0E2A3A; --cellbg:#0E1936;
+  --blk-cell:#1A2E5C; --blk-common:#123A3A; --blk-service:#1C2440; --grp:#16244A; --teal:#00C2D1; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.65 var(--font);margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+.mast{background:var(--navy);color:#fff;border-radius:0 0 4px 4px}
+.mast .wrap{padding-block:30px 26px}
+.mast .eyebrow{color:var(--cyan)}
+.mast h1{font-size:clamp(26px,4vw,38px);font-weight:900;margin:.2em 0 .3em;letter-spacing:-.01em;text-wrap:balance}
+.mast p{margin:0;color:#C9D4EE;max-width:none}
+.eyebrow{font:500 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin:0}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--rule)}
+nav.toc .wrap{padding-block:10px;display:flex;gap:8px;flex-wrap:wrap}
+nav.toc a{font:500 13px var(--mono);color:var(--ink);text-decoration:none;border:1px solid var(--rule);padding:4px 10px;border-radius:999px;background:var(--paper)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--teal);color:var(--teal);outline:none}
+h2{font-size:24px;font-weight:900;margin:.15em 0 .5em;text-wrap:balance;color:var(--ink)}
+h3{font-size:15px;font-weight:700;margin:1.2em 0 .35em;color:var(--navy2)}
+:root[data-theme="dark"] h3{color:#8FB3F0}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) h3{color:#8FB3F0}}
+p,li{max-width:72ch}
+section{margin-top:44px}
+.summary ul{padding-left:1.1em;margin:.3em 0}
+.summary li{margin:.25em 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0 6px}
+.kpis div{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:12px 14px}
+.kpis b{display:block;font:500 24px/1.2 var(--mono);color:var(--teal);font-variant-numeric:tabular-nums}
+.kpis span{font-size:13px;color:var(--muted)}
+.tbl-wrap{overflow-x:auto;background:var(--paper);border:1px solid var(--rule);border-radius:6px;margin:8px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+thead th{background:var(--navy);color:#fff;font-weight:700;white-space:nowrap;position:sticky;top:0}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.sym{font-family:var(--mono);font-size:12px;color:var(--teal);white-space:nowrap}
+td.nm{font-weight:700;min-width:150px}
+td.spec{min-width:210px;color:var(--ink)}
+td.note{color:var(--muted);font-size:12px;min-width:150px}
+td.u{white-space:nowrap}
+table.bom td:nth-child(4),table.bom td:nth-child(5){min-width:140px}
+tr.grp th,tr.grp td{background:var(--grp);font-weight:700;color:var(--navy2)}
+tr.grp.sw th{color:var(--teal)}
+tfoot th{text-align:right;font-weight:500;color:var(--muted)}
+tfoot td{font-weight:700}
+tr.tot.strong th,tr.tot.strong td{color:var(--ink);font-weight:900;font-size:14px}
+.meter{display:inline-block;width:56px;height:6px;background:var(--rule);border-radius:3px;margin-right:8px;vertical-align:middle;overflow:hidden}
+.meter span{display:block;height:100%;background:var(--teal)}
+.sum td a{font-family:var(--mono);color:var(--teal);font-weight:500}
+figure{margin:0}
+.fig{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:12px;overflow-x:auto;min-width:0}
+figcaption{font-size:12px;color:var(--muted);margin-top:6px}
+.plan{width:100%;height:auto;display:block;margin:0 auto}
+.plan text{font-family:var(--font)}
+.fence{fill:var(--cellbg);stroke:var(--ink);stroke-width:7}
+.area{fill:var(--area);stroke:var(--eqline);stroke-width:2;stroke-dasharray:10 7;opacity:.95}
+.area-t{font-size:21px;fill:var(--teal);font-weight:700;paint-order:stroke;stroke:var(--cellbg);stroke-width:7px;stroke-linejoin:round}
+.eq{fill:var(--eq);stroke:var(--eqline);stroke-width:2.5}
+.eq-t{fill:var(--ink);text-anchor:middle;font-weight:500}
+.reach{fill:var(--reachf);fill-opacity:.07;stroke:var(--robot);stroke-width:2;stroke-dasharray:6 6}
+.rob{fill:var(--robot)}
+.rob-t{fill:#fff;font-size:22px;font-weight:700;text-anchor:middle}
+.hum{fill:var(--hum)}
+.amr{fill:var(--amr)}
+.amr-t{fill:#fff;font-size:15px;font-weight:700;text-anchor:middle}
+.cam{fill:var(--cam)}
+.lane{fill:none;stroke-width:6;stroke-dasharray:18 10}
+.lane.main{stroke:var(--teal)}
+.lane.sub{stroke:var(--hum)}
+.ar{fill:var(--teal)}
+.gap{stroke:var(--cellbg);stroke-width:12}
+.jamb{stroke:var(--ink);stroke-width:4}
+.door-t{font-size:19px;fill:var(--amber);text-anchor:middle;font-weight:700}
+.dim{stroke:var(--muted);stroke-width:2}
+.dim-t{font-size:24px;fill:var(--muted);text-anchor:middle;font-family:var(--mono)!important}
+.dim-t.z{font-size:64px}
+.sb1{fill:var(--ink)} .sb2{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.sc-t{font-size:20px;fill:var(--muted);font-family:var(--mono)!important}
+.sc-t.z{font-size:56px}
+.bldg{fill:var(--paper);stroke:var(--ink);stroke-width:22}
+.aisle{fill:var(--aisle)}
+.aisle-t{font-size:66px;fill:var(--teal);font-weight:700}
+.blk{stroke:var(--ink);stroke-width:10}
+.blk.cell{fill:var(--blk-cell)} .blk.common{fill:var(--blk-common)} .blk.service{fill:var(--blk-service)}
+.blk-t{text-anchor:middle;font-weight:900;fill:var(--navy2);font-family:var(--mono)!important}
+:root[data-theme="dark"] .blk-t{fill:#BFD3F7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .blk-t{fill:#BFD3F7}}
+.blk-t.common,.blk-t.service{font-family:var(--font)!important}
+.blk-s{text-anchor:middle;fill:var(--ink)}
+.cell-link:hover .blk.cell,.cell-link:focus .blk.cell{stroke:var(--amber);stroke-width:18}
+.door-z{fill:var(--teal)} .door-p{fill:var(--amber)}
+.walk-t{font-size:44px;fill:var(--muted);text-anchor:middle}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);margin:10px 2px 0;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:12px;border-radius:2px}
+.cell{border-top:3px solid var(--navy2);padding-top:18px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:6px 0 4px}
+.facts div{border-left:3px solid var(--cyan);padding:2px 10px}
+.facts dt{font-size:12px;color:var(--muted)}
+.facts dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:22px;align-items:start;margin-top:8px}
+.two .txt{min-width:0}
+.two ul{padding-left:1.1em;margin:.2em 0}
+.flow{font-size:14px}
+.tbl-title span{font-weight:400;color:var(--muted);font-size:13px}
+.refs li,.issues li{margin:.35em 0}
+.keytbl th[scope=row],.issuetbl th[scope=row]{white-space:nowrap;color:var(--navy2);font-weight:700;background:var(--grp);text-align:left}
+table.sum th.r,table.bom th.r{text-align:right}
+.keytbl td,.issuetbl td{font-size:13px;line-height:1.55}
+.issuetbl td:nth-child(3){min-width:320px}
+.refs code{font-family:var(--mono);color:var(--teal);font-size:13px}
+.note-box{background:var(--paper);border:1px solid var(--rule);border-left:4px solid var(--amber);border-radius:4px;padding:10px 14px;font-size:13.5px;color:var(--ink);max-width:none}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+html{scroll-behavior:smooth}
+</style><style>
+.mast p{max-width:none}
+table.bom th.r{text-align:right}
+.tag{display:inline-block;font:600 11px var(--mono);padding:1px 7px;border-radius:3px;white-space:nowrap}
+.tag.req{background:var(--teal);color:#fff} .tag.opt{background:var(--grp);color:var(--navy2);border:1px solid var(--rule)}
+.tag.cond{background:#FFF1E2;color:#9A4A00;border:1px solid #F0C08A} .tag.na{color:var(--muted)}
+td.zero{color:var(--muted)}
+td.dz,th.dz{text-align:center;white-space:nowrap} table.bom td a{white-space:nowrap}
+.dot{color:var(--teal);font-weight:900}
+.chg{font:500 11px var(--mono);color:var(--muted)}
+.chg.up{color:#B45309} .chg.down{color:var(--teal)}
+.keytbl th[scope=row],.issuetbl th[scope=row]{white-space:nowrap;color:var(--navy2);font-weight:700;background:var(--grp);text-align:left}
+.keytbl td,.issuetbl td{font-size:13px;line-height:1.55}
+</style>
+<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 20px;font:600 13px "Noto Sans KR",sans-serif}.webbar a{color:#C9D6F0;text-decoration:none}.webbar a.on{color:#00C2D1}.webbar a:hover{color:#fff}body{margin:0}.webbar .dl{margin-left:auto;display:flex;gap:8px}.webbar .dl a{color:#0A1636;background:#00C2D1;border-radius:4px;padding:2px 10px}.webbar .dl a:hover{background:#fff;color:#0A1636}@page{size:A3 landscape;margin:10mm}@media print{.webbar,nav.toc,.where,a.tolink[href^="#topo-"]:not(.sw){display:none!important}.wrap{max-width:none!important;padding-inline:0!important;padding-block:0 8mm!important}thead{display:table-header-group}th{position:static!important;white-space:normal!important}.tbl-wrap,.fig{overflow:visible!important}table,table.wide{width:100%!important;min-width:0!important;table-layout:auto}td,th{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere;word-break:keep-all}td.num,td.q,td.u,td.sym{white-space:nowrap!important}td.src a{word-break:break-all}table{font-size:9px!important}table.wide{font-size:7.5px!important}table.wide td.note,table.wide td.basis,table.wide td.uc,table.wide td.src,table.wide td.mk{font-size:7px!important}p,li{max-width:none!important}figure,svg,tr,.kpis{break-inside:avoid}h2,h3,.eyebrow,.tbl-title{break-after:avoid}main>section{break-inside:auto}main>section+section{break-before:page}.fig svg{max-height:175mm;width:auto!important;max-width:100%!important;height:auto;display:block;margin:0 auto}a{color:inherit;text-decoration:none}:root{color-scheme:light}}</style>
+</head>
+<body>
+<nav class="webbar"><a href="index.html">목차</a><a href="precision_zone.html">셀 구성 계획</a><a href="ocs_precision.html">정밀조립존 OCS Cell</a><a href="dmworks_zones.html" class=on>DMWorks 존별 옵션</a><span class="dl"><a href="dmworks_zones.pdf" download>PDF 저장</a><a href="dmworks_zones.docx" download>Word 저장</a></span></nav>
+<header class="mast"><div class="wrap">
+  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · 이지로보틱스 DMWorks 3.0 · 정가표(2026.01) 기반 · 2026.10.08 작성 · 설계 추정본</p>
+  <h1>DMWorks 존별 옵션 구성</h1>
+</div></header>
+<nav class="toc" aria-label="바로가기"><div class="wrap">
+  <a href="#sum">요약</a><a href="#opt">옵션 기능</a><a href="#z14">A-1-4</a><a href="#z25">A-2-5</a><a href="#z45">A-4-5</a><a href="#z3">A-3</a><a href="#issues">확인 필요</a><a href="#refs">근거</a>
+</div></nav>
+<main class="wrap">
+<section id="sum" style="margin-top:8px">
+  <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
+  <h2>4개 존 · 정가 1,517,300천원 → 추정 606,920천원</h2>
+  <div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>내용</th><th>근거</th></tr></thead><tbody><tr><th scope="row">견적 기준</th><td>이지로보틱스 DMWorks 3.0 정가표(2026.01, Node-Lock) × 40%. 10/6 제안이 60% 할인가였음. 단위 천원, VAT 별도</td><td class="note">가격표 · 10/6 의사결정</td></tr><tr><th scope="row">4개 존 합계</th><td>정가 1,517,300천원 → 추정 606,920천원. 유지보수는 1년 무상 후 매년 구매가의 18%(협의 시 15%) ≈ 109,246천원/년</td><td class="note">가격표 주석 · 9/30 Q&amp;A</td></tr><tr><th scope="row">존별 차별화</th><td>유연제조는 가상 시운전·작업자·OLP, 적응가공은 PLC·OLP·환류, AI정밀검사는 POINT CLOUD·PANORAMA(PLC 제외), 정밀조립은 BASE·MULTIPLE PROCESS·PLC 1좌석</td><td class="note">존별 목적(10/6)</td></tr><tr><th scope="row">플러그인 개발 통합</th><td>Developer를 존마다 사던 구성(3카피, 정가 126,000)을 개발 거점 1카피 + 실행용 User 5카피(정가 112,000)로 바꿈. AAS 출력·OpenUSD·OCS 연동 코드를 한 번 만들어 모든 존에서 실행</td><td class="note">가격표 옵션 10·11</td></tr><tr><th scope="row">협동로봇 OLP 공백</th><td>OLP·RRS 목록에 협동로봇·휴머노이드 컨트롤러가 없음. 정밀조립(협동로봇 50대)은 OLP를 넣지 않았고, 적응가공 머신텐딩이 협동로봇이면 &#x27;요청 시 지원&#x27; 가격을 따로 받아야 함</td><td class="note">가격표 · 9/30 Q&amp;A</td></tr><tr><th scope="row">이전 표와 차이</th><td>10/7 OCS 셀 3종 표 대비 PLUG-IN Developer 3→1, User +5, CAD IMPORT·PANORAMA 선택 추가, RRS를 OLP에서 분리(조건부), 정밀조립에 User 추가</td><td class="note">이전 산출물(git a54f74f)</td></tr></tbody></table></div>
+  <h3>존별 합계</h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>목적</th><th>옵션 구성</th><th class="r">정가 합계</th><th class="r">추정가(×40%)</th></tr></thead><tbody><tr><td><a href="#z14">A-1-4</a></td><td class="nm">유연제조 OCS 시뮬레이션 Cell</td><td>공정 최적화 + 가상 시운전</td><td>BASE×2 · CAD IMPORT · MULTIPLE PROCESS×2 · PLC SIMULATION · OLP×2 · HUMAN · VR · PLUG-IN for Developer · PLUG-IN for User</td><td class="num">591,600</td><td class="num"><b>236,640</b></td></tr><tr><td><a href="#z25">A-2-5</a></td><td class="nm">적응가공 OCS 시뮬레이션 Cell</td><td>데이터 + 강화학습</td><td>BASE×2 · MULTIPLE PROCESS · PLC SIMULATION · OLP · PLUG-IN for User×2</td><td class="num">426,600</td><td class="num"><b>170,640</b></td></tr><tr><td><a href="#z45">A-4-5</a></td><td class="nm">AI정밀검사 OCS 시뮬레이션 Cell</td><td>DT(역설계) + 품질 운영</td><td>BASE · MULTIPLE PROCESS · POINT CLOUD · PANORAMA · PLUG-IN for User</td><td class="num">252,700</td><td class="num"><b>101,080</b></td></tr><tr><td><a href="#z3">A-3</a></td><td class="nm">정밀조립존 (OCS 셀 없음 · DT 워크스테이션 1대)</td><td>셀 배치·물류·상태머신 검증</td><td>BASE · MULTIPLE PROCESS · PLC SIMULATION · PLUG-IN for User</td><td class="num">246,400</td><td class="num"><b>98,560</b></td></tr><tr class="tot strong"><th colspan="4">합계 (4개 존)</th><td class="num">1,517,300</td><td class="num">606,920</td></tr></tbody></table></div>
+</section>
+<section id="opt">
+  <p class="eyebrow">1. 옵션 기능</p>
+  <h2>DMWorks 3.0 옵션별 기능·가격·제약</h2>
+  <p class="note-box">정가(천원, VAT 별도). [S1] 가격표 기준이며 9/30 Q&A [M1]에서 확인한 제약을 함께 적음. 오른쪽 열은 이 구성에서 해당 옵션을 쓰는 존(●).</p>
+  <div class="tbl-wrap"><table class="bom wide mx"><thead><tr><th>No</th><th>옵션</th><th class="r">Node-Lock</th><th class="r">Floating</th><th>기능</th><th>9/30 확인·제약</th><th class='dz'>A-1-4</th><th class='dz'>A-2-5</th><th class='dz'>A-4-5</th><th class='dz'>A-3</th></tr></thead><tbody><tr><td class="sym">1</td><td class="nm">DMWORKS BASE<br><span class="chg">DMW-001-0000</span></td><td class="num">142,200</td><td class="num">184,860</td><td>Device Modeler(기구학·CAD 생성/수정·좌표계) + Factory Simulator(설비 배치·로봇 라이브러리·모션/Task·충돌검사·케이블 시뮬레이션·단일 공정 Single Station·비디오/3D PDF). CAD IMPORT 1종 포함</td><td class="note">단일 공정만 지원(라인·물류는 MULTIPLE PROCESS 필요). 물리엔진 없음 → 학습은 Omniverse. USD 내보내기는 지오메트리만(Assembly·Kinematic·Metadata 미전달)</td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td></tr><tr><td class="sym">2</td><td class="nm">CAD IMPORT<br><span class="chg">DMW-002-00**</span></td><td class="num">9,000</td><td class="num">11,700</td><td>외부 CAD 변환·경량화 (STEP·CATIA V4/V5/V6·NX·SolidWorks·Creo·Parasolid·JT·STL 등 22종, 포맷당 1옵션)</td><td class="note">BASE에 1종 포함. 수요기업·설비사 CAD 원본 포맷에 맞춰 추가</td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">3</td><td class="nm">CAD EXPORT<br><span class="chg">DMW-003-00**</span></td><td class="num">9,000</td><td class="num">11,700</td><td>DMWorks 데이터를 STL·STEP·IGES·Parasolid·JT·VRML로 내보내기 (포맷당 1옵션)</td><td class="note">업체 고지: 원하는 결과가 안 나올 수 있음. DT 라이브러리는 원본 CAD→USD 파이프라인을 쓰므로 필수 아님</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">4</td><td class="nm">DM OLP<br><span class="chg">DMW-004-00**</span></td><td class="num">24,000</td><td class="num">31,200</td><td>로봇 컨트롤러별 오프라인 프로그래밍. 스폿·핸들링 27종 24,000 / 아크 용접(현대 Hi5) 33,000 / 도장 28,000~33,000</td><td class="note">목록에 협동로봇·휴머노이드 컨트롤러 없음(두산·레인보우는 &#x27;요청 시 지원&#x27;, 가격 미정). Upload→수정→Download 오프라인 방식</td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">8</td><td class="nm">DM RRS<br><span class="chg">DMW-009-00**</span></td><td class="num">20,000</td><td class="num">26,000</td><td>로봇 제조사 RCS 모듈 연동으로 정확한 경로·사이클타임 계산</td><td class="note">지원 컨트롤러 2종뿐(현대 Hi5·FANUC RJ3). 로봇 RCS 모듈은 미포함(로봇사 별도 구매)</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">5</td><td class="nm">DM POINT CLOUD<br><span class="chg">DMW-005-0000</span></td><td class="num">38,000</td><td class="num">49,400</td><td>3D 스캔 데이터를 DMWorks에서 확인·수정해 실제 공간 기반 가상 작업장 구축</td><td class="note">공장 공간 스캔 개념. 부품 계측·역설계(로봇 스캐닝 경로)는 별도 SW(AIMS) + PolyWorks 연계</td><td class="dz">–</td><td class="dz">–</td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td></tr><tr><td class="sym">5&#x27;</td><td class="nm">DM PANORAMA<br><span class="chg">DMW-006-0000</span></td><td class="num">12,500</td><td class="num">16,250</td><td>스캔 지점 파노라마 이미지와 연계한 팩토리 네비게이터(클릭으로 지점 이동)</td><td class="note">POINT CLOUD와 함께 쓸 때 의미 있음</td><td class="dz">–</td><td class="dz">–</td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td></tr><tr><td class="sym">6</td><td class="nm">DM MULTIPLE PROCESS<br><span class="chg">DMW-007-0000</span></td><td class="num">46,000</td><td class="num">59,800</td><td>다공정 라인(Multiple Station)·물류(컨베이어·셔틀·포크리프트 버퍼) 시뮬레이션, 다차종, UPH·가동률</td><td class="note">AMR 대수 산정은 시뮬레이션형(3→4→5대 증가 비교). AMR 실운영 속도·가감속 파라미터 필요. 병목 분석 UI는 커스터마이징</td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td></tr><tr><td class="sym">7</td><td class="nm">DM HUMAN<br><span class="chg">DMW-008-0000</span></td><td class="num">38,000</td><td class="num">49,400</td><td>휴먼 디바이스 모델·모션, 작업 자세 분석 리포트 (7-1~7-3 서브옵션의 필수 옵션)</td><td class="note"></td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">7-3</td><td class="nm">DM VR<br><span class="chg">DMW-008-0300</span></td><td class="num">20,000</td><td class="num">26,000</td><td>가상 작업장을 VR(Oculus Rift·HTC Vive)로 확인</td><td class="note">HUMAN 필수</td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">7-1</td><td class="nm">DM MVN<br><span class="chg">DMW-008-0100</span></td><td class="num">24,000</td><td class="num">31,200</td><td>Movella MVN 착용형 모션캡처 실시간·오프라인 연동</td><td class="note">착용형 MVN 장비 별도 필요(업체 미보유)</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">7-2</td><td class="nm">DM VICON<br><span class="chg">DMW-008-0200</span></td><td class="num">30,000</td><td class="num">39,000</td><td>VICON 광학식 모션캡처(두리시스템) 연동</td><td class="note">VICON 장비 보유 시에만</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">9</td><td class="nm">DM PLC SIMULATION<br><span class="chg">DMW-010-0000</span></td><td class="num">44,200</td><td class="num">57,460</td><td>PLC 프로그램을 가상 설비와 연동해 공정 로직·I/O 매핑·인터록·이상 시나리오 검증(가상 시운전)</td><td class="note">PLC→DMWorks Read + 핸드셰이크만(Write 제어 불가). 이기종 PLC 동시 시뮬레이션 경험 2종까지 → 셀별 PLC 메이커 통일</td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td><td class="dz"><span class="dot">●</span></td></tr><tr><td class="sym">10</td><td class="nm">DM PLUG-IN for Developer<br><span class="chg">DMW-011-0000</span></td><td class="num">42,000</td><td class="num">54,600</td><td>Visual Studio 기반 API로 DMWorks 기능 직접 개발 (AAS 출력·OpenUSD 물성 전달·OCS/VLA 연동)</td><td class="note">VLA 실증·AAS 환류·충돌/병목 리포트는 기성 기능 아님 → 플러그인 커스텀</td><td class="dz"><span class="dot">●</span></td><td class="dz">–</td><td class="dz">–</td><td class="dz">–</td></tr><tr><td class="sym">11</td><td class="nm">DM PLUG-IN for User<br><span class="chg">DMW-012-0000</span></td><td class="num">14,000</td><td class="num">18,200</td><td>Developer로 만든 플러그인을 다른 DMWorks에서 실행</td><td class="note">개발은 1곳, 실행 좌석에는 User로 충분</td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td><td class="dz"><span class="dot">●</span></td></tr></tbody></table></div>
+</section>
+
+<section id="z14">
+  <p class="eyebrow">A-1-4 · 공정 최적화 + 가상 시운전</p>
+  <h2>유연제조 OCS 시뮬레이션 Cell</h2>
+  <h3>해야 할 일과 필요한 기능</h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>DMWorks 기능·옵션</th></tr></thead><tbody><tr><td>삼진산업 도어·차체 혼류 공정 DT 모델링, 설비 배치·로봇 경로 사전 검증</td><td class='nm'>BASE · CAD IMPORT</td></tr><tr><td>다공정 라인·AMR 물류·작업 스케줄 최적화(UPH·가동률·AMR 대수)</td><td class='nm'>MULTIPLE PROCESS</td></tr><tr><td>2차년도 실물 셀(A-1-3) 투입 전 PLC 제어로직·이상 상황 가상 시운전(HIL)</td><td class='nm'>PLC SIMULATION</td></tr><tr><td>용접·핸들링 산업용 로봇 오프라인 프로그램 생성·사이클타임 산출</td><td class='nm'>OLP (컨트롤러별)</td></tr><tr><td>작업자–로봇 협업 구간 안전거리·동선·작업 자세 검증, VR 리뷰</td><td class='nm'>HUMAN · VR</td></tr><tr><td>AAS 출력·OpenUSD 물성 전달·OCS 연동 플러그인 개발(3존 공통 개발 거점)</td><td class='nm'>PLUG-IN Developer</td></tr></tbody></table></div>
+  <h3>옵션 구성 <span class="chg">(단위 천원 · VAT 별도 · 정가 = Node-Lock)</span></h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th>구분</th><th style="text-align:center">수량</th><th style="text-align:center">이전(10/7)</th><th class="r">정가 단가</th><th class="r">정가 금액</th><th class="r">추정가(×40%)</th><th>이 존에서 쓰는 이유</th></tr></thead><tbody><tr><td class="nm">DMWORKS BASE<br><span class="chg">DMW-001-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>2</b></td><td class="q">2 </td><td class="num">142,200</td><td class="num">284,400</td><td class="num">113,760</td><td>DT 모니터링 1 + 시뮬레이션 1 (업체: 1카피로는 운영 곤란). STEP Import 포함</td></tr><tr><td class="nm">CAD IMPORT<br><span class="chg">DMW-002-00**</span></td><td><span class="tag opt">선택</span></td><td class="q"><b>1</b></td><td class="q">0 <span class="chg up">+1</span></td><td class="num">9,000</td><td class="num">9,000</td><td class="num">3,600</td><td>수요기업(삼진산업) 차체·도어 원본 CAD 포맷(예: CATIA V5) 확인 후 1종 추가</td></tr><tr><td class="nm">DM MULTIPLE PROCESS<br><span class="chg">DMW-007-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>2</b></td><td class="q">2 </td><td class="num">46,000</td><td class="num">92,000</td><td class="num">36,800</td><td>혼류 라인·AMR 물류 시뮬레이션. 모니터링 DT에서도 라인 단위 재생 필요</td></tr><tr><td class="nm">DM PLC SIMULATION<br><span class="chg">DMW-010-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">44,200</td><td class="num">44,200</td><td class="num">17,680</td><td>가상 시운전은 시뮬레이션 좌석 1곳에서 수행</td></tr><tr><td class="nm">DM OLP<br><span class="chg">DMW-004-00**</span></td><td><span class="tag cond">조건부</span></td><td class="q"><b>2</b></td><td class="q">2 </td><td class="num">24,000</td><td class="num">48,000</td><td class="num">19,200</td><td>산업용 로봇 메이커 2종 가정(예: 현대 Hi6·FANUC R30iB). 로봇 기종 확정 후 컨트롤러 선택</td></tr><tr><td class="nm">DM RRS<br><span class="chg">DMW-009-00**</span></td><td><span class="tag cond">조건부</span></td><td class="q zero"><b>0</b></td><td class="q">0 </td><td class="num zero">20,000</td><td class="num zero">0</td><td class="num zero">0</td><td>현대 Hi5·FANUC RJ3 컨트롤러일 때만 1종당 20,000 추가</td></tr><tr><td class="nm">DM HUMAN<br><span class="chg">DMW-008-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">38,000</td><td class="num">38,000</td><td class="num">15,200</td><td>협업 구간 작업자 모델·자세 분석</td></tr><tr><td class="nm">DM VR<br><span class="chg">DMW-008-0300</span></td><td><span class="tag opt">선택</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">20,000</td><td class="num">20,000</td><td class="num">8,000</td><td>몰입형 배치·안전거리 리뷰(VR 헤드셋 별도)</td></tr><tr><td class="nm">DM PLUG-IN for Developer<br><span class="chg">DMW-011-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">42,000</td><td class="num">42,000</td><td class="num">16,800</td><td>3존 공통 플러그인 개발 거점(AAS·OpenUSD·OCS 연동)</td></tr><tr><td class="nm">DM PLUG-IN for User<br><span class="chg">DMW-012-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">0 <span class="chg up">+1</span></td><td class="num">14,000</td><td class="num">14,000</td><td class="num">5,600</td><td>모니터링 DT 좌석에서 플러그인 실행</td></tr></tbody><tfoot><tr class="tot strong"><th colspan="5">합계</th><td class="num">591,600</td><td class="num">236,640</td><td>정가 / 60% 할인 가정 추정가</td></tr></tfoot></table></div>
+</section>
+<section id="z25">
+  <p class="eyebrow">A-2-5 · 데이터 + 강화학습</p>
+  <h2>적응가공 OCS 시뮬레이션 Cell</h2>
+  <h3>해야 할 일과 필요한 기능</h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>DMWorks 기능·옵션</th></tr></thead><tbody><tr><td>가공기·로봇·팔레트·AMR 경로·간섭 가상검증</td><td class='nm'>BASE</td></tr><tr><td>공정 배정·팔레트·AMR 물류 흐름 최적화</td><td class='nm'>MULTIPLE PROCESS</td></tr><tr><td>머신텐딩 로봇 셀 제어로직·가공기 인터록(핸드셰이크) 사전검증</td><td class='nm'>PLC SIMULATION</td></tr><tr><td>로딩·언로딩 로봇 오프라인 프로그램. 가공기 경로→로봇 경로 변환(DMWorks 보유 기능)</td><td class='nm'>OLP (컨트롤러별)</td></tr><tr><td>시뮬레이션 결과를 AAS·강화학습 환경(Omniverse)으로 환류</td><td class='nm'>PLUG-IN User</td></tr><tr><td>※ CNC 가공 경로·NC 검증은 DMWorks에 CAM이 없어 별도 SW(NC 검증)로 수행</td><td class='nm'>—</td></tr></tbody></table></div>
+  <h3>옵션 구성 <span class="chg">(단위 천원 · VAT 별도 · 정가 = Node-Lock)</span></h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th>구분</th><th style="text-align:center">수량</th><th style="text-align:center">이전(10/7)</th><th class="r">정가 단가</th><th class="r">정가 금액</th><th class="r">추정가(×40%)</th><th>이 존에서 쓰는 이유</th></tr></thead><tbody><tr><td class="nm">DMWORKS BASE<br><span class="chg">DMW-001-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>2</b></td><td class="q">2 </td><td class="num">142,200</td><td class="num">284,400</td><td class="num">113,760</td><td>DT 모니터링 1 + 시뮬레이션 1. STEP Import 포함(가공기·지그 STEP)</td></tr><tr><td class="nm">DM MULTIPLE PROCESS<br><span class="chg">DMW-007-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">46,000</td><td class="num">46,000</td><td class="num">18,400</td><td>팔레트·AMR 물류는 시뮬레이션 좌석에서</td></tr><tr><td class="nm">DM PLC SIMULATION<br><span class="chg">DMW-010-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">44,200</td><td class="num">44,200</td><td class="num">17,680</td><td>로봇 셀 제어로직·가공기 인터록 검증</td></tr><tr><td class="nm">DM OLP<br><span class="chg">DMW-004-00**</span></td><td><span class="tag cond">조건부</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">24,000</td><td class="num">24,000</td><td class="num">9,600</td><td>머신텐딩 로봇이 산업용이면 1종. 협동로봇이면 &#x27;요청 시 지원&#x27;(가격 미정)</td></tr><tr><td class="nm">DM PLUG-IN for User<br><span class="chg">DMW-012-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>2</b></td><td class="q">0 <span class="chg up">+2</span></td><td class="num">14,000</td><td class="num">28,000</td><td class="num">11,200</td><td>A-1-4에서 개발한 AAS·환류 플러그인을 두 좌석에서 실행</td></tr><tr><td class="nm">DM PLUG-IN for Developer<br><span class="chg">DMW-011-0000</span></td><td><span class="tag na">—</span></td><td class="q zero"><b>0</b></td><td class="q">1 <span class="chg down">-1</span></td><td class="num zero">42,000</td><td class="num zero">0</td><td class="num zero">0</td><td>개발은 A-1-4 1곳으로 통합(이전 구성의 Developer 1카피 제외)</td></tr></tbody><tfoot><tr class="tot strong"><th colspan="5">합계</th><td class="num">426,600</td><td class="num">170,640</td><td>정가 / 60% 할인 가정 추정가</td></tr></tfoot></table></div>
+</section>
+<section id="z45">
+  <p class="eyebrow">A-4-5 · DT(역설계) + 품질 운영</p>
+  <h2>AI정밀검사 OCS 시뮬레이션 Cell</h2>
+  <h3>해야 할 일과 필요한 기능</h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>DMWorks 기능·옵션</th></tr></thead><tbody><tr><td>3D 스캔으로 검사 셀·수요기업 현장을 가상 작업장으로 구축</td><td class='nm'>POINT CLOUD</td></tr><tr><td>스캔 지점 파노라마로 현장 원격 리뷰</td><td class='nm'>PANORAMA (선택)</td></tr><tr><td>검사·로봇·AMR 공정 시뮬레이션, 검사 대기·흐름 분석</td><td class='nm'>BASE · MULTIPLE PROCESS</td></tr><tr><td>QMS 판정→재검사→리워크 폐루프와 검사 결과 데이터 연계</td><td class='nm'>PLUG-IN User</td></tr><tr><td>※ 부품 계측용 로봇 스캐닝 경로는 별도 SW(AIMS)·PolyWorks 연계 — 가격표 외, 별도 견적</td><td class='nm'>—</td></tr><tr><td>※ PLC 가상 시운전은 이 존 목적(품질 운영)에 해당 없음</td><td class='nm'>—</td></tr></tbody></table></div>
+  <h3>옵션 구성 <span class="chg">(단위 천원 · VAT 별도 · 정가 = Node-Lock)</span></h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th>구분</th><th style="text-align:center">수량</th><th style="text-align:center">이전(10/7)</th><th class="r">정가 단가</th><th class="r">정가 금액</th><th class="r">추정가(×40%)</th><th>이 존에서 쓰는 이유</th></tr></thead><tbody><tr><td class="nm">DMWORKS BASE<br><span class="chg">DMW-001-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">142,200</td><td class="num">142,200</td><td class="num">56,880</td><td>검사 셀 레이아웃·공정 시뮬레이션. 운영 모니터링은 QMS가 담당</td></tr><tr><td class="nm">DM MULTIPLE PROCESS<br><span class="chg">DMW-007-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">46,000</td><td class="num">46,000</td><td class="num">18,400</td><td>검사 라인·AMR 물류·대기 분석</td></tr><tr><td class="nm">DM POINT CLOUD<br><span class="chg">DMW-005-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">38,000</td><td class="num">38,000</td><td class="num">15,200</td><td>3D 스캐너(핸드헬드·대형) 점군을 가상 작업장으로</td></tr><tr><td class="nm">DM PANORAMA<br><span class="chg">DMW-006-0000</span></td><td><span class="tag opt">선택</span></td><td class="q"><b>1</b></td><td class="q">0 <span class="chg up">+1</span></td><td class="num">12,500</td><td class="num">12,500</td><td class="num">5,000</td><td>POINT CLOUD와 짝. 수요기업 현장 원격 리뷰 필요 시</td></tr><tr><td class="nm">DM PLUG-IN for User<br><span class="chg">DMW-012-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">0 <span class="chg up">+1</span></td><td class="num">14,000</td><td class="num">14,000</td><td class="num">5,600</td><td>QMS·AAS 연동 플러그인 실행</td></tr><tr><td class="nm">DM PLUG-IN for Developer<br><span class="chg">DMW-011-0000</span></td><td><span class="tag na">—</span></td><td class="q zero"><b>0</b></td><td class="q">1 <span class="chg down">-1</span></td><td class="num zero">42,000</td><td class="num zero">0</td><td class="num zero">0</td><td>개발은 A-1-4로 통합(이전 구성의 Developer 1카피 제외)</td></tr></tbody><tfoot><tr class="tot strong"><th colspan="5">합계</th><td class="num">252,700</td><td class="num">101,080</td><td>정가 / 60% 할인 가정 추정가</td></tr></tfoot></table></div>
+</section>
+<section id="z3">
+  <p class="eyebrow">A-3 · 셀 배치·물류·상태머신 검증</p>
+  <h2>정밀조립존 (OCS 셀 없음 · DT 워크스테이션 1대)</h2>
+  <h3>해야 할 일과 필요한 기능</h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>DMWorks 기능·옵션</th></tr></thead><tbody><tr><td>5개 셀 레이아웃·협동로봇 10대/셀 작업영역 간섭 검증</td><td class='nm'>BASE</td></tr><tr><td>셀 간 AMR 물류(셀당 4대)·대수 산정, 셀 재배정 흐름</td><td class='nm'>MULTIPLE PROCESS</td></tr><tr><td>셀 상태머신(IDLE~SAFE-STOP)·셀 PLC 시퀀스 가상검증</td><td class='nm'>PLC SIMULATION</td></tr><tr><td>AAS 출력 플러그인 실행(존 Local Server AAS Repository 연계)</td><td class='nm'>PLUG-IN User</td></tr><tr><td>※ 협동로봇(국산)은 OLP 목록에 없어 제외. 로봇 동작은 VLA·티칭과 Isaac Sim 학습 DT로 처리</td><td class='nm'>—</td></tr></tbody></table></div>
+  <h3>옵션 구성 <span class="chg">(단위 천원 · VAT 별도 · 정가 = Node-Lock)</span></h3>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th>구분</th><th style="text-align:center">수량</th><th style="text-align:center">이전(10/7)</th><th class="r">정가 단가</th><th class="r">정가 금액</th><th class="r">추정가(×40%)</th><th>이 존에서 쓰는 이유</th></tr></thead><tbody><tr><td class="nm">DMWORKS BASE<br><span class="chg">DMW-001-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">142,200</td><td class="num">142,200</td><td class="num">56,880</td><td>DT 워크스테이션(DWS) 1대용. STEP Import 포함</td></tr><tr><td class="nm">DM MULTIPLE PROCESS<br><span class="chg">DMW-007-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">46,000</td><td class="num">46,000</td><td class="num">18,400</td><td>셀 간 AMR 물류·배치</td></tr><tr><td class="nm">DM PLC SIMULATION<br><span class="chg">DMW-010-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">1 </td><td class="num">44,200</td><td class="num">44,200</td><td class="num">17,680</td><td>셀 상태머신·PLC 시퀀스 검증</td></tr><tr><td class="nm">DM PLUG-IN for User<br><span class="chg">DMW-012-0000</span></td><td><span class="tag req">필수</span></td><td class="q"><b>1</b></td><td class="q">0 <span class="chg up">+1</span></td><td class="num">14,000</td><td class="num">14,000</td><td class="num">5,600</td><td>AAS 출력 플러그인 실행</td></tr></tbody><tfoot><tr class="tot strong"><th colspan="5">합계</th><td class="num">246,400</td><td class="num">98,560</td><td>정가 / 60% 할인 가정 추정가</td></tr></tfoot></table></div>
+</section>
+<section id="issues">
+  <p class="eyebrow">확인 필요 사항</p>
+  <h2>재견적 전에 정리할 쟁점</h2>
+  <div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>구분</th><th>쟁점</th><th>현재 상황</th><th>영향</th><th>다음 조치</th></tr></thead><tbody><tr><td class="u">견적</td><th scope="row">할인율·범위</th><td>10/6 제안 2억 9,500만 원(60% 할인)이 존당인지 3존 합계인지, 어떤 옵션이 들어갔는지 기록 없음. &#x27;옵션 포함 시 존당 약 5억&#x27; 발언도 있음</td><td>추정가가 실제 견적과 크게 다를 수 있음</td><td>옵션 목록을 붙여 존별 재견적 요청(10/7 협의 결과 확인)</td></tr><tr><td class="u">로봇</td><th scope="row">협동로봇 OLP</th><td>OLP·RRS 목록에 협동로봇 컨트롤러 없음. 두산·레인보우는 &#x27;요청 시 지원&#x27;</td><td>정밀조립·적응가공 로봇 프로그램 검증 범위 불확실</td><td>로봇 기종 확정 후 지원 여부·가격 서면 확인</td></tr><tr><td class="u">로봇</td><th scope="row">OLP 컨트롤러</th><td>유연제조 OLP 2종은 메이커 미정 가정</td><td>컨트롤러가 아크 용접·도장이면 단가 28,000~33,000</td><td>산업용 로봇 메이커·용도(스폿·핸들링·실링) 확정</td></tr><tr><td class="u">연동</td><th scope="row">OpenUSD·AAS</th><td>USD 내보내기는 지오메트리만, AAS 출력은 고객 정의 포맷 방식. 커스텀 개발비는 가격표 외</td><td>플러그인 개발 공수·비용 추가</td><td>캠틱이 OpenUSD 구조·AAS 규격 정의 후 개발 범위·비용 제안 요청</td></tr><tr><td class="u">검사</td><th scope="row">로봇 스캐닝 SW</th><td>부품 계측 경로는 AIMS(별도 SW)·PolyWorks 연계 구조</td><td>가격표 외 비용, PolyWorks는 외산</td><td>AIMS 견적·국산 대체 가능 여부 확인</td></tr><tr><td class="u">PLC</td><th scope="row">PLC 메이커</th><td>이기종 PLC 동시 시뮬레이션 경험 2종까지</td><td>셀마다 PLC가 다르면 가상 시운전 통합 곤란</td><td>존·셀별 PLC 메이커 1사 지정(발주 사양 명시)</td></tr><tr><td class="u">라이선스</td><th scope="row">Node-Lock vs Floating</th><td>Floating은 정가 1.3배, 구매 카피 수 = 동시 사용자 수</td><td>좌석 공유가 많으면 Floating이 유리할 수 있음</td><td>존별 실제 사용자 수 확정 후 혼합 구성 검토</td></tr><tr><td class="u">교육·SI</td><th scope="row">교육·컨설팅</th><td>기본 교육 3일 + 추가 1회, 시뮬레이션 수행·결과 영상 제공 가능. 비용 미제시</td><td>SI·교육비 별도</td><td>재견적 시 교육·SI 범위 포함 요청</td></tr></tbody></table></div>
+</section>
+<section id="refs">
+  <p class="eyebrow">근거 문서</p>
+  <h2>참조</h2>
+  <div class="tbl-wrap"><table class="bom"><thead><tr><th>표기</th><th>구분</th><th>문서·내용</th><th>일자</th><th>위치</th></tr></thead><tbody><tr><td class="sym">[S1]</td><td class="u">견적</td><td>DMWorks 3.0 Solution List Price (이지로보틱스) — 옵션 11종·서브옵션·CAD/OLP/RRS 상세 옵션표, 유지보수 18%</td><td class="u">2026-01</td><td class="note">OneDrive Workspace / Customers / 이지로보틱스</td></tr><tr><td class="sym">[M1]</td><td class="u">회의록</td><td>이지로보틱스 DMWorks 방문 Q&amp;A — 기능 충족 여부 26개 항목, USD·PLC·AAS·OLP 제약, 라이선스·교육</td><td class="u">2026-09-30</td><td class="note">OneDrive Workspace / MoM / 2026-09-30</td></tr><tr><td class="sym">[M2]</td><td class="u">회의록</td><td>국산 프로세스 시뮬레이션(DMWorks) 세미나 — 학습(Omniverse)·검증(DMWorks) 역할 분리</td><td class="u">2026-09-17</td><td class="note">OneDrive Workspace / MoM / 2026-09-17</td></tr><tr><td class="sym">[W1]</td><td class="u">llm-wiki 결정</td><td>OCS 시뮬레이션 셀 존별 목적·구성 문서화 후 견적 확정 — 제안 2억 9,500만 원(60% 할인), 옵션 포함 시 존당 약 5억</td><td class="u">2026-10-06</td><td class="note">llm-wiki decisions</td></tr><tr><td class="sym">[W2]</td><td class="u">llm-wiki 결정</td><td>DMWorks 도입 조건 — AAS 규격 캠틱 정의·PLC Read·핸드셰이크·셀별 PLC 통일·라이선스 후속 제안</td><td class="u">2026-09-30</td><td class="note">llm-wiki decisions</td></tr><tr><td class="sym">[P1]</td><td class="u">이전 산출물</td><td>OCS 셀 3종 장비 목록(존별 DMWorks 모듈 표) — 삭제 전 버전</td><td class="u">2026-10-07</td><td class="note">github.com/theuniversepark/micro-cell 커밋 a54f74f</td></tr></tbody></table></div>
+  <p class="note-box">구분 표기: <b>필수</b> 존 목적상 꼭 필요 · <b>선택</b> 있으면 좋으나 빼도 목적 달성 · <b>조건부</b> 로봇 기종·CAD 포맷 등 확정에 따라 결정. '이전(10/7)'은 삭제 전 OCS 셀 3종 표의 수량이며, 정밀조립은 OCS Cell 페이지의 DMWorks 1카피(BASE+MULTIPLE PROCESS+PLC) 기준.</p>
+</section>
+</main>
+
+</body>
+</html>

@@ -3,8 +3,9 @@
 # PUBLIC=1 ./build.sh 로 실행하면 DMWorks 단가를 가린 공개본으로 빌드함
 set -e
 cd "$(dirname "$0")"
-python3 build_page.py && python3 build_ocs_pz.py
+python3 build_page.py && python3 build_ocs_pz.py && python3 build_dmworks.py
 OUT_DIR=docs python3 build_page.py
 OUT_DIR=docs python3 build_ocs_pz.py
+OUT_DIR=docs python3 build_dmworks.py
 python3 web_wrap.py
 uv run --quiet --with python-docx --with beautifulsoup4 python export_docs.py || echo "PDF·Word 생성 건너뜀"
