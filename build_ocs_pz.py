@@ -280,7 +280,7 @@ SW_NODE = {
 
 
 def topo_svg():
-    o = ['<svg class="arch plan" viewBox="0 0 1120 952" role="img" aria-label="정밀조립존 OCS Cell 물리 연결 토폴로지" style="max-width:1120px">']
+    o = ['<svg class="arch plan" viewBox="0 0 1120 996" role="img" aria-label="정밀조립존 OCS Cell 물리 연결 토폴로지" style="max-width:1120px">']
 
     used = set()
 
@@ -362,10 +362,17 @@ def topo_svg():
     dev(820, 380, 265, 80, "운영자 HMI 데스크", "알람 대응 · HOLD/재배정 승인", "dv3")
     link([(590, 252), (800, 252)], "l10b", "10GbE×2", 690, 246)
     link([(440, 226), (440, 210), (800, 210)], "l10a")
+    # 통로 AP 2대 (AMR 주통로 천장, 셀 간 이동 중 로밍)
+    for ax in (110, 560):
+        dev(ax, 500, 120, 40, "AP (통로)", "Wi-Fi 6E · 통로 천장", "dv2", 11)
+        o.append(f'<path d="M{ax + 124},{520} q4,-6 8,0 q4,6 8,0 q4,-6 8,0 q4,6 8,0" class="lk wl"/>')
+        o.append(f'<text x="{ax + 160}" y="{524}" class="lkt">셀 간 이동 AMR</text>')
+        link([(ax + 60, 540), (ax + 60, 556)], "poe")
+    o.append('<g transform="translate(0,44)">')
     # cable tray
     o.append(tlink("FIB", '<rect x="20" y="512" width="1080" height="16" rx="3" class="tray"/><text x="560" y="524" class="tray-t" text-anchor="middle">존 통로 상부 케이블 트레이 — 셀 액세스 스위치 ↔ 서버실 10GbE 이중 광(OM4) · PTP(802.1AS)</text>'))
-    link([(377, 270), (377, 512)], "l25a")
-    link([(520, 270), (520, 288), (391, 288), (391, 512)], "l25b")
+    link([(377, 270), (377, 556)], "l25a")
+    link([(520, 270), (520, 288), (391, 288), (391, 556)], "l25b")
     # cells
     cells = [(cid, "TSN×4 · PoE×2", True) for cid in ("A-3-5", "A-3-2", "A-3-3", "A-3-1", "A-3-4")]
     for i, (cid, yr, now) in enumerate(cells):
@@ -394,10 +401,11 @@ def topo_svg():
         link([(x + 55, 756), (x + 55, 768)], "fb")
         link([(x + 30, 812), (x + 30, 824)], "fb")
         link([(x + 194, 656), (x + 202, 656), (x + 202, 790), (x + 198, 790)], "l1")
-        # 무선: AMR·모바일 → 통로 천장 AP (AP는 PoE로 셀 액세스 스위치에 연결)
-        dev(x + 108, 904, 90, 40, "AP", "Wi-Fi 6E · 통로 천장", "dv2", 11)
+        # 무선: AMR·모바일 → 셀 천장 AP (AP는 PoE로 셀 액세스 스위치에 연결)
+        dev(x + 108, 904, 90, 40, "AP", "Wi-Fi 6E · 셀 천장", "dv2", 11)
         o.append(f'<path d="M{x + 153},{868} q-6,4 0,9 q6,4 0,9 q-6,4 0,9 q6,4 0,8" class="lk wl"/>')
         link([(x + 198, 924), (x + 213, 924), (x + 213, 664), (x + 194, 664)], "poe")
+    o.append("</g>")
     o.append("</svg>")
     return "".join(o)
 
