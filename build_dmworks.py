@@ -143,6 +143,8 @@ GRAND = sum(zone_total(z) for z in ZONES)
 CSS = re.search(r"<style>.*?</style>", bp.page(), re.S).group(0)
 EXTRA = """<style>
 .mast p{max-width:none}
+.mast{background:none;border-radius:0;max-width:1240px;margin:16px auto 0;padding-inline:20px;box-sizing:border-box}
+.mast .wrap{background:var(--navy);border-radius:6px;max-width:none;padding-inline:24px}
 table.bom th.r{text-align:right}
 .tag{display:inline-block;font:600 11px var(--mono);padding:1px 7px;border-radius:3px;white-space:nowrap}
 .tag.req{background:var(--teal);color:#fff} .tag.opt{background:var(--grp);color:var(--navy2);border:1px solid var(--rule)}
