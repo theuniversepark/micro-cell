@@ -912,7 +912,7 @@ def price_summary(chw_tot, chw_new, csw_tot, csw_new):
     body += (f'<tr class="tot"><th scope="row">존 소계 (OCS Cell)</th><td></td><td class="num">{k(zone)}</td><td class="note">존 HW + 존 SW</td></tr>'
              f'<tr class="tot"><th scope="row">셀 소계 (온디바이스 엣지)</th><td></td><td class="num">{k(cell)}</td><td class="note">셀 HW + 셀 SW</td></tr>'
              f'<tr class="tot strong"><th scope="row">총계</th><td></td><td class="num">{k(zone + cell)}</td><td class="note">존 소계 + 셀 소계</td></tr>')
-    return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>구분</th><th>품목 수</th><th>총액 (천원)</th><th>비고</th></tr></thead>'
+    return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>구분</th><th style="text-align:center">품목 수</th><th style="text-align:right">총액 (천원)</th><th>비고</th></tr></thead>'
             f'<tbody>{body}</tbody></table></div>')
 
 
