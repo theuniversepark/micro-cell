@@ -192,7 +192,7 @@ def bom_table(items, budget=None, tid="", kunit=False):
         foot.append(f'<tr class="tot"><th colspan="8">협약 예산 [R2] · 잔여(존 공용 분담·예비)</th>'
                     f'<td class="num" colspan="2">{m(budget)} · {"+" if rest >= 0 else "−"}{m(abs(rest))}</td></tr>')
     head = ('<thead><tr><th>기호</th><th>품목</th><th>주요 스펙</th><th>기능</th><th>용도(공정)</th>'
-            '<th>수량</th><th>단위</th><th>단가</th><th>금액</th><th>비고</th></tr></thead>')
+            '<th class="r">수량</th><th>단위</th><th class="r">단가</th><th class="r">금액</th><th>비고</th></tr></thead>')
     return (f'<div class="tbl-wrap" id="{tid}"><table class="bom">{head}<tbody>{"".join(rows)}</tbody>'
             f'<tfoot>{"".join(foot)}</tfoot></table></div>'), total, hw, sw, sv
 
@@ -448,7 +448,7 @@ figcaption{{font-size:12px;color:var(--muted);margin-top:6px}}
 .tbl-title span{{font-weight:400;color:var(--muted);font-size:13px}}
 .refs li,.issues li{{margin:.35em 0}}
 .keytbl th[scope=row],.issuetbl th[scope=row]{{white-space:nowrap;color:var(--navy2);font-weight:700;background:var(--grp);text-align:left}}
-table.sum th.r{{text-align:right}}
+table.sum th.r,table.bom th.r{{text-align:right}}
 .keytbl td,.issuetbl td{{font-size:13px;line-height:1.55}}
 .issuetbl td:nth-child(3){{min-width:320px}}
 .refs code{{font-family:var(--mono);color:var(--teal);font-size:13px}}
