@@ -38,9 +38,9 @@ def arch_svg():
          '<marker id="ac" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9DB8E8"/></marker></defs>']
     layers = [
         (20, "중앙 계층", "ly1", [("중앙 DCC (D-2-1)", "통합관제·KPI 대시보드"), ("AAS 통합서버 (D-1-1)", "AAS Repository·AI-Ready 데이터")]),
-        (160, "OCS 셀 = 존 계층", "ly2", [("로컬 DCC 서버", "존 오케스트레이터·OCS 실행"), ("검증 DT · DMWorks", "공정·물류·PLC 가상 시운전"),
-                                       ("학습 DT · Omniverse", "GPU 서버·RL·합성데이터"), ("존별 운영 SW", "APS / MES·DAQ / QMS·OPT"), ("로컬 스토리지", "원시데이터 200~300TB")]),
-        (340, "엣지 계층", "ly3", [("엣지 AI 추론기 × 30", "Jetson Thor급·로봇당 1"), ("국산 NPU 엣지", "GPU 대비 추론 비교"), ("PLC/PAC·HIL 랙", "셀 지정 PLC 1사 통일")]),
+        (160, "OCS 셀 = 존 계층", "ly2", [("로컬 서버 × 3", "K8s HA · OCS·AAS·TSDB"), ("검증 DT · DMWorks", "공정·물류·PLC 가상 시운전"),
+                                       ("학습 DT · Omniverse", "GPU 서버(8장)·RL·합성데이터"), ("존별 운영 SW", "APS / MES·DAQ / QMS·OPT"), ("스토리지 3노드", "Ceph · usable 약 480TB")]),
+        (340, "엣지 계층", "ly3", [("Edge Gateway", "OPC UA 수집·AAS 매핑"), ("엣지 AI 추론기 × 30", "Jetson Thor·로봇당 1"), ("국산 NPU 엣지", "GPU 대비 추론 비교"), ("PLC/PAC·HIL 랙", "셀 지정 PLC 1사 통일")]),
         (480, "현장 계층", "ly4", [("Sim-to-Real 키트", "협동로봇·AMR·카메라"), ("3D 스캐너", "점군 → DT 라이브러리(USD)"), ("2차년도 실물 셀", "A-1-3 · A-2-x · A-4-x")]),
     ]
     centers = {}
@@ -65,13 +65,14 @@ def arch_svg():
         o.append(f'<text x="{(x1 + x2) / 2 + dx:.0f}" y="{(y1 + y2) / 2 + 4:.0f}" class="fl-t" text-anchor="{anchor}">{E(label)}</text>')
 
     c = centers
-    lx = c["로컬 DCC 서버"][0]
+    lx = c["로컬 서버 × 3"][0]
     arrow(lx - 30, 160 + 18, lx - 30, 20 + 100, "AAS 서브모델·KPI", dx=-8, anchor="end")
     arrow(lx + 30, 20 + 100, lx + 30, 160 + 18, "작업지시·재계획", "c", dx=8)
     ex = c["엣지 AI 추론기 × 30"][0]
-    arrow(ex - 30, 340 + 18, ex - 30, 160 + 100, "추론결과·상태 (OPC UA/MQTT)")
+    gx_ = c["Edge Gateway"][0]
+    arrow(gx_, 340 + 18, gx_, 160 + 100, "OPC UA·AAS (추론결과·상태)", dx=8)
     ox = c["학습 DT · Omniverse"][0]
-    arrow(ox, 160 + 100, ex + 60, 340 + 18, "스킬·모델 배포", "c")
+    arrow(ox - 20, 160 + 100, ex + 20, 340 + 18, "스킬·모델 배포", "c", dx=10)
     hx = c["PLC/PAC·HIL 랙"][0]
     dx_ = c["검증 DT · DMWorks"][0]
     arrow(hx, 340 + 18, dx_ + 40, 160 + 100, "PLC Read·핸드셰이크")
@@ -90,7 +91,7 @@ MATRIX = [
     ("DMWorks HUMAN·VR (작업자)", ["DM-H"]),
     ("DMWorks POINT CLOUD", ["DM-PC"]),
     ("Omniverse 학습 DT", ["OV"]),
-    ("GPU 8장 연산 서버", ["SRV"]),
+    ("GPU 서버 (GPU 8장)", ["GPU"]),
     ("생산 스케줄링(APS)", ["APS"]),
     ("CNC 가공 시뮬레이션·NC 검증", ["NCV"]),
     ("작업지시·생산·품질(MES)", ["MES"]),
@@ -101,7 +102,10 @@ MATRIX = [
     ("대형 공간 3D 스캐너", ["SCN-L"]),
     ("핸드헬드 정밀 3D 스캐너", ["SCN-H"]),
     ("PLC/PAC·HIL 랙", ["HIL"]),
-    ("엣지 30대·로컬 DCC·스토리지", ["EDGE", "LDCC", "STO"]),
+    ("로컬 서버·스토리지·Edge Gateway", ["LS", "STO", "EGW"]),
+    ("데이터 계층 SW (OPC UA·TSDB·MQTT·보안)", ["OPCUA", "OTSDB", "MQTT", "SEC"]),
+    ("코어·방화벽·PTP·서버실 설비", ["CORE", "FW", "PTP", "UPS", "CRAC"]),
+    ("엣지 30대·국산 NPU", ["EDGE-T", "NPU-M"]),
     ("Sim-to-Real 검증 키트", ["S2R"]),
 ]
 
@@ -172,8 +176,9 @@ def page():
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
   <h2>3개 셀 · 협약 {bp.k(budget)}천원 · 추정 {bp.k(grand)}천원 ({grand / budget * 100:.0f}%)</h2>
   <ul>
-    <li><b>심의 단위</b>: SW만 올리지 않고 SW + 워크스테이션 + GPU 서버 + 엣지 + 로컬 DCC + 스토리지 + HIL을 묶은 '셀 = 시스템'으로 상정함. NIPA 9/23 회신(장비 전용 SW는 장비 구축비 포함)과 맞음 [W7]</li>
-    <li><b>존별 차별화</b>: 유연제조는 공정 최적화·가상 시운전, 적응가공은 데이터·강화학습, 정밀검사는 역설계 DT·품질 운영을 목적으로 둠. 공통 골격(DMWorks·Omniverse·로컬 DCC·엣지)만 같고 존별 SW·스캐너·서버 구성은 다름 [W7]</li>
+    <li><b>심의 단위</b>: SW만 올리지 않고 SW + 워크스테이션 + GPU 서버 + 엣지 + 로컬 서버 + 스토리지 + HIL을 묶은 '셀 = 시스템'으로 상정함. NIPA 9/23 회신(장비 전용 SW는 장비 구축비 포함)과 맞음 [W7]</li>
+    <li><b>존별 차별화</b>: 유연제조는 공정 최적화·가상 시운전, 적응가공은 데이터·강화학습, 정밀검사는 역설계 DT·품질 운영을 목적으로 둠. 공통 골격(데이터 계층·DMWorks·Omniverse·엣지)만 같고 존별 SW·스캐너·서버 구성은 다름 [W7]</li>
+    <li><b>정밀조립존 OCS Cell과 통일</b>: 로컬 서버 3·GPU 서버·스토리지 3노드·코어·방화벽·PTP·서버실 설비·Edge Gateway·운영/DT 워크스테이션·엣지와 데이터 계층 SW(Kepware·Cocktail·Machbase·HiveMQ·AI Enterprise·HIWARE)는 정밀조립존 OCS Cell과 같은 제품·단가로 맞춤. 존마다 다른 것은 시뮬레이션 SW·스캐너·HIL·S2R 키트·존별 운영 SW임</li>
     <li><b>시뮬레이션 역할 분리</b>: 공정·PLC 검증은 국산 DMWorks, 물리 기반 학습·합성데이터는 Omniverse/Isaac으로 나눔. DMWorks에 물리엔진이 없고 USD는 지오메트리만 내보내기 때문임 [W5]</li>
     <li><b>집행률</b>: 국산 SW 전환으로 SW 비중이 줄어든 만큼 9/28 방침대로 엣지(존당 30대)·로컬 스토리지·Sim-to-Real 키트를 넣었고, 오픈소스 기반 개발·구축(DMWorks 커스텀, 강화학습 환경, 합성데이터, DT 라이브러리)은 연구 인력 자체 개발(0원)로 빼서 현재 예산의 {min(RATIOS)}~{max(RATIOS)}% 수준임. 20% 넘게 줄면 NIPA 사전승인·중장위 변경심의 대상이 될 수 있음 [W6][W7]</li>
   </ul>
@@ -185,7 +190,7 @@ def page():
 <section id="arch">
   <p class="eyebrow">아키텍처</p>
   <h2>OCS 셀 계층 구성도 (3개 셀 공통 골격)</h2>
-  <figure class="fig">{arch_svg()}<figcaption>OCS 셀은 존 오케스트레이터 겸 로컬 서버 역할을 함. 엣지는 로봇마다, 원시데이터는 로컬 스토리지, AI-Ready 데이터는 중앙 AAS 통합서버로 보냄 [W6].</figcaption></figure>
+  <figure class="fig">{arch_svg()}<figcaption>OCS 셀은 존 오케스트레이터 겸 Local Server 역할을 함. 구성·단가는 정밀조립존 OCS Cell과 같음. 엣지는 로봇마다, 원시데이터는 스토리지 3노드, AI-Ready 데이터는 중앙 AAS 통합서버로 보냄 [W6].</figcaption></figure>
 </section>
 <section id="mx">
   <p class="eyebrow">구성 비교</p>
@@ -201,8 +206,9 @@ def page():
     <li><b>DMWorks 옵션 단가</b>: OLP·RRS·CAD IMPORT/EXPORT 상세 옵션표를 받지 못해 추정값을 넣었음. {PV.DM_PROPOSAL if PV else "제안가·예상치는 대외비라 공개본에서 뺐음. 재견적으로 확정해야 함"}</li>
     <li><b>비교견적</b>: 국산 단일 벤더라 제조사가 다른 비교견적 2건이 필요함. 지멘스 Process Simulate 등을 비교 대상으로 받아야 함</li>
     <li><b>구독형 SW</b>: Omniverse Enterprise·CAD→USD 도구는 연 구독이라 장비비 계상 가능 여부를 NIPA에 확인해야 함. 안 되면 Isaac Sim(무료)만 쓰고 그 금액을 HW로 돌림</li>
-    <li><b>엣지 30대 선행 확보</b>: 1차년도 OCS 셀에는 실물 로봇이 없음. 엣지를 2차년도로 미루면 셀당 약 300,000천원이 줄어 집행률이 80% 밑으로 떨어짐. 엣지 SW 개발 주체도 아직 정해지지 않았음</li>
-    <li><b>GPU 서버 금액</b>: 적응가공 GPU 8장 서버가 405,000천원인지 450,000천원인지 확인해야 함. 유연제조·정밀검사도 같은 구성을 적용했음</li>
+    <li><b>엣지 30대 선행 확보</b>: 1차년도 OCS 셀에는 실물 로봇이 없음. 엣지를 2차년도로 미루면 셀당 약 270,000천원(MIC-743 9,000천원 × 30)이 줄어 집행률이 크게 떨어짐. 엣지 SW 개발 주체도 아직 정해지지 않았음</li>
+    <li><b>GPU 서버 금액</b>: 정밀조립존 GPU 서버(4장)에 4장을 더한 제품 기준으로 GPU 8장 서버를 241,080천원으로 잡았음. 10/6 회의 수치 405,000천원(450,000천원 여부)과 차이가 커서 견적으로 확정해야 함</li>
+    <li><b>A-1-4 예산 초과</b>: 데이터 계층을 정밀조립존 기준으로 맞추면서 A-1-4가 협약 예산을 약 2% 넘음. VR 헤드셋·대형 스캐너 공동활용 분담이나 엣지 수량 조정으로 맞춰야 함</li>
     <li><b>3D 스캐너 구분</b>: 10/6 견적 130,000천원·250,000천원 중 어느 쪽이 대형 공간형이고 어느 쪽이 핸드헬드형인지 확인해야 함</li>
     <li><b>PLC 메이커</b>: DMWorks 동시 시뮬레이션 경험이 2개 기종까지이므로 셀별 PLC 메이커를 1사로 지정해 HIL 랙과 2차년도 실물 셀 발주 사양에 같이 넣어야 함 [W4]</li>
     <li><b>정밀조립존</b>: 정밀조립존에는 OCS 셀이 없음. A-3-5 DT 검증은 이 3개 셀의 DMWorks 카피 공동활용이나 별도 라이선스 1카피로 확보해야 함</li>

@@ -141,3 +141,74 @@ OCS.append({
 if PUBLIC:
     for _c in OCS:
         _c["items"] = [it[:8] + (0, HIDDEN) if it[1].startswith("DM-") and it[1] != "DM-OLP" else it for it in _c["items"]]
+
+
+# ------------------------------------------------------------------ 정밀조립존 OCS Cell 기준 통일 (2026-10-08)
+# 데이터 계층(Local Server·네트워크·보안·Edge Gateway·운영)과 엣지는 정밀조립존 OCS Cell과 같은 제품·단가를 씀.
+# 존별 차별화 항목(DMWorks 모듈·Omniverse·스캐너·HIL·S2R·존별 운영 SW·DAQ 등)은 그대로 둠.
+from ocs_pz_products import P as _P, CELL_P as _CP
+
+GPU_ADD = 2567                                   # RTX PRO 6000 Max-Q 1장 (만원) [S2]
+GPU8 = _P["GPU"][2] + 4 * GPU_ADD                # 정밀조립존 GPU 서버(4장)에 4장 추가
+_REPLACED = {"LDCC", "NET", "SRV", "WS", "STO", "EDGE", "NPU", "DSP"}
+
+
+def _grade(note):
+    return note.split("]")[0] + "]" if note.startswith("[") else note
+
+
+def _pz(sym, name, func, use, q, unit, extra="", price=None, src=None):
+    prod, maker, p, note = (src or _P)[sym]
+    spec = f"{prod} · {maker}" + (f" · {extra}" if extra else "")
+    return ("HW" if sym not in _SW_SYMS else "SW", sym, name, spec, func, use, q, unit, p if price is None else price,
+            "정밀조립존 OCS Cell과 동일 제품·단가 · " + _grade(note))
+
+
+_SW_SYMS = {"OPCUA", "K8S", "OTSDB", "MQTT", "INF", "SEC"}
+
+
+def _common(ws_qty):
+    hw = [
+        _pz("LS", "로컬 서버 노드 (K8s HA)", "존 오케스트레이터·AAS Repository·TSDB·파이프라인 실행", "Local Server 3노드 이중화", 3, "대"),
+        ("HW", "GPU", "GPU 서버 (GPU 8)", f"{_P['GPU'][0].replace('× 4', '× 8')} · {_P['GPU'][1]}",
+         "강화학습·합성데이터·병렬 시뮬레이션, AI Ready 변환 가속", "학습·검증 연산", 1, "대", GPU8,
+         f"정밀조립존 GPU 서버(4장 {_P['GPU'][2] * 10:,}천원)에 GPU 4장({GPU_ADD * 10:,}천원/장 [S2]) 추가 · 10/6 회의 405,000천원과 차이 확인"),
+        _pz("STO", "스토리지 노드 (Ceph)", "원시데이터·시뮬레이션 결과·AI Ready 데이터셋 보관", "Local Data Lake (raw·ai-ready 버킷)", 3, "대",
+            "3노드 EC 2+1 · usable 약 480TB"),
+        _pz("BAK", "백업 NAS", "설정·메타데이터·AAS 백업", "Local Server 백업", 1, "대"),
+        _pz("CORE", "코어 스위치 (L3)", "서버·스토리지·Edge Gateway 집선", "존 백본 MLAG 이중화", 2, "대"),
+        _pz("MGT", "관리망 스위치", "IPMI·장비 관리망 분리", "서버 원격관리", 1, "대"),
+        _pz("FW", "산업용 방화벽 (OT/IT 경계)", "중앙 Server·TTA 연계 구간 보호", "HA 쌍", 2, "대"),
+        _pz("PTP", "PTP 그랜드마스터", "HIL·S2R 데이터 타임스탬프 정합", "시간동기 (802.1AS·1588)", 1, "대"),
+        _pz("EGW", "Edge Gateway Server", "HIL 랙·S2R 키트 OPC UA 수집·AAS 매핑", "1차년도 1대 · 2차년도 실물 셀부터 셀당 1대", 1, "대"),
+        _pz("RACK", "서버 랙", "연산·스토리지·네트워크 수용", "Rack A 연산 · Rack B 스토리지·네트워크", 2, "대"),
+        _pz("UPS", "UPS", "서버실 전원 보호", "20kVA · 30분", 1, "대"),
+        _pz("CRAC", "항온항습기", "서버실 열부하 처리 (GPU 8장 서버 포함)", "인로우 20kW", 1, "대"),
+        _pz("KVM", "KVM·콘솔", "서버 현장 유지보수", "Rack A", 1, "식"),
+        _pz("OWS", "OCS 운영 워크스테이션", "존 오케스트레이터·셀 상태 관제", "로컬 DCC 관제", 2, "대"),
+        _pz("DWS", "DT·시뮬레이션 워크스테이션", "DMWorks 검증 DT·Isaac Sim 학습 DT 작업", "프로그램당 1대", ws_qty, "대"),
+        _pz("VW", "관제 비디오월", "시뮬레이션 리뷰·DT·KPI 표시", "55″ 2×2", 1, "식"),
+        _pz("EDGE-T", "엣지 AI 추론기 (Jetson Thor)", "HIL 추론 시험·2차년도 실물 셀 선행 확보", "2차년도 실물 셀 로봇당 1 + 관리용 [W6]", 30, "대", src=_CP),
+        _pz("NPU-M", "국산 NPU 엣지 모듈", "GPU 대비 추론 지연·전력 비교", "NPU 실증존 연계", 4, "개", src=_CP),
+    ]
+    sw = [
+        _pz("OPCUA", "OPC UA Aggregation Server", "필드장비·HIL OPC UA 집약, AAS 서브모델 매핑", "Edge Gateway 1대분", 1, "카피"),
+        _pz("K8S", "컨테이너 플랫폼 (K8s HA)", "로컬 서비스 배포·이중화 운영", "Local Server 3노드", 1, "식"),
+        _pz("OTSDB", "Operational TSDB (HA)", "운영 시계열(상태·알람·공정값) 저장", "DCC 대시보드 원천", 1, "식"),
+        _pz("MQTT", "MQTT 브로커 클러스터", "AI Ready 데이터 중앙 전송 (Sparkplug B)", "중앙 Server 연계", 1, "식"),
+        _pz("INF", "AI Inference Engine + AI Enterprise", "이상 판단·재계획 모델 추론", "GPU 4장·1년", 1, "식"),
+        _pz("SEC", "보안 스택", "IAM·SSO·OPC UA 인증서·접근통제", "사용자·장비 인증", 1, "식"),
+        ("SW", "DLS", "데이터 계층 SW (오픈소스 기반)",
+         "AAS 정보모델 · BaSyx Repository · InfluxDB 엣지 TSDB · Iceberg Data Lake · Feast · Airflow AI Ready 파이프라인 · OpenMetadata · Prometheus/Grafana · K3s GW 관리 · Trace API · 존 오케스트레이터",
+         "원시데이터 → AI Ready 변환·카탈로그·모니터링·OCS", "정밀조립존 OCS Cell 존 SW와 같은 구성", 1, "식", 0,
+         "연구 인력 자체 개발(오픈소스 기반, 인건비 처리)"),
+    ]
+    return hw, sw
+
+
+for _c in OCS:
+    _ws = next((it[6] for it in _c["items"] if it[1] == "WS"), 2)
+    _hw, _sw = _common(_ws)
+    _keep = [it for it in _c["items"] if it[1] not in _REPLACED]
+    _c["items"] = [it for it in _keep if it[0] == "SW"] + _sw + _hw + [it for it in _keep if it[0] == "HW"] + [it for it in _keep if it[0] == "서비스"]
+    _c["diff"] = _c["diff"].replace("GPU 8장 학습 서버(405,000천원 견적)", "GPU 8장 학습 서버")
