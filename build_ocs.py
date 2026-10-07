@@ -158,7 +158,7 @@ def page():
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{EXTRA}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · 1차년도 통합 OCS 시뮬레이션 Cell · 2026.10.07 작성 · 설계 추정본 · {"대외비 단가 포함" if not PUBLIC else "공개본(DMWorks 단가 비공개)"}</p>
+  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · 1차년도 통합 OCS 시뮬레이션 Cell · 2026.10.07 작성 · 설계 추정본{"" if not PUBLIC else " · DMWorks 단가 비공개"}</p>
   <h1>OCS 셀 장비 목록</h1>
   <p>유연제조(A-1-4)·적응가공(A-2-5)·AI정밀검사(A-4-5) OCS 셀의 존별 구축 목적, 계층 구성도, HW·SW 장비 목록을 정리함. 10/6 결정에 따라 3개 셀을 같은 구성으로 두지 않고 존별 목적에 맞춰 차별화함.</p>
 </div></header>
@@ -206,7 +206,6 @@ def page():
     <li><b>3D 스캐너 구분</b>: 10/6 견적 130,000천원·250,000천원 중 어느 쪽이 대형 공간형이고 어느 쪽이 핸드헬드형인지 확인해야 함</li>
     <li><b>PLC 메이커</b>: DMWorks 동시 시뮬레이션 경험이 2개 기종까지이므로 셀별 PLC 메이커를 1사로 지정해 HIL 랙과 2차년도 실물 셀 발주 사양에 같이 넣어야 함 [W4]</li>
     <li><b>정밀조립존</b>: 정밀조립존에는 OCS 셀이 없음. A-3-5 DT 검증은 이 3개 셀의 DMWorks 카피 공동활용이나 별도 라이선스 1카피로 확보해야 함</li>
-    <li><b>대외비</b>: {"DMWorks 금액은 이지로보틱스 대외비 정가표에서 산출했으므로 원내 담당자 외에는 공유하지 않음" if not PUBLIC else "공개본은 DMWorks 정가 기반 금액을 0원으로 두고 비공개 표기함. 합계·집행률도 DMWorks를 뺀 값임"}</li>
   </ul>
 </section>
 <section id="refs" class="refs">
@@ -214,7 +213,7 @@ def page():
   <h2>참조</h2>
   <ul>
     <li><code>[R2]</code> 연구개발계획서 부록(협약용, 2026.08.19) — A-1-4 2,100,000·A-2-5 2,320,000·A-4-5 2,600,000천원, 기자재 구입 및 활용계획서 주요사양</li>
-    <li><code>[S1]</code> DMWorks 3.0 Solution List Price(이지로보틱스, 2026.01, 대외비) — 모듈별 정가, 60% 내외 할인 예정</li>
+    <li><code>[S1]</code> DMWorks 3.0 Solution List Price(이지로보틱스, 2026.01) — 모듈별 정가, 60% 내외 할인 예정</li>
     <li><code>[S2]</code> 아이티마야 RTX PRO 6000 Max-Q 견적(2026.09.23) — GPU 공급단가 25,670천원</li>
     <li><code>[W4]</code> DMWorks 도입 조건(9/30) — AAS 규격 캠틱 정의, PLC Read+핸드셰이크, 셀별 PLC 통일, 라이선스 후속 제안</li>
     <li><code>[W5]</code> 피지컬AI 학습·검증 시뮬레이션 역할 분리(옴니버스·DMWorks, 9/17·9/21)</li>

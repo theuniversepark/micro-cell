@@ -960,7 +960,6 @@ def page():
 <header class="mast"><div class="wrap">
   <p class="eyebrow">총괄5-세부1 · A-3 정밀조립(Micro) Zone · 피지컬AI 제조 데이터 구축(2-2) 수집–저장 표준 아키텍처 적용 · 2026.10.07 작성 · 설계 추정본</p>
   <h1>정밀조립존 OCS Cell</h1>
-  <p>OCS Cell을 디지털트윈 전용이 아니라 Local Server – Edge Gateway Server 기반 데이터 계층으로 정의함. 현장 원시데이터 수집·저장, AI Ready 데이터 변환, 중앙 Server 전송, 디지털트윈·존 오케스트레이션을 한 시스템으로 구성함.</p>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
   <a href="#sum">요약</a><a href="#logic">논리 구성도</a><a href="#topo">연결 토폴로지</a><a href="#floor">설치 배치</a>
