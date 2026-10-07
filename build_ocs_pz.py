@@ -159,7 +159,7 @@ SW = [
     ("운영·DT SW", "OCS", "존 오케스트레이터 (OCS)", "Manufacturing Agent · Field Logistics Agent · Cell Agent API · 셀 재배정·HOLD", 1, 0, 0, "식",
      "셀 상태 집계·배치 진척·재계획, 공장 PA Agent 연계"),
     ("운영·DT SW", "DMW", "DMWorks (검증 DT)", "BASE + MULTIPLE PROCESS + PLC SIMULATION · 1카피", 1, 0, 0, "카피",
-     "셀 공정·PLC 가상 시운전 (OCS 3셀과 버전 통일)"),
+     "셀 공정·PLC 가상 시운전"),
     ("운영·DT SW", "ISAAC", "Isaac Sim·Lab (학습 DT)", "오픈 라이선스 · USD 씬", 1, 0, 0, "식", "VLA·스킬 학습 씬, S2R/R2S 정합"),
     ("운영·DT SW", "MON", "모니터링·로그", "메트릭·로그·알람 통합 (Prometheus/Grafana급)", 1, 0, 0, "식", "EGW·서버·파이프라인 상태 감시"),
     ("보안·검증 SW", "SEC", "보안 스택", "IAM·SSO · OPC UA 인증서 PKI · 접근통제 · 감사로그", 1, 0, 0, "식", "사용자·장비 인증, 데이터 접근권한"),

@@ -12,7 +12,6 @@
 | 파일 | 내용 |
 |---|---|
 | `docs/precision_zone.html` | 정밀조립존 셀 구성 계획 — 존 2D 배치도, A-3-1~A-3-5 셀별 HW·SW BOM(셀당 협동로봇 10·AMR 4·AMMR 1, 로봇별 카메라 3대) |
-| `docs/ocs_cells.html` | 1차년도 통합 OCS 시뮬레이션 Cell 3종(A-1-4·A-2-5·A-4-5) — 존별 목적·계층 구성·장비 목록 |
 | `docs/ocs_precision.html` | 정밀조립존 OCS Cell — AAS 기반 수집–저장 공통 아키텍처, 물리 연결 토폴로지, 설치 배치, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록 |
 
 ## 구조
@@ -21,7 +20,6 @@
 |---|---|
 | `cells_data.py` | 존 블록·5개 셀 구성품·레이아웃, 표준 로봇·카메라 기준 적용(`_apply_standard`) |
 | `build_page.py` | 셀 구성 계획 페이지 생성, 공통 CSS·BOM 표 헬퍼 |
-| `ocs_data.py` / `build_ocs.py` | OCS 셀 3종 데이터·페이지 |
 | `ocs_pz_products.py` / `build_ocs_pz.py` | 정밀조립존 OCS Cell 제품·출처·수량 근거·Use Case, 페이지·도면·데이터량 산정 |
 | `private_prices.py` | DMWorks 3.0 정가(이지로보틱스, 2026.01) 기반 단가 |
 | `privacy.py` | 단가 마스킹 스위치(`PUBLIC=1`이면 DMWorks 금액 0·비공개 표기), 출력 폴더(`OUT_DIR`) |
