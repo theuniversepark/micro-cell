@@ -214,6 +214,44 @@ def _over():
 OVER = _over()
 
 
+def key_table(grand, total_budget):
+    rows = [
+        ("배치", "창조2관 2층(1,361.3㎡)에 셀 5개를 남북 2열로 두고 가운데 3.2m AMR 주통로로 연결함. 셀 출입구·AMR 포트는 모두 주통로 측에 둠", "[R1] [R3 s52]"),
+        ("구축 순서", "1차년도 A-3-5(실장비, '27.4 입고) → 2차년도 A-3-2·A-3-3 → 3차년도 A-3-1·A-3-4", "[R2]"),
+        ("표준 로봇·카메라", "셀마다 협동로봇 10 · AMR 4 · AMMR 양팔로봇 1 = 로봇 15대, 로봇별 카메라 3대(팔·상부·정면) = 45대", "2026-10-07 기준 변경"),
+        ("공통 구성", "모든 셀에 로봇별 Edge 추론기, F/T 센서, PTP 시각동기 로거, AAS 어댑터, 셀 상태머신(IDLE/READY/RUN/HOLD/RECOVER/SAFE-STOP)을 넣어 셀–존–공장 운영 계층과 데이터 플라이휠에 바로 연결함", "[W2]"),
+        ("조달 원칙", "중국산 전면 배제, 국산 우선. 국산 동급이 없는 ±0.01mm 고정밀 로봇·나노 스테이지·mN급 F/T·공초점 변위센서만 외산 예외 후보로 둠", "[W1]"),
+        ("금액", f"5셀 추정 {k(grand)}천원 = 협약 {k(total_budget)}천원의 {grand / total_budget * 100:.0f}%. A-3-2만 예산 안이고 나머지 4셀은 {min(OVER)}~{max(OVER)}% 초과 → 로봇 대수 단계 도입(연차 분할)·AMMR 공동활용·예산 변경 중 선택 필요", "아래 셀별 표"),
+    ]
+    body = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, b, c in rows)
+    return ('<div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>내용</th><th>근거</th></tr></thead>'
+            f'<tbody>{body}</tbody></table></div>')
+
+
+ISSUES = [
+    ("사업계획", "로봇 대수 변경", "셀당 협동로봇 10대 기준. 9/17 결정(고정 3대+레일)·계획서(A-3-5 6축 5식)보다 많고 10/6 v3 시나리오(R1~R10)와는 맞음 [W1][W2]",
+     "계획서 장비 대수와 달라져 사업계획 변경 대상", "변경 범위를 NIPA와 확인"),
+    ("공정", "대상 품목", "10/6 결정에 따라 장비 체계를 E-Axle 기준으로 짰음 [W1]",
+     "도어트림(가로 약 1.5m) 시나리오는 지그 팔레트·AMR 가반·스테이션 폭 부족", "도어트림 병행 시 지그·AMR·스테이션 폭 상향 검토"),
+    ("공급", "AMR 공급 주체", "유일 자사 AMR(9/29)과 기존 협업 AMR 업체(10/6 유보) 중 미정",
+     "AMR 사양·단가·셀 간 물류 인터페이스 미확정", "공급사 확정, 셀 간 물류는 KAIST B-1 존과 과제 간 협의"),
+    ("예산·공간", "AMMR·면적", "AMMR 양팔로봇은 유일 범위 밖이라 별도 입찰. A-3-2(100㎡)는 로봇 15대에 비해 좁음",
+     "2~3차년도 AMMR을 공동활용하면 셀당 약 150,000천원 절감 가능", "전북대 NPU 실증존 장비 공동활용 협의, A-3-2 면적 재배분 검토"),
+    ("조달", "외산 예외", "고정밀 6축(±0.01mm)·헥사포드·nm 스테이지·mN F/T·공초점 변위센서는 국산 동급 없음",
+     "국산 우선 원칙 예외 → 심의 지연 위험", "국산 불가 사유서 작성, NIPA 사전 협의"),
+    ("시설", "층·진동", "9/15 협의에서 고중량 장비 1층 우선 배치 요구. 정밀조립존은 2층",
+     "나노 스테이지 셀(A-3-3·A-3-4) 정밀도 저하 위험", "2층 바닥 진동 실측 후 제진 사양 확정"),
+    ("단가", "견적 전환", "표의 단가는 2026년 국내 시장가 기준 설계 추정이며 견적이 아님",
+     "자체 심의·중장위 제출 시 근거 부족", "제조사가 다른 비교견적 2건 이상으로 교체"),
+]
+
+
+def issues_table():
+    body = "".join(f'<tr><td class="u">{E(a)}</td><th scope="row">{E(b)}</th><td>{E(c)}</td><td>{E(d)}</td><td>{E(e)}</td></tr>' for a, b, c, d, e in ISSUES)
+    return ('<div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>구분</th><th>쟁점</th><th>현재 안·상황</th><th>영향</th><th>다음 조치</th></tr></thead>'
+            f'<tbody>{body}</tbody></table></div>')
+
+
 REFS = [
     ("R1", "협약 문서", "기술실증 테스트베드 플랫폼화 추진 연구개발계획서(협약용) — 연도별 목표(2차 A-3-2·A-3-3 각 7종, 3차 A-3-1·A-3-4 각 7종), 전용공간(창조2관 2층 1,361.3㎡)",
      "2026-08-19", "OneDrive 피지컬AI 테스트베드 / 4. 사업계획서(수정)", "셀 구축 연차, 층 면적, 연차 논란"),
@@ -408,6 +446,9 @@ figcaption{{font-size:12px;color:var(--muted);margin-top:6px}}
 .flow{{font-size:14px}}
 .tbl-title span{{font-weight:400;color:var(--muted);font-size:13px}}
 .refs li,.issues li{{margin:.35em 0}}
+.keytbl th[scope=row],.issuetbl th[scope=row]{{white-space:nowrap;color:var(--navy2);font-weight:700;background:var(--grp);text-align:left}}
+.keytbl td,.issuetbl td{{font-size:13px;line-height:1.55}}
+.issuetbl td:nth-child(3){{min-width:320px}}
 .refs code{{font-family:var(--mono);color:var(--teal);font-size:13px}}
 .note-box{{background:var(--paper);border:1px solid var(--rule);border-left:4px solid var(--amber);border-radius:4px;padding:10px 14px;font-size:13.5px;color:var(--ink);max-width:none}}
 @media (max-width:900px){{.two{{grid-template-columns:1fr}}}}
@@ -430,14 +471,7 @@ html{{scroll-behavior:smooth}}
 <section class="summary" id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
   <h2>5개 셀 · 793.4㎡ · 협약 12,600,000천원</h2>
-  <ul>
-    <li><b>배치</b>: 창조2관 2층(1,361.3㎡)에 셀 5개를 남북 2열로 두고 가운데 3.2m AMR 주통로로 연결함. 셀 출입구·AMR 포트는 모두 주통로 측에 둠 [R1][R3 s52]</li>
-    <li><b>구축 순서</b>: 1차년도 A-3-5(실장비, '27.4 입고) → 2차년도 A-3-2·A-3-3 → 3차년도 A-3-1·A-3-4 [R2]</li>
-    <li><b>표준 로봇·카메라</b>: 셀마다 협동로봇 10 · AMR 4 · AMMR 양팔로봇 1 = 로봇 15대, 로봇별 카메라 3대(팔·상부·정면) = 45대를 둠(2026-10-07 기준 변경)</li>
-    <li><b>공통 구성</b>: 모든 셀에 로봇별 Edge 추론기, F/T 센서, PTP 시각동기 로거, AAS 어댑터, 셀 상태머신(IDLE/READY/RUN/HOLD/RECOVER/SAFE-STOP)을 넣어 셀–존–공장 운영 계층과 데이터 플라이휠에 바로 연결되게 함 [W2]</li>
-    <li><b>조달 원칙</b>: 중국산 전면 배제, 국산 우선. 국산 동급이 없는 ±0.01mm 고정밀 로봇·나노 스테이지·mN급 F/T·공초점 변위센서만 외산 예외 후보로 둠 [W1]</li>
-    <li><b>금액</b>: 표준 기준을 적용하면 5셀 추정 {k(grand)}천원으로 협약 {k(total_budget)}천원의 {grand / total_budget * 100:.0f}%임. A-3-2만 예산 안이고 나머지 4셀은 {min(r for r in OVER)}~{max(r for r in OVER)}% 초과하므로, 로봇 대수 단계 도입(연차 분할)·AMMR 공동활용·예산 변경 중 선택이 필요함</li>
-  </ul>
+  {key_table(grand, total_budget)}
   <div class="kpis">
     <div><b>5</b><span>Cell (A-3-1 ~ A-3-5)</span></div>
     <div><b>793.4㎡</b><span>셀 면적 합 / 층 1,361.3㎡</span></div>
@@ -483,18 +517,10 @@ html{{scroll-behavior:smooth}}
   {common_tbl}
 </section>
 
-<section id="issues" class="issues">
+<section id="issues">
   <p class="eyebrow">확인 필요 사항</p>
   <h2>확정 전에 정리할 쟁점</h2>
-  <ul>
-    <li><b>로봇 대수 변경</b>: 셀당 협동로봇 10대 기준은 9/17 결정(고정 3대+레일)·계획서(A-3-5 6축 5식)보다 많고, 10/6 v3 시나리오(R1~R10)와는 맞음. 계획서 장비 대수와 달라지므로 사업계획 변경 범위를 NIPA와 확인해야 함 [W1][W2]</li>
-    <li><b>대상 품목</b>: 10/6 결정에 따라 장비 체계는 E-Axle 기준으로 짰음. 도어트림(가로 약 1.5m) 시나리오를 같은 장비로 돌리려면 지그 팔레트·AMR 가반·스테이션 폭을 도어트림 기준으로 키워야 함 [W1]</li>
-    <li><b>AMR 공급 주체</b>: 유일 자사 AMR(9/29)과 기존 협업 AMR 업체(10/6 유보)가 미정임. 셀 간 물류는 KAIST B-1 존과 과제 간 협의 대상임</li>
-    <li><b>AMMR·면적</b>: AMMR 양팔로봇은 유일 범위 밖이라 별도 입찰로 둠. 2~3차년도 셀 AMMR을 전북대 NPU 실증존 장비 공동활용으로 대체하면 셀당 약 150,000천원을 줄일 수 있음. A-3-2(100㎡)는 로봇 15대에 비해 좁아 면적 재배분 검토가 필요함</li>
-    <li><b>외산 예외</b>: 고정밀 6축(±0.01mm)·헥사포드·nm 스테이지·mN F/T·공초점 변위센서는 국산 불가 사유서와 NIPA 사전 협의가 필요함</li>
-    <li><b>층·진동</b>: 9/15 협의에서 고중량 장비 1층 우선 배치를 요구했음. 나노 스테이지 셀(A-3-3·A-3-4)은 2층 바닥 진동 실측 후 제진 사양을 확정해야 함</li>
-    <li><b>단가</b>: 표의 단가는 2026년 국내 시장가 기준 설계 추정이며 견적이 아님. 자체 심의·중장위 제출 전 제조사가 다른 비교견적 2건 이상으로 바꿔야 함</li>
-  </ul>
+  {issues_table()}
 </section>
 
 <section id="refs">
