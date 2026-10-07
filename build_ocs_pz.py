@@ -958,6 +958,7 @@ ISSUES = [
     ("기술", "AAS 규격", "서브모델·Semantic ID를 캠틱이 정의해야 함(DMWorks·유일로보틱스 모두 자체 템플릿 없음)", "데이터 표준화·중앙 연계 지연", "TTA 표준 템플릿·힌지큐브 자문(10/16·11/6·12/4)으로 1차 정의안"),
     ("기술", "영상 수집 노드 GPU", "SYS-E403-14B 스토어 페이지에는 GPU 지원 목록에 RTX 3060만 표시", "L4 미지원 시 사양 변경", "공급사에 L4 장착 지원 확인"),
     ("데이터", "보관 정책", f"원시데이터 {RET_M}개월 + AI Ready {AIR_RET}개월 로컬 보관(필요 {NEED_TB:,.0f}TB, 스토리지 {N_STO}노드). 9/21 회의는 원시 약 1개월 언급", f"1개월이면 약 {NEED_1M:,.0f}TB·6노드로 감소", "보관 기간 결정"),
+    ("기술", "장비 통신 방식", "OPC UA 수집을 오픈소스(open62541·PLC4X)로 자체 구성, Kepware 미사용", "고유 프로토콜 장비가 많으면 드라이버 개발 부담 증가", "셀 장비 발주 사양에 'OPC UA 서버 내장 또는 Modbus·EtherNet/IP 지원' 명시, 예외 장비는 Kepware 1~2카피로 보완"),
     ("데이터", "데이터량 가정", "카메라 비트레이트·Depth 기록·운용 중 연속 기록·검사 카메라 제외를 가정", f"Depth를 기록하지 않으면 월 약 {tb_month(N_ROBOT * sum(4 for _ in CAMS) + SZ[0]['tel_mbps']) * len(SZ):,.0f}TB, 지금 가정은 {MONTH_TB:,.0f}TB로 가정에 따라 크게 변동", "카메라 설정·기록 정책 확정 후 재산정"),
     ("연계", "중앙 연계", "중앙 Server(AAS 통합서버 D-1-1)가 GPU를 뺀 스토리지 컨셉으로 재견적 중(10/7)", "추론 역할 중복·공백", "로컬 GPU 서버(추론)와 역할 경계 합의"),
     ("설치", "서버실 여건", f"존 서버실 28.8㎡에 랙 3개·UPS·항온항습기, 부하 약 {2.4 + 4.0 + N_STO * 0.5 + 1.3:.0f}kW", "전력·하중 부족 시 위치 변경", "전력·하중·층고 실측"),
@@ -1068,7 +1069,7 @@ def page():
 <section id="sw">
   <p class="eyebrow">6. 존 SW</p>
   <h2>존 SW 품목·수량·용도·Use Case·추천 제품·가격</h2>
-  <p class="note-box">상용 라이선스(Kepware·Machbase·DMWorks·HIWARE)만 금액을 잡았음. 오픈소스 기반 개발·구축 항목(RKE2·Triton·RabbitMQ 등)은 연구 인력 자체 개발(인건비 처리)로 0원임. 연 구독형 SW는 없음.</p>
+  <p class="note-box">상용 라이선스(Machbase·DMWorks·HIWARE)만 금액을 잡았음. 오픈소스 기반 개발·구축 항목(open62541·PLC4X·RKE2·Triton·RabbitMQ 등)은 연구 인력 자체 개발(인건비 처리)로 0원임. 연 구독형 SW는 없음.</p>
   {item_table(SW, with_loc=False)}
 </section>
 
