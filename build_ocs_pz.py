@@ -91,7 +91,7 @@ HW = [
      "AAS·TSDB·설정·모델 백업 (원시데이터 원본은 중앙 Golden Copy)", "존 서버실 Rack B"),
     ("Edge Gateway", "EGW", "Edge Gateway Server", "산업용 박스형 · Core i9급 24코어 · RAM 64GB · GPU(RTX 2000 Ada) 1 · NVMe 4TB · 10GBASE-T 1 + 2.5GbE 2", 6, 0, 0, "대",
      "셀 단위 OPC UA 수집·정규화·AAS 매핑, 엣지 TSDB(시계열 7일 버퍼), F/T 이상감지 모델, 설정·모델 배포 수신", "각 셀 네트워크 캐비닛"),
-    ("Edge Gateway", "VNODE", "영상 수집 노드", "얕은 깊이 엣지 서버 · Xeon 6 · RAM 128GB · NVIDIA L4(NVDEC 4) · U.2 NVMe 3.84TB×2(RAID1, 수신) + 24TB HDD×2(RAID1, 7일 버퍼) · 10GbE×2", 5, 0, 0, "대",
+    ("Edge Gateway", "VNODE", "영상 수집 노드", "Short-Depth 엣지 서버 · Xeon 6 · RAM 128GB · NVIDIA L4(NVDEC 4) · U.2 NVMe 3.84TB×2(RAID1, 수신) + 24TB HDD×2(RAID1, 7일 버퍼) · 10GbE×2", 5, 0, 0, "대",
      "셀 카메라 45대 영상 수신·버퍼·Data Lake 업로드, 영상 AI(작업자 접근 감지) 추론", "각 셀 네트워크 캐비닛"),
     ("Edge Gateway", "CAB", "셀 네트워크 캐비닛", "18U · 전면 잠금 · 팬 · 1kVA 라인인터랙티브 UPS · 광 패치", 5, 0, 0, "식",
      "EGW·셀 스위치 설치, 셀 단위 전원 보호", "각 셀 출입구 측 벽면"),
