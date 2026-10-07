@@ -1068,7 +1068,7 @@ def page():
 <section id="sw">
   <p class="eyebrow">6. 존 SW</p>
   <h2>존 SW 품목·수량·용도·Use Case·추천 제품·가격</h2>
-  <p class="note-box">상용 라이선스(Kepware·Cocktail Cloud·Machbase·DMWorks·HIWARE)만 금액을 잡았음. 오픈소스 기반 개발·구축 항목(Triton·RabbitMQ 등)은 연구 인력 자체 개발(인건비 처리)로 0원임. 연 구독형 SW는 없음.</p>
+  <p class="note-box">상용 라이선스(Kepware·Machbase·DMWorks·HIWARE)만 금액을 잡았음. 오픈소스 기반 개발·구축 항목(RKE2·Triton·RabbitMQ 등)은 연구 인력 자체 개발(인건비 처리)로 0원임. 연 구독형 SW는 없음.</p>
   {item_table(SW, with_loc=False)}
 </section>
 
