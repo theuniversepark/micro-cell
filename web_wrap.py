@@ -11,8 +11,16 @@ BAR_CSS = ('<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4p
            '.webbar .dl{margin-left:auto;display:flex;gap:8px}.webbar .dl a{color:#0A1636;background:#00C2D1;border-radius:4px;padding:2px 10px}'
            '.webbar .dl a:hover{background:#fff;color:#0A1636}'
            '@page{size:A3 landscape;margin:10mm}'
-           '@media print{.webbar,nav.toc{display:none!important}th{position:static!important}.tbl-wrap{overflow:visible!important}'
-           'table{font-size:10px!important}figure,svg,tr{break-inside:avoid}h2,h3,.eyebrow{break-after:avoid}a{color:inherit;text-decoration:none}'
+           '@media print{.webbar,nav.toc,.where,a.tolink[href^="#topo-"]:not(.sw){display:none!important}'
+           '.wrap{max-width:none!important;padding-inline:0!important;padding-block:0 8mm!important}'
+           'thead{display:table-header-group}th{position:static!important;white-space:normal!important}'
+           '.tbl-wrap,.fig{overflow:visible!important}table,table.wide{width:100%!important;min-width:0!important;table-layout:auto}'
+           'td,th{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere;word-break:keep-all}'
+           'td.num,td.q,td.u,td.sym{white-space:nowrap!important}td.src a{word-break:break-all}'
+           'table{font-size:9px!important}table.wide{font-size:7.5px!important}table.wide td.note,table.wide td.basis,table.wide td.uc,table.wide td.src,table.wide td.mk{font-size:7px!important}'
+           'p,li{max-width:none!important}figure,svg,tr,.kpis{break-inside:avoid}h2,h3,.eyebrow,.tbl-title{break-after:avoid}'
+           'main>section{break-inside:auto}main>section+section{break-before:page}'
+           '.fig svg{max-height:175mm;width:auto!important;max-width:100%!important;height:auto;display:block;margin:0 auto}a{color:inherit;text-decoration:none}'
            ':root{color-scheme:light}}</style>')
 
 

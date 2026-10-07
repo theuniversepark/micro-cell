@@ -7,4 +7,4 @@ python3 build_page.py && python3 build_ocs_pz.py
 OUT_DIR=docs python3 build_page.py
 OUT_DIR=docs python3 build_ocs_pz.py
 python3 web_wrap.py
-python3 export_docs.py || true
+uv run --quiet --with python-docx --with beautifulsoup4 python export_docs.py || echo "PDF·Word 생성 건너뜀"
