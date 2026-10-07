@@ -83,8 +83,8 @@ BASIS["RACK"] = f"Rack A(연산: 로컬 서버 3·GPU 서버 2 = 14U) + Rack B(�
 HW = [
     ("Local Server", "LS", "로컬 서버 노드 (K8s HA 클러스터)", "2U · Xeon 6 P-core 2소켓(코어 32×2급) · RAM 512GB · NVMe 2×7.68TB · 25GbE×2(OCP 3.0)", 3, 0, 0, "대",
      "AAS Repository·Operational TSDB·Feature Store·OCS·AI Ready 변환 파이프라인 실행 (3노드 HA)", "존 서버실 Rack A"),
-    ("Local Server", "GPU", "GPU 추론·변환 서버", "4U · 2×AMD EPYC · RTX PRO 6000 96GB×4 (8장까지 증설) · RAM 512GB · NVMe 15TB", 2, 0, 0, "대",
-     "AI Inference Engine(Triton), 영상 비식별·사전 라벨링, 합성데이터 생성", "존 서버실 Rack A"),
+    ("Local Server", "GPU", "GPU 서버 (GPU-1 실시간 추론 · GPU-2 배치)", "4U · 2×AMD EPYC · RTX PRO 6000 96GB×4 (8장까지 증설) · RAM 512GB · NVMe 15TB", 2, 0, 0, "대",
+     "GPU-1: AI Inference Engine(Triton) 실시간 추론 / GPU-2: AI Ready 변환 GPU 단계·영상 비식별·사전 라벨링·합성데이터·재학습", "존 서버실 Rack A"),
     ("Local Server", "STO", "Scale-out 스토리지 노드 (S3 + NFS)", "12×20TB HDD(raw 240TB) + NVMe 캐시 · 이레이저 코딩 4+2 · 25GbE×4(공용망·클러스터망)", N_STO, 0, 0, "노드",
      f"Data Lake — raw 버킷(원시 {RET_M}개월) + ai-ready 버킷(AI Ready {AIR_RET}개월) (필요 {NEED_TB:,.0f}TB)", "존 서버실 Rack C"),
     ("Local Server", "BAK", "백업 NAS", "usable 50TB · 스냅샷 · 오프사이트 복제", 1, 0, 0, "대",
@@ -112,9 +112,9 @@ HW = [
     ("네트워크·시간동기", "FIB", "광·UTP 배선 및 케이블 트레이", "셀 액세스 스위치–서버실 10G 이중 광(OM4) · Cat6A · 통로 상부 트레이", 1, 0, 0, "식",
      "셀 캐비닛–서버실 백본, 카메라·AP 배선", "존 통로 상부"),
     ("운영·DT", "OWS", "OCS 운영 워크스테이션", "i9 · 64GB · 듀얼 32″ 모니터", 2, 0, 0, "대",
-     "존 오케스트레이터·Cell Agent 상태 관제, 알람 대응", "로컬 DCC 관제실"),
+     "1대 존 전체 관제(OCS·셀 상태·KPI) + 1대 셀 알람 대응(HOLD 승인·재배정)", "로컬 DCC 관제실"),
     ("운영·DT", "DWS", "DT·시뮬레이션 워크스테이션", "Xeon W · 256GB · RTX PRO 6000 1 · NVMe 8TB", 2, 0, 0, "대",
-     "DMWorks 검증 DT·Isaac Sim 학습 DT, DT 리플레이", "로컬 DCC 관제실"),
+     "1대 DMWorks 검증 DT(가상 시운전) + 1대 Isaac Sim 학습 DT(VLA·S2R), DT 리플레이", "로컬 DCC 관제실"),
     ("운영·DT", "VW", "관제 비디오월", "55″ 베젤리스 2×2 · 영상 컨트롤러", 1, 0, 0, "식",
      "셀 영상·DT·KPI 대시보드 표시", "로컬 DCC 관제실"),
     ("기반시설", "RACK", "서버 랙", "42U · 1,200mm 깊이 · 이중 PDU", 3, 0, 0, "대",
@@ -336,8 +336,8 @@ def topo_svg():
     o.append('<rect x="40" y="290" width="330" height="180" rx="5" class="rack"/>' + tlink("RACK", '<text x="52" y="308" class="rack-t">Rack A · 연산</text>'))
     for i in range(3):
         dev(52 + i * 104, 318, 96, 46, f"LS-{i + 1}", "로컬 서버 노드")
-    dev(52, 376, 200, 46, "GPU-1", "추론·변환 (RTX PRO 6000×4)")
-    dev(262, 376, 96, 46, "GPU-2", "비식별·합성")
+    dev(52, 376, 200, 46, "GPU-1", "실시간 추론 (RTX PRO 6000×4)")
+    dev(262, 376, 96, 46, "GPU-2", "배치·비식별·합성")
     dev(52, 430, 96, 32, "KVM", "", "dv3", 11)
     # rack B
     o.append('<rect x="400" y="290" width="370" height="180" rx="5" class="rack"/>' + tlink("RACK", '<text x="412" y="308" class="rack-t">Rack B · 스토리지·네트워크 (Rack C 별도)</text>'))
@@ -775,6 +775,37 @@ DEV_SYMS = ("AASIM", "RAW", "ETL", "OCS", "TRC", "AASR", "LAKE", "FS", "CAT", "M
 DEV = sum(P[k][2] for k in DEV_SYMS)
 
 
+ROLES = [
+    ("LS-1 · LS-2 · LS-3", "LS", "3대 (한 묶음)",
+     "같은 역할을 하는 Kubernetes HA 클러스터. 존 SW 약 20개를 세 대에 나눠 돌리고 1대가 고장 나면 나머지 2대로 자동 재배치",
+     "AAS Repository·Registry · Operational TSDB(Machbase) · MQTT 브로커 · 존 오케스트레이터(OCS) · Airflow 파이프라인 제어 · Feature Store · 카탈로그 · 모니터링 · 보안 · TTA Trace API",
+     "etcd 과반수 판단에 최소 3노드 필요. AAS·TSDB·MQTT는 3중 복제. 노드별 주 배치는 운영 시 LS-1 AAS·OCS / LS-2 TSDB·MQTT / LS-3 파이프라인·카탈로그·모니터링으로 둠(설계)"),
+    ("GPU-1", "GPU", "1대",
+     "실시간 추론. 셀 상태머신의 HOLD·재시도·격리 판단 모델, 결합 OK/NG 판정 모델, 재계획 모델 서비스",
+     "Triton Inference Server + NVIDIA AI Enterprise (GPU 4장분)",
+     "이상 판단 10초 KPI를 지키려면 배치 작업과 GPU를 나눠 써야 함"),
+    ("GPU-2", "GPU", "1대",
+     "배치 연산. AI Ready 변환의 GPU 단계(영상 디코딩·동기 정렬), 작업자 영상 비식별, 사전 라벨링, 합성데이터 생성, 모델 재학습",
+     "Airflow 파이프라인 GPU 작업 · Isaac Sim/Lab 연산 보조",
+     "대용량 배치가 실시간 추론 지연을 일으키지 않도록 분리"),
+    ("OWS ×2", "OWS", "2대",
+     "운영 관제. 1대는 존 전체(OCS 화면·셀 상태·배치 진척·KPI), 1대는 셀 알람 대응(HOLD 승인·셀 재배정·이상 이력)",
+     "존 오케스트레이터 UI · 모니터링 대시보드",
+     "운영자 2명이 동시에 작업. GPU 불필요해 고성능 PC로 구성"),
+    ("DWS ×2", "DWS", "2대",
+     "디지털트윈. 1대는 DMWorks 검증 DT(지그·공정 투입 전 경로 간섭·사이클타임 가상 시운전, PLC 시퀀스 검증), 1대는 Isaac Sim 학습 DT(VLA·스킬 학습 씬, S2R 정합)",
+     "DMWorks · Isaac Sim/Lab",
+     "라이선스와 3D GPU 부하가 겹치지 않게 분리. RTX PRO 6000 탑재"),
+]
+
+
+def roles_table():
+    body = "".join(f'<tr><th scope="row"><a href="#hw-{sym}" class="tolink">{E(n)}</a></th><td class="u">{E(q)}</td><td>{E(r)}</td><td>{E(sw)}</td><td class="note">{E(why)}</td></tr>'
+                   for n, sym, q, r, sw, why in ROLES)
+    return ('<div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>장비</th><th>수량</th><th>용도</th><th>올라가는 SW</th><th>나눈 이유</th></tr></thead>'
+            f'<tbody>{body}</tbody></table></div>')
+
+
 def summary_svg():
     cell_mbps = SZ[0]["cam_mbps"] + SZ[0]["tel_mbps"]
     zone_g = sum(r["cam_mbps"] + r["tel_mbps"] for r in SZ) / 1000
@@ -1000,6 +1031,8 @@ def page():
   <h2>장비 설치·연결 구성</h2>
   <figure class="fig">{topo_svg()}{legend_topo()}
   <figcaption>모든 서버·스토리지·방화벽·관제실·셀 캐비닛은 CORE-1(실선)과 CORE-2(점선)에 1회선씩 연결한 MLAG 이중 구성임. <b>장비 노드를 누르면 존 HW(셀 내부 로봇 CTRL·AMR 노드는 셀 HW)의 해당 품목으로 이동함(강조는 다음 클릭 때 해제).</b> 각 표의 “도면 ↑”와 SW 품목명을 누르면 이 도면의 설치 노드로 돌아옴. 최종 구성(5셀 완성 기준)임. 셀 내부 장비(PLC·서보·카메라·F/T)는 연결 관계를 보이기 위해 함께 그렸음.</figcaption></figure>
+  <h3>주요 서버·워크스테이션 용도</h3>
+  {roles_table()}
 </section>
 
 <section id="floor">
