@@ -314,7 +314,7 @@ body{{background:var(--bg);color:var(--ink);font:15px/1.65 var(--font);margin:0}
 .mast .wrap{{padding-block:30px 26px}}
 .mast .eyebrow{{color:var(--cyan)}}
 .mast h1{{font-size:clamp(26px,4vw,38px);font-weight:900;margin:.2em 0 .3em;letter-spacing:-.01em;text-wrap:balance}}
-.mast p{{margin:0;color:#C9D4EE;max-width:70ch}}
+.mast p{{margin:0;color:#C9D4EE;max-width:none}}
 .eyebrow{{font:500 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin:0}}
 nav.toc{{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--rule)}}
 nav.toc .wrap{{padding-block:10px;display:flex;gap:8px;flex-wrap:wrap}}
