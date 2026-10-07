@@ -6,6 +6,9 @@
 
 ## 페이지 (`docs/`)
 
+웹에서 보기: **https://theuniversepark.github.io/micro-cell/** (GitHub Pages, 로그인 불필요)
+
+
 | 파일 | 내용 |
 |---|---|
 | `docs/precision_zone.html` | 정밀조립존 셀 구성 계획 — 존 2D 배치도, A-3-1~A-3-5 셀별 HW·SW BOM(셀당 협동로봇 10·AMR 4·AMMR 1, 로봇별 카메라 3대) |
@@ -22,6 +25,7 @@
 | `ocs_pz_products.py` / `build_ocs_pz.py` | 정밀조립존 OCS Cell 제품·출처·수량 근거·Use Case, 페이지·도면·데이터량 산정 |
 | `private_prices.py` | DMWorks 3.0 정가(이지로보틱스, 2026.01) 기반 단가 |
 | `privacy.py` | 단가 마스킹 스위치(`PUBLIC=1`이면 DMWorks 금액 0·비공개 표기), 출력 폴더(`OUT_DIR`) |
+| `web_wrap.py` | `docs/`를 독립 웹 페이지로 감쌈(doctype·이동 바) + `index.html` 생성 |
 | `build.sh` | 전체 빌드 |
 
 ## 빌드
