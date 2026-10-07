@@ -10,16 +10,18 @@ E = html.escape
 CSS = re.search(r"<style>.*?</style>", bp.page(), re.S).group(0)
 
 # ------------------------------------------------------------------ 데이터량 산정 (장비 단위 상향식)
-# 셀 기준 장비 (사용자 지정 2026-10-07): 협동로봇 10 + AMR 4 + AMMR 양팔 1 = 로봇 15대, 로봇별 카메라 3대(팔·상부·정면)
+# 셀 기준 장비 (사용자 지정 2026-10-07): 협동로봇 10 + AMR 4 + AMMR 양팔 1 = 로봇 15대, 로봇별 카메라 3대(손목 D405 · 머리·가슴 D455, 모두 USB3로 로봇 엣지 직결)
 OPS_H = 8 * 22          # 월 운용시간: 일 8h × 22일, 운용 중 연속 기록 (가정)
 ROBOTS = [("협동로봇", 10), ("AMR", 4), ("AMMR 양팔로봇", 1)]
 N_ROBOT = sum(n for _, n in ROBOTS)
 # 카메라 스트림 (Mbps)
 CAMS = [
-    ("팔 카메라 (RGB-D)", "RGB 1280×720 · 30fps · H.265 4Mbps + Depth 640×480 · 15fps · 16bit 무손실 압축(약 4:1) 18.4Mbps", 4 + 640 * 480 * 2 * 15 / 4 * 8 / 1e6,
-     "협동로봇·AMMR은 손목, AMR은 적재·도킹부에 설치"),
-    ("상부 카메라", "3840×2160(4K) · 30fps · H.265 15Mbps", 15.0, "로봇 작업영역 탑뷰"),
-    ("정면 카메라", "1920×1080 · 30fps · H.265 6Mbps", 6.0, "로봇 정면 행동 관찰"),
+    ("손목 카메라 (RealSense D405)", "RGB 1280×720 · 30fps · H.265 4Mbps + Depth 640×480 · 15fps · 16bit 무손실 압축(약 4:1) 18.4Mbps", 4 + 640 * 480 * 2 * 15 / 4 * 8 / 1e6,
+     "협동로봇·AMMR 손목, AMR은 도킹부 · USB3 엣지 직결"),
+    ("머리 카메라 (RealSense D455)", "RGB 1280×800 · 30fps · H.265 4Mbps + Depth 640×480 · 15fps · 16bit 무손실 압축(약 4:1) 18.4Mbps", 4 + 640 * 480 * 2 * 15 / 4 * 8 / 1e6,
+     "작업영역 상부 시점 · USB3 엣지 직결"),
+    ("가슴 카메라 (RealSense D455)", "RGB 1280×800 · 30fps · H.265 4Mbps + Depth 640×480 · 15fps · 16bit 무손실 압축(약 4:1) 18.4Mbps", 4 + 640 * 480 * 2 * 15 / 4 * 8 / 1e6,
+     "로봇 정면 행동·작업자 근접 · USB3 엣지 직결"),
 ]
 CAM_MBPS = sum(c[2] for c in CAMS)
 # 로봇 텔레메트리 (B/s)
@@ -97,8 +99,8 @@ HW = [
      "서버·스토리지·셀 캐비닛 집선, 존 백본", "존 서버실 Rack B"),
     ("네트워크·시간동기", "TSN", "셀 TSN 산업용 스위치", "관리형 · 6×GbE + 2×GbE/SFP 콤보 · IEEE 802.1AS·1588 · TSN(Qbv)", 20, 0, 0, "대",
      "PLC·로봇 컨트롤러·온디바이스 엣지·EGW 연결, μs급 시간동기 분배 (셀당 4대)", "각 셀 캐비닛"),
-    ("네트워크·시간동기", "POE", "셀 액세스·PoE 스위치", "24×mGig(최대 10G) UPOE · 10G SFP+ 업링크 2(모듈)", 10, 0, 0, "대",
-     "카메라 PoE 급전·영상 수집, 공정설비·제어 PC 연결, 서버실 10G 업링크 (셀당 2대)", "각 셀 캐비닛"),
+    ("네트워크·시간동기", "POE", "셀 액세스·PoE 스위치", "24×mGig(최대 10G) UPOE · 10G SFP+ 업링크 2(모듈)", 5, 0, 0, "대",
+     "공정 비전 카메라·AP PoE 급전, 공정설비·제어 PC 연결, 서버실 10G 업링크 (셀당 1대)", "각 셀 캐비닛"),
     ("네트워크·시간동기", "MGT", "관리망 스위치", "48×1GbE · IPMI/BMC 전용", 1, 0, 0, "대",
      "서버 원격관리(IPMI)·장비 관리망 분리", "존 서버실 Rack B"),
     ("네트워크·시간동기", "FW", "산업용 방화벽 (OT/IT 경계)", "10GbE · HA 쌍 · DPI(OPC UA·MQTT) · VPN", 2, 0, 0, "대",
@@ -390,8 +392,8 @@ def topo_svg():
         link([(x + 151, 626), (x + 151, 638)], "l10")
         # field devices
         dev(x + 10, 712, 90, 44, "셀 PLC", "안전PLC·AAS", "fd", 11)
-        dev(x + 108, 712, 90, 44, "카메라", "관찰·검사 PoE", "fd", 11)
-        dev(x + 10, 824, 90, 44, "로봇 CTRL", "+ 온디바이스 엣지", "fd", 11)
+        dev(x + 108, 712, 90, 44, "공정 비전", "검사 카메라 PoE", "fd", 11)
+        dev(x + 10, 824, 90, 44, "로봇 CTRL", "+ 엣지 · D405/D455", "fd", 11)
         dev(x + 108, 768, 90, 44, "F/T·센서", "1kHz", "fd", 11)
         dev(x + 10, 768, 90, 44, "서보·설비", "EtherCAT", "fd", 11)
         dev(x + 108, 824, 90, 44, "AMR·모바일", "Wi-Fi 6E + 5G 모뎀", "fd", 11)
@@ -654,11 +656,12 @@ def size_flow_svg():
     # 카메라 레인
     cy = [64, 114, 164]
     for (name, sp, mbps, _), y in zip(CAMS, cy):
-        sub = {"팔": f"RGB 4 + Depth {mbps - 4:.1f} (무손실 4:1)", "상부": "4K 30fps H.265", "정면": "FHD 30fps H.265"}[name[:2].strip()]
+        model = name.split("(")[1].rstrip(")").replace("RealSense ", "")
+        sub = f"{model} · RGB 4 + Depth {mbps - 4:.1f} (무손실 4:1)"
         box(20, y, 250, 42, f"{name.split(' (')[0]}  {mbps:.1f} Mbps", sub)
         arr([(270, y + 21), (296, y + 21), (296, 127), (316, 127)])
     o.append('<text x="306" y="119" class="fl-t" text-anchor="middle" font-weight="700">합</text>')
-    box(318, 104, 210, 46, f"로봇 1대 {CAM_MBPS:.1f} Mbps", "22.4 + 15.0 + 6.0")
+    box(318, 104, 210, 46, f"로봇 1대 {CAM_MBPS:.1f} Mbps", " + ".join(f"{c[2]:.1f}" for c in CAMS))
     arr([(528, 127), (574, 127)], f"× {N_ROBOT}대", 551, 118)
     box(576, 100, 230, 54, f"셀 카메라 {cam_cell:.0f} Mbps", f"{N_ROBOT * 3}대 · {CAM_MBPS:.1f} × {N_ROBOT}", "dv2")
     # 텔레메트리 레인
@@ -744,7 +747,7 @@ def cap_flow_svg():
 def sizing_table():
     spec = []
     spec.append('<tr class="grp"><th colspan="5">로봇 구성 (셀당)</th></tr>')
-    spec.append(f'<tr><td class="nm">셀당 로봇 {N_ROBOT}대</td><td class="spec">' + " · ".join(f"{n} {q}대" for n, q in ROBOTS) + f'</td><td class="num">–</td><td class="num">–</td><td class="note">카메라 = 로봇당 3대(팔·상부·정면) → 셀당 {N_ROBOT * 3}대</td></tr>')
+    spec.append(f'<tr><td class="nm">셀당 로봇 {N_ROBOT}대</td><td class="spec">' + " · ".join(f"{n} {q}대" for n, q in ROBOTS) + f'</td><td class="num">–</td><td class="num">–</td><td class="note">카메라 = 로봇당 3대(손목 D405·머리/가슴 D455, USB3) → 셀당 {N_ROBOT * 3}대</td></tr>')
     spec.append('<tr class="grp"><th colspan="5">카메라 1대당 기록 사양</th></tr>')
     for name, sp, mbps, note in CAMS:
         spec.append(f'<tr><td class="nm">{E(name)}</td><td class="spec">{E(sp)}</td><td class="num">{mbps:.1f} Mbps</td><td class="num">{tb_month(mbps):.2f} TB/월</td><td class="note">{E(note)}</td></tr>')
@@ -813,7 +816,7 @@ def summary_table():
         ("계층 배치", "Local Server → 존 서버실 랙 3개(연산·네트워크·스토리지) · 방화벽 HA 쌍 · 코어 스위치 MLAG 2대 / Edge Gateway(OPC UA)·영상 수집 노드 → 셀 캐비닛 / 셀–서버실 10GbE 이중 광 + PTP 시간동기", ""),
         ("수집 경로", "① 상태·공정값: OPC UA → Edge TSDB → Operational TSDB ② 영상·진동·오디오 대용량: OPC UA 우회 → S3 → Data Lake", "D1"),
         ("실시간 제어", "OPC UA 지연(약 100ms) 때문에 로봇·서보 제어는 셀 PLC EtherCAT에 둠. OCS Cell은 수집·감독·재계획만 맡음", "W8"),
-        ("산정 기준", f"셀당 협동로봇 10 · AMR 4 · AMMR 1 = 로봇 {N_ROBOT}대, 로봇별 카메라 3대(팔·상부·정면), 월 {OPS_H}h 연속 기록", ""),
+        ("산정 기준", f"셀당 협동로봇 10 · AMR 4 · AMMR 1 = 로봇 {N_ROBOT}대, 로봇별 카메라 3대(손목 D405·머리/가슴 D455), 월 {OPS_H}h 연속 기록", ""),
         ("데이터량", f"셀당 {SZ[0]['cam_mbps'] + SZ[0]['tel_mbps']:.0f}Mbps · 월 {SZ[0]['tot']:.1f}TB → 존 월 {MONTH_TB:,.0f}TB (카메라 영상 98%)", ""),
         ("저장", f"{RET_M}개월 보관 필요 {NEED_TB:,.0f}TB → 20TB×12 스토리지 노드 {N_STO}대, usable {cap:,.0f}TB (Ceph 사용률 80% 이내)", ""),
         ("규모·금액", f"존 HW {len(HW)}종 · 존 SW {len(SW)}종 {k(total(HW) + total(SW))}천원 + 셀 HW·SW(온디바이스 엣지 75대) 별도 (VAT 별도, 총액 요약 참조)", ""),
@@ -925,7 +928,7 @@ ISSUES = [
     ("기술", "AAS 규격", "서브모델·Semantic ID를 캠틱이 정의해야 함(DMWorks·유일로보틱스 모두 자체 템플릿 없음)", "데이터 표준화·중앙 연계 지연", "TTA 표준 템플릿·힌지큐브 자문(10/16·11/6·12/4)으로 1차 정의안"),
     ("기술", "영상 수집 노드 GPU", "SYS-E403-14B 스토어 페이지에는 GPU 지원 목록에 RTX 3060만 표시", "L4 미지원 시 사양 변경", "공급사에 L4 장착 지원 확인"),
     ("데이터", "보관 정책", f"원시데이터 {RET_M}개월 + AI Ready {AIR_RET}개월 로컬 보관(필요 {NEED_TB:,.0f}TB, 스토리지 {N_STO}노드). 9/21 회의는 원시 약 1개월 언급", f"1개월이면 약 {NEED_1M:,.0f}TB·6노드로 감소", "보관 기간 결정"),
-    ("데이터", "데이터량 가정", "카메라 비트레이트·Depth 기록·운용 중 연속 기록·검사 카메라 제외를 가정", "가정에 따라 월 발생량 153~263TB 이상 변동", "카메라 설정·기록 정책 확정 후 재산정"),
+    ("데이터", "데이터량 가정", "카메라 비트레이트·Depth 기록·운용 중 연속 기록·검사 카메라 제외를 가정", f"Depth를 기록하지 않으면 월 약 {tb_month(N_ROBOT * sum(4 for _ in CAMS) + SZ[0]['tel_mbps']) * len(SZ):,.0f}TB, 지금 가정은 {MONTH_TB:,.0f}TB로 가정에 따라 크게 변동", "카메라 설정·기록 정책 확정 후 재산정"),
     ("연계", "중앙 연계", "중앙 Server(AAS 통합서버 D-1-1)가 GPU를 뺀 스토리지 컨셉으로 재견적 중(10/7)", "추론 역할 중복·공백", "로컬 GPU 서버(추론)와 역할 경계 합의"),
     ("설치", "서버실 여건", f"존 서버실 28.8㎡에 랙 3개·UPS·항온항습기, 부하 약 {2.4 + 4.0 + N_STO * 0.5 + 1.3:.0f}kW", "전력·하중 부족 시 위치 변경", "전력·하중·층고 실측"),
 ]
