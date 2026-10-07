@@ -6,7 +6,7 @@
 
 ## 페이지 (`docs/`)
 
-웹에서 보기: **https://theuniversepark.github.io/micro-cell/** (GitHub Pages, 로그인 불필요)
+웹에서 보기: **https://theuniversepark.github.io/micro-cell/** (GitHub Pages, 로그인 불필요) · 각 페이지 상단의 PDF 저장·Word 저장 버튼으로 내려받기
 
 
 | 파일 | 내용 |
@@ -24,6 +24,7 @@
 | `private_prices.py` | DMWorks 3.0 정가(이지로보틱스, 2026.01) 기반 단가 |
 | `privacy.py` | 단가 마스킹 스위치(`PUBLIC=1`이면 DMWorks 금액 0·비공개 표기), 출력 폴더(`OUT_DIR`) |
 | `web_wrap.py` | `docs/`를 독립 웹 페이지로 감쌈(doctype·이동 바) + `index.html` 생성 |
+| `export_docs.py` | `docs/*.pdf`(Chrome 인쇄, A3 가로)·`docs/*.docx`(도면 PNG + LibreOffice) 생성 — 웹의 PDF·Word 저장 버튼용 |
 | `build.sh` | 전체 빌드 |
 
 ## 빌드
