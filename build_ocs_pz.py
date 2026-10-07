@@ -257,7 +257,7 @@ def logical_svg():
 # ------------------------------------------------------------------ 물리 연결 토폴로지
 NODE_RULES = [("FW-", "FW"), ("CORE-", "CORE"), ("LS-", "LS"), ("GPU-", "GPU"), ("KVM", "KVM"), ("STO-", "STO"),
               ("BAK", "BAK"), ("PTP", "PTP"), ("MGT", "MGT"), ("UPS", "UPS"), ("OWS", "OWS"), ("DWS", "DWS"),
-              ("비디오월", "VW"), ("EGW", "EGW"), ("영상 노드", "VNODE"), ("로봇 CTRL", "c:EDGE-T"), ("AMR·모바일", "c:EDGE-O"), ("TSN SW", "TSN"), ("액세스·PoE", "POE")]
+              ("비디오월", "VW"), ("EGW", "EGW"), ("영상 노드", "VNODE"), ("로봇 CTRL", "c:EDGE-T"), ("AMR·모바일", "c:EDGE-O"), ("TSN SW", "TSN"), ("액세스·PoE", "POE"), ("AP", "AP")]
 
 
 def node_sym(t):
@@ -280,7 +280,7 @@ SW_NODE = {
 
 
 def topo_svg():
-    o = ['<svg class="arch plan" viewBox="0 0 1120 900" role="img" aria-label="정밀조립존 OCS Cell 물리 연결 토폴로지" style="max-width:1120px">']
+    o = ['<svg class="arch plan" viewBox="0 0 1120 952" role="img" aria-label="정밀조립존 OCS Cell 물리 연결 토폴로지" style="max-width:1120px">']
 
     used = set()
 
@@ -394,13 +394,16 @@ def topo_svg():
         link([(x + 55, 756), (x + 55, 768)], "fb")
         link([(x + 30, 812), (x + 30, 824)], "fb")
         link([(x + 194, 656), (x + 202, 656), (x + 202, 790), (x + 198, 790)], "l1")
-        o.append(f'<path d="M{x + 160},{846} q8,-10 16,0 q8,10 16,0" class="lk wl"/>')
+        # 무선: AMR·모바일 → 통로 천장 AP (AP는 PoE로 셀 액세스 스위치에 연결)
+        dev(x + 108, 904, 90, 40, "AP", "Wi-Fi 6E · 통로 천장", "dv2", 11)
+        o.append(f'<path d="M{x + 153},{868} q-6,4 0,9 q6,4 0,9 q-6,4 0,9 q6,4 0,8" class="lk wl"/>')
+        link([(x + 198, 924), (x + 213, 924), (x + 213, 664), (x + 194, 664)], "poe")
     o.append("</svg>")
     return "".join(o)
 
 
 LEGEND_TOPO = [("l100", "100GbE (코어 간 MLAG 피어링)"), ("l25a", "CORE-1 측 연결 (25GbE 서버 / 10GbE 셀 업링크)"), ("l25b", "CORE-2 측 연결 (이중화 짝)"), ("l10a", "10GbE · CORE-1 측"), ("l10b", "10GbE · CORE-2 측"), ("l1", "1/10GbE 산업 Ethernet (OPC UA)"),
-               ("poe", "PoE+ 2.5GbE (카메라)"), ("fb", "Fieldbus EtherCAT (실시간 제어)"), ("ptp", "PTP 시간동기"), ("wl", "무선")]
+               ("poe", "PoE+ 2.5GbE (카메라·AP)"), ("fb", "Fieldbus EtherCAT (실시간 제어)"), ("ptp", "PTP 시간동기"), ("wl", "무선 Wi-Fi 6E (AMR·AMMR ↔ AP)")]
 
 
 # ------------------------------------------------------------------ 설치 배치도 (존 평면)
@@ -549,7 +552,7 @@ def links(sym):
     return "<br>".join(f'<a href="{E(u)}" target="_blank" rel="noopener">{E(t)} ↗</a>' for t, u in ls)
 
 
-TOPO_SYMS = {"FW", "CORE", "LS", "GPU", "KVM", "STO", "BAK", "PTP", "MGT", "UPS", "OWS", "DWS", "VW", "EGW", "VNODE", "TSN", "POE", "RACK", "FIB", "CAB"}
+TOPO_SYMS = {"FW", "CORE", "LS", "GPU", "KVM", "STO", "BAK", "PTP", "MGT", "UPS", "OWS", "DWS", "VW", "EGW", "VNODE", "TSN", "POE", "AP", "RACK", "FIB", "CAB"}
 
 
 # HW → 탑재 SW (SW 목록 순서 유지)
