@@ -938,7 +938,7 @@ def price_summary(chw_tot, chw_new, csw_tot, csw_new):
         ("존 HW", f"{len(HW)}종", zh, "존 서버실·관제실·셀 캐비닛 장비 (OCS Cell)", "#hw"),
         ("존 SW", f"{len(SW)}종", zs, "Edge Gateway·로컬 서버·DT 소프트웨어 (OCS Cell)", "#sw"),
         ("셀 HW", f"{len(CELL_HW)}종", chw_tot, "온디바이스 엣지 75대·부속", "#chw"),
-        ("셀 SW", f"{len(CELL_SW)}종", csw_tot, "제어 브리지·엣지 보안 구축비(5셀 공통 1회). 오픈소스 기반 개발은 자체 개발 0원", "#csw"),
+        ("셀 SW", f"{len(CELL_SW)}종", csw_tot, "모두 무료 플랫폼 또는 연구 인력 자체 개발 0원", "#csw"),
     ]
     body = "".join(f'<tr><th scope="row"><a href="{h}" class="tolink">{E(a)}</a></th><td class="q">{c}</td><td class="num">{k(v)}</td><td class="note">{E(n)}</td></tr>'
                    for a, c, v, n, h in rows)
@@ -1083,7 +1083,7 @@ def page():
 <section id="csw">
   <p class="eyebrow">8. 셀 SW — 온디바이스 엣지</p>
   <h2>셀 SW 품목·기능·Use Case·사양·가격</h2>
-  <p class="note-box">엣지에 설치되는 소프트웨어. 무료 플랫폼은 엣지 대수만큼 설치함. VLA 추론 런타임·안전 이상 감지 모델·에피소드 기록기·업로드 에이전트는 오픈소스 기반으로 연구 인력이 자체 개발해 0원(인건비 처리)으로 두었고, 로봇 제어 브리지·엣지 보안 설정만 5셀 공통 1회 구축비로 잡음. 품목명을 누르면 설치 노드로 이동함.</p>
+  <p class="note-box">엣지에 설치되는 소프트웨어. 무료 플랫폼은 엣지 대수만큼 설치함. 로봇 제어 브리지·VLA 추론 런타임·안전 이상 감지 모델·에피소드 기록기·업로드 에이전트·엣지 보안 설정은 오픈소스 기반으로 연구 인력이 자체 개발·구축해 모두 0원(인건비 처리)으로 둠. 품목명을 누르면 설치 노드로 이동함.</p>
   {CSW_TABLE}
 </section>
 

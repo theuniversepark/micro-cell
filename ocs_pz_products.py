@@ -217,14 +217,14 @@ CELL_HW = [
 CELL_SW = [
     ("플랫폼", "JP", "JetPack (Jetson Linux · CUDA · TensorRT · cuDNN)", "Thor용 JetPack 7 · Orin용 JetPack 6", 75, "대", "엣지 OS·GPU 가속 라이브러리", "엣지 75대 기본 소프트웨어", "EDGE-T", "무료"),
     ("플랫폼", "ROS", "ROS 2 Jazzy + Isaac ROS", "ROS 2 LTS · Isaac ROS 인지·nvblox·cuMotion 패키지", 75, "대", "로봇 미들웨어·GPU 가속 인지·경로계획", "협동로봇 파지 대상 인지, AMR 장애물 지도(nvblox)", "EDGE-T", "무료"),
-    ("제어 연동", "BRG", "로봇 제어 브리지", "로봇 SDK ↔ ROS 2 · 관절·TCP 명령 · 안전 I/O 상태 반영", 3, "식", "엣지 추론 결과를 로봇 제어기 명령으로 변환", "VLA가 낸 파지 궤적을 협동로봇 컨트롤러로 전달하고, 안전 PLC 정지 신호를 받으면 즉시 중단", "EDGE-T", "셀 BOM 미포함(추가)"),
+    ("제어 연동", "BRG", "로봇 제어 브리지", "로봇 SDK ↔ ROS 2 · 관절·TCP 명령 · 안전 I/O 상태 반영", 3, "식", "엣지 추론 결과를 로봇 제어기 명령으로 변환", "VLA가 낸 파지 궤적을 협동로봇 컨트롤러로 전달하고, 안전 PLC 정지 신호를 받으면 즉시 중단", "EDGE-T", "자체 개발"),
     ("AI 추론", "VLA-R", "VLA·스킬 추론 런타임", "TensorRT·TensorRT-LLM · OpenVLA/π0.5 경량화·FP8/FP4 배포 · 모델 버전 고정", 1, "식", "카메라·관절·F/T 입력으로 다음 동작 생성", "A-3-5 R5가 커넥터 삽입 직전 손목 카메라(D405) 영상으로 위치를 보정해 삽입 궤적 생성", "EDGE-T", "자체 개발 (셀 BOM 'VLA'도 0원)"),
     ("AI 추론", "SAFE-AI", "엣지 안전·이상 감지 모델", "작업자 근접·파지 실패·F/T 이상 파형 감지 · 100ms 이내 판단", 1, "식", "로봇 단위 즉시 정지·재시도 판단", "가슴 카메라(D455)에 작업자가 들어오면 감속, F/T 파형이 정상 범위를 벗어나면 삽입 중단 후 HOLD 보고", "EDGE-T", "자체 개발"),
     ("데이터", "EPI", "에피소드 기록기", "카메라 3대 + 관절 100Hz + F/T 1kHz · PTP 시각동기 · LeRobot/RLDS 포맷", 1, "식", "로봇 1대 단위 멀티모달 에피소드 생성", "체결 1사이클(약 180초)을 order·episode ID로 묶어 저장", "EDGE-T", "자체 개발 (셀 BOM 'LOG'도 0원)"),
     ("데이터", "UPL", "업로드 에이전트", "영상 수집 노드로 청크 전송 · 단절 시 로컬 버퍼 · 체크섬 재전송", 1, "식", "엣지 기록분을 셀 영상 수집 노드로 전달", "AMR이 Wi-Fi 음영 구간을 지나는 동안 SSD에 쌓았다가 충전 중 일괄 전송", "EDGE-O", "자체 개발"),
     ("운영", "OTA", "컨테이너·OTA 에이전트", "K3s agent · 존 Gateway 관리와 연동 · 롤백", 75, "대", "추론 모델·기록기 버전 원격 배포", "새 VLA 모델을 A-3-5 협동로봇 10대에 동시 배포, 문제 시 이전 버전으로 롤백", "EDGE-T", "무료"),
     ("운영", "MONA", "엣지 모니터링 에이전트", "jtop · node-exporter · GPU·온도·전력 지표", 75, "대", "엣지 상태 감시", "엣지 GPU 온도·추론 지연이 임계값을 넘으면 존 모니터링에 알람", "EDGE-T", "무료"),
-    ("보안", "ESEC", "엣지 보안 설정", "Secure Boot · OP-TEE · 디스크 암호화 · 장비 인증서", 1, "식", "엣지 위변조·데이터 유출 방지", "분실·교체된 엣지가 존 네트워크에 붙지 못하게 인증서로 차단", "EDGE-T", "셀 BOM 미포함(추가)"),
+    ("보안", "ESEC", "엣지 보안 설정", "Secure Boot · OP-TEE · 디스크 암호화 · 장비 인증서", 1, "식", "엣지 위변조·데이터 유출 방지", "분실·교체된 엣지가 존 네트워크에 붙지 못하게 인증서로 차단", "EDGE-T", "자체 구축"),
     ("NPU", "DXNN", "DXNN SDK", "DEEPX NPU 컴파일러·런타임", 10, "카피", "모델을 국산 NPU용으로 변환·실행", "작업자 근접 감지 모델을 DX-M1에서 돌려 Thor GPU 대비 지연·전력 비교", "EDGE-T", "무료"),
 ]
 
@@ -240,14 +240,14 @@ CELL_P = {
     "NPU-M": ("DX-M1 M.2 모듈", "딥엑스 (한국)", 300, "[추정] 공개가 없음"),
     "JP": ("JetPack 7 / 6", "NVIDIA", 0, "무료"),
     "ROS": ("ROS 2 Jazzy · Isaac ROS", "Open Robotics · NVIDIA", 0, "무료"),
-    "BRG": ("로봇 SDK–ROS 2 제어 브리지 개발", "자체 개발", 2000, "[추정] 로봇 기종군별(셀 공정군 3개) 개발"),
+    "BRG": ("ros2_control·MoveIt 2 + 제조사 SDK·ROS 2 드라이버 기반 브리지", "오픈소스 + 자체 개발", 0, "연구 인력 자체 개발(오픈소스 기반, 인건비 처리). 로봇 발주 사양에 ROS 2 드라이버 또는 공개 SDK 제공 명시. 안전 정지는 안전 PLC·로봇 자체 안전 기능이 담당"),
     "VLA-R": ("TensorRT·TensorRT-LLM + OpenVLA/π0.5 공개 모델", "NVIDIA·오픈소스 + 자체 개발", 0, "연구 인력 자체 개발(오픈소스 기반, 인건비 처리). 미세조정·경량화·제어 연동은 연구 인력 수행"),
     "SAFE-AI": ("YOLO 계열 검출 모델 + 이상탐지 라이브러리", "오픈소스 + 자체 개발", 0, "연구 인력 자체 개발(오픈소스 기반, 인건비 처리). 데이터 수집·라벨링·검증은 연구 인력 수행"),
     "EPI": ("LeRobot 기록 도구 확장", "Hugging Face(오픈소스) + 자체 개발", 0, "연구 인력 자체 개발(오픈소스 기반, 인건비 처리). F/T·PTP·ID 태깅 확장"),
     "UPL": ("rclone·MinIO 클라이언트 설정", "오픈소스 + 자체 구성", 0, "연구 인력 자체 개발(오픈소스 기반, 인건비 처리). 기존 S3 전송 도구 설정 수준"),
     "OTA": ("K3s agent", "SUSE (오픈소스)", 0, "무료"),
     "MONA": ("jtop · node-exporter", "오픈소스", 0, "무료"),
-    "ESEC": ("Jetson 보안 기능 설정·인증서 연동", "NVIDIA 기능 + 구축", 1000, "[추정] 구축"),
+    "ESEC": ("Jetson 보안 기능(Secure Boot·OP-TEE·디스크 암호화) 설정 + step-ca 인증서 연동", "NVIDIA 기본 기능 + 오픈소스", 0, "연구 인력 자체 구축(인건비 처리). Jetson 기본 제공 기능 설정 작업"),
     "DXNN": ("DXNN SDK", "딥엑스 (한국)", 0, "무료(모듈 구매 시 제공)"),
 }
 
@@ -264,7 +264,8 @@ CELL_SRC = {
     "NPU-M": [("DX-M1", "https://deepx.ai/products/dx-m1/")],
     "JP": [("JetPack", "https://developer.nvidia.com/embedded/jetpack")],
     "ROS": [("ROS 2 Jazzy", "https://docs.ros.org/en/jazzy/"), ("Isaac ROS", "https://nvidia-isaac-ros.github.io/")],
-    "BRG": [], "SAFE-AI": [], "UPL": [], "ESEC": [],
+    "BRG": [("ros2_control", "https://control.ros.org/"), ("MoveIt 2", "https://moveit.ai/")], "SAFE-AI": [], "UPL": [],
+    "ESEC": [("Jetson 보안(Secure Boot)", "https://docs.nvidia.com/jetson/archives/r36.4/DeveloperGuide/SD/Security.html"), ("step-ca", "https://smallstep.com/docs/step-ca/")],
     "VLA-R": [("TensorRT", "https://developer.nvidia.com/tensorrt")],
     "EPI": [("LeRobot", "https://github.com/huggingface/lerobot")],
     "OTA": [("K3s", "https://k3s.io/")],
