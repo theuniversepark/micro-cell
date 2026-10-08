@@ -316,9 +316,23 @@ class Writer:
                     shade(cell, "EEF2F9")
                     inline(p, c, fs, True, NAVY2)
                 else:
-                    color = TEAL if "sym" in ccls else (MUTED if ("note" in ccls or "basis" in ccls) else INK)
-                    inline(p, c, fs, "nm" in ccls, color, mono="sym" in ccls)
+                    tg = c.find("span", class_="tag")
+                    if tg is not None:   # 검토 표시(적합·확인·조정 등)는 웹과 같은 색으로 음영
+                        fill, fc = {"ok": ("D9F0F2", TEAL), "req": ("D9F0F2", TEAL), "chk": ("FFF1E2", "9A4A00"),
+                                    "cond": ("FFF1E2", "9A4A00"), "adj": ("FDE8E8", "A12020")}.get(
+                                        next((x for x in tg.get("class", []) if x != "tag"), ""), ("EEF2F9", NAVY2))
+                        shade(cell, fill)
+                        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        inline(p, c, fs, True, fc)
+                    else:
+                        color = TEAL if "sym" in ccls else (MUTED if ("note" in ccls or "basis" in ccls) else INK)
+                        inline(p, c, fs, "nm" in ccls, color, mono="sym" in ccls)
                 ci += span
+        # 마지막 몇 행이 다음 쪽에 홀로 넘어가지 않도록 끝 4행을 다음 행과 묶음
+        for row in t.rows[-4:-1]:
+            for cell in row.cells:
+                for par in cell.paragraphs:
+                    par.paragraph_format.keep_with_next = True
         for i, col in enumerate(t.columns):      # 표 격자(gridCol) 폭 — Word·LibreOffice가 이 값으로 열을 그림
             col.width = widths[i]
         for row in t.rows:
