@@ -349,7 +349,8 @@ def page():
 *{{box-sizing:border-box}}
 body{{background:var(--bg);color:var(--ink);font:15px/1.65 var(--font);margin:0}}
 .wrap{{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}}
-.mast{{background:var(--navy);color:#fff;border-radius:0 0 4px 4px}}
+.mast{{color:#fff;max-width:1240px;margin:16px auto 0;padding-inline:20px;box-sizing:border-box}}
+.mast>.wrap{{background:var(--navy);border-radius:6px;max-width:none;padding-inline:24px}}
 .mast .wrap{{padding-block:30px 26px}}
 .mast .eyebrow{{color:var(--cyan)}}
 .mast h1{{font-size:clamp(26px,4vw,38px);font-weight:900;margin:.2em 0 .3em;letter-spacing:-.01em;text-wrap:balance}}
