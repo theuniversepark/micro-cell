@@ -421,7 +421,7 @@ def floor_svg():
     U = 100
     W, H = ZONE["W"] * U, ZONE["H"] * U
     m = 200
-    o = [f'<svg class="plan zone" viewBox="{-m} {-m} {W + 2 * m} {H + 2 * m}" role="img" aria-label="OCS Cell 설치 배치도">']
+    o = [f'<svg class="plan zone" viewBox="{-m} {-m - 100} {W + 2 * m} {H + 2 * m + 100}" role="img" aria-label="OCS Cell 설치 배치도">']
     o.append(f'<rect x="0" y="0" width="{W}" height="{H}" class="bldg"/>')
     o.append(f'<rect x="50" y="1320" width="{W - 100}" height="320" class="aisle"/>')
     for b in ZONE["blocks"]:
@@ -460,7 +460,7 @@ def floor_svg():
         o.append(f'<rect x="{3510 + i * 125}" y="2010" width="105" height="70" class="deskf"/>')
     o.append('<text x="3750" y="2150" class="flr-s">OWS×2 · DWS×2</text>')
     o.append(f'<line x1="0" y1="-110" x2="{W}" y2="-110" class="dim"/><text x="{W / 2}" y="-140" class="dim-t z">46.0 m</text>')
-    o.append('<text x="0" y="-140" class="zone-ttl">정밀조립존 (A-3)</text>')
+    o.append('<text x="0" y="-150" class="zone-ttl">정밀조립존 (A-3)</text>')
     o.append("</svg>")
     return "".join(o)
 
