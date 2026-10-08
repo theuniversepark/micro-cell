@@ -460,6 +460,7 @@ def floor_svg():
         o.append(f'<rect x="{3510 + i * 125}" y="2010" width="105" height="70" class="deskf"/>')
     o.append('<text x="3750" y="2150" class="flr-s">OWS×2 · DWS×2</text>')
     o.append(f'<line x1="0" y1="-110" x2="{W}" y2="-110" class="dim"/><text x="{W / 2}" y="-140" class="dim-t z">46.0 m</text>')
+    o.append('<text x="0" y="-140" class="zone-ttl">정밀조립존 (A-3)</text>')
     o.append("</svg>")
     return "".join(o)
 
@@ -480,6 +481,7 @@ EXTRA = """<style>
 .sfres{fill:var(--navy2);stroke:var(--amber);stroke-width:2} .sft-w{fill:#fff;text-anchor:middle;font-weight:700} .sfs-w{fill:#C9D6F0;font-size:10.5px;text-anchor:middle}
 .sfn{fill:var(--muted);font-size:12px}
 .mast p{max-width:none}
+.zone-ttl{fill:var(--navy2);font-size:86px;font-weight:900}
 .fld{fill:none;stroke:var(--field);stroke-width:3} .fldtag{fill:var(--field);font-size:12px;font-weight:700}
 .fl-d{stroke:var(--cyan);stroke-width:2.4;fill:none} .fl-c{stroke:#9DB8E8;stroke-width:2.4;fill:none;stroke-dasharray:6 4}
 .fl-t{font-size:11px;fill:var(--ink);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
