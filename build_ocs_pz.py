@@ -10,7 +10,7 @@ E = html.escape
 CSS = re.search(r"<style>.*?</style>", bp.page(), re.S).group(0)
 
 # ------------------------------------------------------------------ 데이터량 산정 (장비 단위 상향식)
-# 셀 기준 장비 (사용자 지정 2026-10-07): 협동로봇 10 + AMR 4 + AMMR 양팔 1 = 로봇 15대, 로봇별 카메라 3대(손목 D405 · 머리·가슴 D455, 모두 USB3로 로봇 엣지 직결)
+# 셀 기준 장비 (사용자 지정 2026-10-07): 협동로봇 10 + AMR 4 + AMMR 양팔 1 = 로봇 15대, 로봇별 카메라 3대(손목 D405 · 머리·가슴 D455) + 협동로봇 엑소센트릭 D455 1대, 모두 USB3로 로봇 엣지 직결 (2026-10-08 엑소 추가)
 OPS_H = 8 * 22          # 월 운용시간: 일 8h × 22일, 운용 중 연속 기록 (가정)
 ROBOTS = [("협동로봇", 10), ("AMR", 4), ("AMMR 양팔로봇", 1)]
 N_ROBOT = sum(n for _, n in ROBOTS)
@@ -24,6 +24,12 @@ CAMS = [
      "로봇 정면 행동·작업자 근접 · USB3 엣지 직결"),
 ]
 CAM_MBPS = sum(c[2] for c in CAMS)
+# 협동로봇만 추가하는 엑소센트릭(3인칭 고정 시점) 카메라 — 로봇 행동 데이터 수집
+EXO = ("엑소센트릭 카메라 (RealSense D455)", "RGB 1280×800 · 30fps · H.265 4Mbps + Depth 640×480 · 15fps · 16bit 무손실 압축(약 4:1) 18.4Mbps", 4 + 640 * 480 * 2 * 15 / 4 * 8 / 1e6,
+       "협동로봇만 1대씩 · 1.5~2m 고정 폴·천장 마운트 · 액티브 USB3로 로봇 엣지 직결")
+N_EXO = dict(ROBOTS)["협동로봇"]
+N_CAM = N_ROBOT * len(CAMS) + N_EXO
+CAM_CELL = N_ROBOT * CAM_MBPS + N_EXO * EXO[2]
 # 로봇 텔레메트리 (B/s)
 TEL = [
     ("협동로봇", "관절 7축(위치·속도·토크·전류, float32) 100Hz 11.2KB/s + TCP 포즈 100Hz 2.8KB/s + 6축 F/T 1kHz 24KB/s + 그리퍼·상태 이벤트 1KB/s",
@@ -43,8 +49,8 @@ def tb_month(mbps):  # Mbps 연속 → TB/월 (10진 TB)
 def sizing():
     rows = []
     for c in CELLS:
-        cam_n = N_ROBOT * 3
-        cam_mbps = N_ROBOT * CAM_MBPS
+        cam_n = N_CAM
+        cam_mbps = CAM_CELL
         tel_mbps = sum(n * TEL_BPS[name] for name, n in ROBOTS) * 8 / 1e6
         rows.append(dict(id=c["id"], rob=N_ROBOT, cam=cam_n, cam_mbps=cam_mbps, tel_mbps=tel_mbps,
                          video=tb_month(cam_mbps), tel=tb_month(tel_mbps), tot=tb_month(cam_mbps + tel_mbps),
@@ -65,6 +71,11 @@ NEED_1M = (MONTH_TB + MONTH_TB * AIR_RATIO) * 1.3
 NODE_RAW = 240            # 12 × 20TB
 NODE_USABLE = NODE_RAW * 4 / 6            # 이레이저 코딩 4+2
 N_STO = max(6, -(-int(NEED_TB / FILL) // int(NODE_USABLE)))
+LOAD_KW = 2.4 + 4.0 + N_STO * 0.5 + 1.3
+N_UPS = max(1, -(-int(LOAD_KW * 10) // 128))          # 20kVA(16kW) UPS를 80% 이하로 운용
+N_RACK = 2 + -(-(N_STO * 2) // 36)                     # 스토리지 랙은 36U까지 채움(PDU·배터리 여유)
+DAILY_TB = (CAM_CELL + 0) / 8 * 3600 * 8 / 1e6         # 셀 영상 1일(8h) 발생량
+BUF_D = int(24 / DAILY_TB)                              # 영상 수집 노드 HDD 24TB(RAID1) 버퍼 일수
 NEED = {3: NEED_TB}
 
 
@@ -73,9 +84,13 @@ BASIS["STO"] = (f"필요 {NEED_TB:,.0f}TB(원시 {RAW_TB:,.0f}TB + AI Ready {AIR
                 f"{NODE_USABLE:.0f}TB(raw 240TB × 이레이저 코딩 4+2) = {NEED_TB / FILL / NODE_USABLE:.1f} → {N_STO}대")
 BASIS["CORE"] = (f"MLAG 이중화 2대. 소요 포트 약 {6 + 4 + N_STO * 4 + 20 + 5}개(로컬 서버 6, GPU 4, 스토리지 {N_STO * 4}[{N_STO}노드×공용망·클러스터망], 셀 액세스 업링크 20, "
                  f"백업·방화벽·관제·관리 5)를 2대에 나누면 대당 약 {(6 + 4 + N_STO * 4 + 20 + 5 + 1) // 2}포트 ≤ 48")
-BASIS["UPS"] = f"서버실 부하 산정 약 {2.4 + 4.0 + N_STO * 0.5 + 1.3:.1f}kW(서버 2.4 + GPU 서버 4.0 + 스토리지 {N_STO}노드 {N_STO * 0.5:.1f} + 네트워크·기타 1.3) → 20kVA(16kW) 1대, 30분 유지"
-BASIS["CRAC"] = f"서버실 열부하 약 {2.4 + 4.0 + N_STO * 0.5 + 1.3:.0f}kW → 20kW급 1대(여유 포함)"
-BASIS["RACK"] = f"Rack A(연산: 로컬 서버 3·GPU 서버 2 = 14U) + Rack B(코어·방화벽·관리·백업·PTP) + Rack C(스토리지 {N_STO}노드 {N_STO * 2}U·UPS 배터리)"
+BASIS["UPS"] = (f"서버실 부하 산정 약 {LOAD_KW:.1f}kW(서버 2.4 + GPU 서버 4.0 + 스토리지 {N_STO}노드 {N_STO * 0.5:.1f} + 네트워크·기타 1.3) → 20kVA(16kW)를 부하율 80% 이하로 쓰면 "
+                f"{N_UPS}대(병렬), 30분 유지")
+BASIS["CRAC"] = f"서버실 열부하 약 {LOAD_KW:.0f}kW → 20kW급 1대(여유 포함)"
+BASIS["RACK"] = (f"Rack A(연산: 로컬 서버 3·GPU 서버 2 = 14U) + Rack B(코어·방화벽·관리·백업·PTP) + 스토리지 {N_STO}노드 {N_STO * 2}U를 랙당 36U까지 → "
+                 f"스토리지 랙 {N_RACK - 2}대, 합계 {N_RACK}대")
+BASIS["VNODE"] = (f"셀당 1대 × 5. 셀 카메라 {N_CAM}대(로봇 {N_ROBOT}대 × 3 + 협동로봇 엑소 {N_EXO}) 영상 평균 {CAM_CELL:,.0f}Mbps(로봇 엣지 업로드)를 받아 NVMe에 수신 → "
+                  f"HDD 24TB(RAID1)에 약 {BUF_D}일분(하루 8h 기준 {DAILY_TB:.1f}TB/일) 버퍼 → Data Lake로 업로드. L4 디코더 4개로 영상 AI(작업자 접근 감지 등) 처리. 10GbE 2포트를 셀 액세스 스위치 2대에 1회선씩 연결")
 
 
 # ------------------------------------------------------------------ 장비 목록
@@ -91,8 +106,8 @@ HW = [
      "AAS·TSDB·설정·모델 백업 (원시데이터 원본은 중앙 Golden Copy)", "존 서버실 Rack B"),
     ("Edge Gateway", "EGW", "Edge Gateway Server", "산업용 박스형 · Core i9급 24코어 · RAM 64GB · GPU(RTX 2000 Ada) 1 · NVMe 4TB · 10GBASE-T 1 + 2.5GbE 2", 6, 0, 0, "대",
      "셀 단위 OPC UA 수집·정규화·AAS 매핑, 엣지 TSDB(시계열 7일 버퍼), F/T 이상감지 모델, 설정·모델 배포 수신", "각 셀 네트워크 캐비닛"),
-    ("Edge Gateway", "VNODE", "영상 수집 노드", "Short-Depth 엣지 서버 · Xeon 6 · RAM 128GB · NVIDIA L4(NVDEC 4) · U.2 NVMe 3.84TB×2(RAID1, 수신) + 24TB HDD×2(RAID1, 7일 버퍼) · 10GbE×2", 5, 0, 0, "대",
-     "셀 카메라 45대 영상 수신·버퍼·Data Lake 업로드, 영상 AI(작업자 접근 감지) 추론", "각 셀 네트워크 캐비닛"),
+    ("Edge Gateway", "VNODE", "영상 수집 노드", "Short-Depth 엣지 서버 · Xeon 6 · RAM 128GB · NVIDIA L4(NVDEC 4) · U.2 NVMe 3.84TB×2(RAID1, 수신) + 24TB HDD×2(RAID1, 영상 버퍼) · 10GbE×2", 5, 0, 0, "대",
+     f"셀 카메라 {N_CAM}대 영상 수신·버퍼·Data Lake 업로드, 영상 AI(작업자 접근 감지) 추론", "각 셀 네트워크 캐비닛"),
     ("Edge Gateway", "CAB", "셀 네트워크 캐비닛", "18U · 전면 잠금 · 팬 · 1kVA 라인인터랙티브 UPS · 광 패치", 5, 0, 0, "식",
      "EGW·셀 스위치 설치, 셀 단위 전원 보호", "각 셀 출입구 측 벽면"),
     ("네트워크·시간동기", "CORE", "코어 스위치 (L3)", "48×25GbE + 6×100GbE · MLAG 이중화 · PTP 지원", 2, 0, 0, "대",
@@ -117,9 +132,9 @@ HW = [
      "1대 DMWorks 검증 DT(가상 시운전) + 1대 Isaac Sim 학습 DT(VLA·S2R), DT 리플레이", "로컬존 DCC 관제실"),
     ("운영·DT", "VW", "관제 비디오월", "55″ 베젤리스 2×2 · 영상 컨트롤러", 1, 0, 0, "식",
      "셀 영상·DT·KPI 대시보드 표시", "로컬존 DCC 관제실"),
-    ("기반시설", "RACK", "서버 랙", "42U · 1,200mm 깊이 · 이중 PDU", 3, 0, 0, "대",
-     "Rack A 연산 · Rack B 네트워크·백업 · Rack C 스토리지", "존 서버실"),
-    ("기반시설", "UPS", "UPS", "20kVA · 온라인 이중변환 · 30분", 1, 0, 0, "대",
+    ("기반시설", "RACK", "서버 랙", "42U · 1,200mm 깊이 · 이중 PDU", N_RACK, 0, 0, "대",
+     "Rack A 연산 · Rack B 네트워크·백업 · Rack C~ 스토리지", "존 서버실"),
+    ("기반시설", "UPS", "UPS", "20kVA · 온라인 이중변환 · 30분 · 병렬 운전", N_UPS, 0, 0, "대",
      "서버실 전원 보호 (부하 약 13kW)", "존 서버실"),
     ("기반시설", "CRAC", "항온항습기", "냉방 15kW급 · 상부 취출", 1, 0, 0, "대",
      "서버실 열부하 처리", "존 서버실"),
@@ -385,7 +400,7 @@ def topo_svg():
         link([(x + 96, 528), (x + 96, 586)], "l25a")
         link([(x + 112, 528), (x + 112, 586)], "l25b")
         dev(x + 14, 586, 86, 40, "EGW", "OPC UA·AAS", "dv" if now else "dvx", 11)
-        dev(x + 108, 586, 86, 40, "영상 노드", "L4·7일 버퍼", "dv" if now else "dvx", 11)
+        dev(x + 108, 586, 86, 40, "영상 노드", f"L4·{BUF_D}일 버퍼", "dv" if now else "dvx", 11)
         dev(x + 14, 638, 86, 36, "TSN SW", "", "dv2" if now else "dvx", 11)
         dev(x + 108, 638, 86, 36, "액세스·PoE", "", "dv2" if now else "dvx", 11)
         link([(x + 57, 626), (x + 57, 638)], "l10")
@@ -628,11 +643,11 @@ def size_flow_svg():
     """② 셀별 발생량 풀이 도식 — 장치 1대 → 대수 곱 → 셀 대역폭 → 월 발생량"""
     cnt = dict(ROBOTS)
     tel_cell = sum(n * TEL_BPS[name] for name, n in ROBOTS)          # B/s
-    cam_cell = N_ROBOT * CAM_MBPS
+    cam_cell = CAM_CELL
     tel_mbps = tel_cell * 8 / 1e6
     cell = cam_cell + tel_mbps
     mbs = cell / 8
-    o = ['<svg class="arch plan" viewBox="0 0 1120 470" role="img" aria-label="셀별 원시데이터 발생량 산정 흐름" style="max-width:1120px">',
+    o = ['<svg class="arch plan" viewBox="0 0 1120 500" role="img" aria-label="셀별 원시데이터 발생량 산정 흐름" style="max-width:1120px">',
          '<defs><marker id="sf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--cyan)"/></marker></defs>']
 
     def box(x, y, w, h, t, s="", cls="dv", fs=12.5):
@@ -654,33 +669,36 @@ def size_flow_svg():
     for x, w, t in [(20, 250, "① 장치 1대 기록 대역폭"), (318, 210, "② 로봇 1대·대수 곱"), (576, 230, "③ 셀 대역폭"), (850, 250, "④ 월 발생량 환산")]:
         o.append(f'<text x="{x}" y="22" class="sfh">{E(t)}</text>')
     # 레인
-    o.append('<rect x="10" y="34" width="806" height="186" rx="8" class="sflane"/><text x="22" y="54" class="sflt">카메라 영상 (로봇당 3대)</text>')
-    o.append('<rect x="10" y="232" width="806" height="186" rx="8" class="sflane"/><text x="22" y="252" class="sflt">로봇 텔레메트리 (로봇 종류별)</text>')
-    # 카메라 레인
-    cy = [64, 114, 164]
-    for (name, sp, mbps, _), y in zip(CAMS, cy):
+    o.append('<rect x="10" y="34" width="806" height="212" rx="8" class="sflane"/><text x="22" y="54" class="sflt">카메라 영상 (로봇당 3대 + 협동로봇 엑소센트릭 1대)</text>')
+    o.append('<rect x="10" y="258" width="806" height="186" rx="8" class="sflane"/><text x="22" y="278" class="sflt">로봇 텔레메트리 (로봇 종류별)</text>')
+    # 카메라 레인: 공통 3대
+    for (name, sp, mbps, _), y in zip(CAMS, [62, 104, 146]):
         model = name.split("(")[1].rstrip(")").replace("RealSense ", "")
-        sub = f"{model} · RGB 4 + Depth {mbps - 4:.1f} (무손실 4:1)"
-        box(20, y, 250, 42, f"{name.split(' (')[0]}  {mbps:.1f} Mbps", sub)
-        arr([(270, y + 21), (296, y + 21), (296, 127), (316, 127)])
-    o.append('<text x="306" y="119" class="fl-t" text-anchor="middle" font-weight="700">합</text>')
-    box(318, 104, 210, 46, f"로봇 1대 {CAM_MBPS:.1f} Mbps", " + ".join(f"{c[2]:.1f}" for c in CAMS))
-    arr([(528, 127), (574, 127)], f"× {N_ROBOT}대", 551, 118)
-    box(576, 100, 230, 54, f"셀 카메라 {cam_cell:.0f} Mbps", f"{N_ROBOT * 3}대 · {CAM_MBPS:.1f} × {N_ROBOT}", "dv2")
+        box(20, y, 250, 38, f"{name.split(' (')[0]}  {mbps:.1f} Mbps", f"{model} · RGB 4 + Depth {mbps - 4:.1f} (무손실 4:1)")
+        arr([(270, y + 19), (296, y + 19), (296, 120), (316, 120)])
+    o.append('<text x="306" y="112" class="fl-t" text-anchor="middle" font-weight="700">합</text>')
+    box(318, 98, 210, 44, f"로봇 1대 {CAM_MBPS:.1f} Mbps", " + ".join(f"{c[2]:.1f}" for c in CAMS) + f"  × {N_ROBOT}대")
+    arr([(528, 120), (552, 120), (552, 166), (574, 166)])
+    # 협동로봇 엑소센트릭
+    box(20, 196, 250, 40, f"엑소센트릭  {EXO[2]:.1f} Mbps", "D455 · 협동로봇만 · RGB 4 + Depth 18.4")
+    arr([(270, 216), (316, 216)], f"× {N_EXO}대", 293, 209)
+    box(318, 196, 210, 40, f"{N_EXO * EXO[2]:.0f} Mbps", f"{EXO[2]:.1f} × {N_EXO}")
+    arr([(528, 216), (552, 216), (552, 166), (574, 166)])
+    box(576, 136, 230, 60, f"셀 카메라 {cam_cell:.0f} Mbps", f"{N_CAM}대 · {CAM_MBPS:.1f}×{N_ROBOT} + {EXO[2]:.1f}×{N_EXO}", "dv2")
     # 텔레메트리 레인
-    ty0 = [262, 312, 362]
+    ty0 = [288, 338, 388]
     for (name, n), y in zip(ROBOTS, ty0):
         bps = TEL_BPS[name]
         sub = {"협동로봇": "관절 7축·TCP 100Hz + F/T 1kHz", "AMR": "LiDAR 2대 + 주행·IMU", "AMMR 양팔로봇": "양팔 14축·F/T 2 + 이동부"}[name]
         box(20, y, 250, 42, f"{name}  {bps / 1000:.0f} KB/s", sub)
         arr([(270, y + 21), (316, y + 21)], f"× {n}대", 293, y + 14)
         box(318, y, 210, 42, f"{n * bps / 1000:,.0f} KB/s", f"{bps / 1000:.0f} × {n}")
-        arr([(528, y + 21), (552, y + 21), (552, 325), (574, 325)])
-    o.append('<text x="562" y="317" class="fl-t" text-anchor="middle" font-weight="700">합</text>')
-    box(576, 296, 230, 58, f"셀 텔레메트리 {tel_mbps:.1f} Mbps", f"{tel_cell / 1000:,.0f} KB/s × 8 ÷ 1,000", "dv2")
+        arr([(528, y + 21), (552, y + 21), (552, 351), (574, 351)])
+    o.append('<text x="562" y="343" class="fl-t" text-anchor="middle" font-weight="700">합</text>')
+    box(576, 322, 230, 58, f"셀 텔레메트리 {tel_mbps:.1f} Mbps", f"{tel_cell / 1000:,.0f} KB/s × 8 ÷ 1,000", "dv2")
     # 합류 → 환산 (위에서 아래로)
-    arr([(806, 127), (830, 127), (830, 68), (848, 68)])
-    arr([(806, 325), (830, 325), (830, 68), (848, 68)])
+    arr([(806, 166), (830, 166), (830, 68), (848, 68)])
+    arr([(806, 351), (830, 351), (830, 68), (848, 68)])
     o.append('<text x="838" y="200" class="fl-t" text-anchor="middle" font-weight="700">합</text>')
     box(850, 40, 250, 56, f"셀 평균 {cell:.0f} Mbps", f"영상 {cam_cell:.0f} + 텔레메트리 {tel_mbps:.1f}", "dv2", 14)
     arr([(975, 96), (975, 116)])
@@ -691,7 +709,7 @@ def size_flow_svg():
     box(850, 268, 250, 56, f"셀 {SZ[0]['tot']:.1f} TB/월", f"{mbs:.1f} × 3,600 × {OPS_H} ÷ 10⁶", "sfres", 15)
     arr([(975, 324), (975, 356)], "× 5셀", 1000, 345)
     box(850, 358, 250, 56, f"존 {MONTH_TB:.0f} TB/월", f"{SZ[0]['tot']:.1f} × 5셀", "sfres", 15)
-    o.append(f'<text x="20" y="450" class="sfn">영상이 셀 발생량의 {cam_cell / cell * 100:.0f}%를 차지함 → 저장 용량은 카메라 수·비트레이트에 가장 민감함. 운용 중 연속 기록 가정(10진 TB).</text>')
+    o.append(f'<text x="20" y="480" class="sfn">영상이 셀 발생량의 {cam_cell / cell * 100:.0f}%를 차지함 → 저장 용량은 카메라 수·비트레이트에 가장 민감함. 운용 중 연속 기록 가정(10진 TB).</text>')
     o.append("</svg>")
     return '<figure class="fig" style="margin:10px 0 14px">' + "".join(o) + "</figure>"
 
@@ -750,11 +768,12 @@ def cap_flow_svg():
 def sizing_table():
     spec = []
     spec.append('<tr class="grp"><th colspan="5">로봇 구성 (셀당)</th></tr>')
-    spec.append(f'<tr><td class="nm">셀당 로봇 {N_ROBOT}대</td><td class="spec">' + " · ".join(f"{n} {q}대" for n, q in ROBOTS) + f'</td><td class="num">–</td><td class="num">–</td><td class="note">카메라 = 로봇당 3대(손목 D405·머리/가슴 D455, USB3) → 셀당 {N_ROBOT * 3}대</td></tr>')
+    spec.append(f'<tr><td class="nm">셀당 로봇 {N_ROBOT}대</td><td class="spec">' + " · ".join(f"{n} {q}대" for n, q in ROBOTS) + f'</td><td class="num">–</td><td class="num">–</td><td class="note">카메라 = 로봇당 3대(손목 D405·머리/가슴 D455) + 협동로봇 엑소센트릭 D455 {N_EXO}대 → 셀당 {N_CAM}대</td></tr>')
     spec.append('<tr class="grp"><th colspan="5">카메라 1대당 기록 사양</th></tr>')
     for name, sp, mbps, note in CAMS:
         spec.append(f'<tr><td class="nm">{E(name)}</td><td class="spec">{E(sp)}</td><td class="num">{mbps:.1f} Mbps</td><td class="num">{tb_month(mbps):.2f} TB/월</td><td class="note">{E(note)}</td></tr>')
-    spec.append(f'<tr class="tot"><th>로봇 1대 카메라 합계</th><td class="spec">팔 + 상부 + 정면</td><td class="num">{CAM_MBPS:.1f} Mbps</td><td class="num">{tb_month(CAM_MBPS):.2f} TB/월</td><td></td></tr>')
+    spec.append(f'<tr class="tot"><th>로봇 1대 카메라 합계</th><td class="spec">손목 + 머리 + 가슴 (모든 로봇)</td><td class="num">{CAM_MBPS:.1f} Mbps</td><td class="num">{tb_month(CAM_MBPS):.2f} TB/월</td><td></td></tr>')
+    spec.append(f'<tr><td class="nm">{E(EXO[0])}</td><td class="spec">{E(EXO[1])}</td><td class="num">{EXO[2]:.1f} Mbps</td><td class="num">{tb_month(EXO[2]):.2f} TB/월</td><td class="note">{E(EXO[3])}</td></tr>')
     spec.append('<tr class="grp"><th colspan="5">로봇 1대당 텔레메트리</th></tr>')
     for name, sp, bps in TEL:
         spec.append(f'<tr><td class="nm">{E(name)}</td><td class="spec">{E(sp)}</td><td class="num">{bps / 1000:.0f} KB/s</td><td class="num">{tb_month(bps * 8 / 1e6):.2f} TB/월</td><td class="note"></td></tr>')
@@ -850,7 +869,7 @@ def summary_table():
         ("계층 배치", "Local Server → 존 서버실 랙 3개(연산·네트워크·스토리지) · 방화벽 HA 쌍 · 코어 스위치 MLAG 2대 / Edge Gateway(OPC UA)·영상 수집 노드 → 셀 캐비닛 / 셀–서버실 10GbE 이중 광 + PTP 시간동기", ""),
         ("수집 경로", "① 상태·공정값: OPC UA → Edge TSDB → Operational TSDB ② 영상·진동·오디오 대용량: OPC UA 우회 → S3 → Data Lake", "D1"),
         ("실시간 제어", "OPC UA 지연(약 100ms) 때문에 로봇·서보 제어는 셀 PLC EtherCAT에 둠. OCS Cell은 수집·감독·재계획만 맡음", "W8"),
-        ("산정 기준", f"셀당 협동로봇 10 · AMR 4 · AMMR 1 = 로봇 {N_ROBOT}대, 로봇별 카메라 3대(손목 D405·머리/가슴 D455), 월 {OPS_H}h 연속 기록", ""),
+        ("산정 기준", f"셀당 협동로봇 10 · AMR 4 · AMMR 1 = 로봇 {N_ROBOT}대, 로봇별 카메라 3대(손목 D405·머리/가슴 D455) + 협동로봇 엑소센트릭 D455 = 셀당 {N_CAM}대, 월 {OPS_H}h 연속 기록", ""),
         ("데이터량", f"셀당 {SZ[0]['cam_mbps'] + SZ[0]['tel_mbps']:.0f}Mbps · 월 {SZ[0]['tot']:.1f}TB → 존 월 {MONTH_TB:,.0f}TB (카메라 영상 98%)", ""),
         ("저장", f"{RET_M}개월 보관 필요 {NEED_TB:,.0f}TB → 20TB×12 스토리지 노드 {N_STO}대, usable {cap:,.0f}TB (Ceph 사용률 80% 이내)", ""),
         ("규모·금액", f"존 HW {len(HW)}종 · 존 SW {len(SW)}종 {k(total(HW) + total(SW))}천원 + 셀 HW·SW(온디바이스 엣지 75대) 별도 (VAT 별도, 총액 요약 참조)", ""),
@@ -962,7 +981,7 @@ ISSUES = [
     ("기술", "영상 수집 노드 GPU", "SYS-E403-14B 스토어 페이지에는 GPU 지원 목록에 RTX 3060만 표시", "L4 미지원 시 사양 변경", "공급사에 L4 장착 지원 확인"),
     ("데이터", "보관 정책", f"원시데이터 {RET_M}개월 + AI Ready {AIR_RET}개월 로컬 보관(필요 {NEED_TB:,.0f}TB, 스토리지 {N_STO}노드). 9/21 회의는 원시 약 1개월 언급", f"1개월이면 약 {NEED_1M:,.0f}TB·6노드로 감소", "보관 기간 결정"),
     ("기술", "장비 통신 방식", "OPC UA 수집을 오픈소스(open62541·PLC4X)로 자체 구성, Kepware 미사용", "고유 프로토콜 장비가 많으면 드라이버 개발 부담 증가", "셀 장비 발주 사양에 'OPC UA 서버 내장 또는 Modbus·EtherNet/IP 지원' 명시, 예외 장비는 Kepware 1~2카피로 보완"),
-    ("데이터", "데이터량 가정", "카메라 비트레이트·Depth 기록·운용 중 연속 기록·검사 카메라 제외를 가정", f"Depth를 기록하지 않으면 월 약 {tb_month(N_ROBOT * sum(4 for _ in CAMS) + SZ[0]['tel_mbps']) * len(SZ):,.0f}TB, 지금 가정은 {MONTH_TB:,.0f}TB로 가정에 따라 크게 변동", "카메라 설정·기록 정책 확정 후 재산정"),
+    ("데이터", "데이터량 가정", "카메라 비트레이트·Depth 기록·운용 중 연속 기록·검사 카메라 제외를 가정", f"Depth를 기록하지 않으면 월 약 {tb_month(N_CAM * 4 + SZ[0]['tel_mbps']) * len(SZ):,.0f}TB, 지금 가정은 {MONTH_TB:,.0f}TB로 가정에 따라 크게 변동", "카메라 설정·기록 정책 확정 후 재산정"),
     ("연계", "중앙 연계", "중앙 Server(AAS 통합서버 D-1-1)가 GPU를 뺀 스토리지 컨셉으로 재견적 중(10/7)", "추론 역할 중복·공백", "로컬 GPU 서버(추론)와 역할 경계 합의"),
     ("설치", "서버실 여건", f"존 서버실 28.8㎡에 랙 3개·UPS·항온항습기, 부하 약 {2.4 + 4.0 + N_STO * 0.5 + 1.3:.0f}kW", "전력·하중 부족 시 위치 변경", "전력·하중·층고 실측"),
 ]
