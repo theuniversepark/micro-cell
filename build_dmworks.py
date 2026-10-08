@@ -200,6 +200,43 @@ def tag(v):
     return f'<span class="tag {c}">{t}</span>'
 
 
+WHY_COMMON = [
+    ("역할 분리", "AI 학습(강화학습·합성데이터)은 물리엔진이 있는 Omniverse/Isaac Sim이, 실제 설비·로봇·PLC가 그대로 돌아가는지 미리 검증하는 일은 프로세스 시뮬레이션이 맡음. DMWorks는 검증 측 도구임", "9/17 세미나 · 9/30 Q&A"),
+    ("한 도구로 검증", "국산(조달 원칙 부합). PLC 가상 시운전·라인/물류 시뮬레이션·로봇 오프라인 프로그래밍·3D 스캔 가상 작업장을 한 도구로 처리", "9/30 Q&A"),
+    ("학습 DT 연계", "USD Converter로 검증용 셀 모델을 Isaac Sim 학습 환경에 넘겨 두 환경을 이어 씀", "10/8 제안서"),
+    ("쓰지 않는 범위", "AI 학습 자체(물리엔진 없음), PLC 직접 제어(Read·핸드셰이크만), 가공 CAM 경로 검증(별도 SW). 협동로봇 OLP는 기성 목록에 없음(요청 시 지원)", "9/30 Q&A"),
+]
+WHY = [
+    ("A-1-4", "z14", "유연제조", "공정 최적화 + 가상 시운전",
+     "2차년도 실물 셀(A-1-3) 투입 전 혼류 라인·로봇·AMR·PLC를 가상으로 먼저 맞춰 설치 후 재작업·시운전 기간을 줄여야 함",
+     "① 삼진산업 도어·차체 혼류 공정 DT로 설비 배치·로봇 경로 검증 ② 다공정 라인·AMR 물류·스케줄 최적화(UPH·가동률·AMR 대수) ③ PLC 가상 시운전으로 제어로직·이상 상황 사전 시험 ④ 용접·핸들링 로봇 OLP·사이클타임 ⑤ 3존 공통 플러그인(AAS 출력·OCS 연동) 개발 거점",
+     "Base · MULTIPLE PROCESS · PLC SIMULATION · OLP · PLUG-IN Developer · USD Converter"),
+    ("A-2-5", "z25", "적응가공", "데이터 + 강화학습",
+     "가공기·로봇·팔레트·AMR 머신텐딩 셀은 간섭·인터록 오류가 곧 설비 충돌이라 실물 전에 경로·신호를 검증해야 함. 강화학습용 셀 모델의 출발점도 필요",
+     "① 가공기–로봇–팔레트–AMR 경로·간섭 검증 ② 공정 배정·물류 흐름 최적화 ③ 머신텐딩 제어로직·가공기 인터록(핸드셰이크) 검증 ④ 셀 모델을 USD로 넘겨 Isaac Lab 강화학습 환경으로 활용·결과 환류",
+     "Base · MULTIPLE PROCESS · PLC SIMULATION · OLP · USD Converter · PLUG-IN User"),
+    ("A-4-5", "z45", "AI정밀검사", "DT(역설계) + 품질 운영",
+     "실제 부품·현장을 3D 스캔해 가상 작업장·검사모델을 만들고 판정→재검사→리워크 폐루프를 돌려야 함. 측정 경로·리워크 프로그램을 매번 사람이 만들 수 없음",
+     "① 3D 스캔으로 검사 셀·수요기업 현장 가상 작업장 구축(역설계) ② 로봇 자동 측정 경로·측정 시뮬레이션(AIMS) ③ 스캔 결과 분석·품질 예측 시각화(PIA) ④ 검사 결과로 리워크 로봇 프로그램 자동 생성(ACS) ⑤ 검사·로봇·AMR 공정 시뮬레이션",
+     "POINT CLOUD · AIMS · PIA · ACS · Base · MULTIPLE PROCESS · USD Converter"),
+    ("A-3", "z3", "정밀조립", "셀 배치·물류·상태머신 검증 (견적 미포함)",
+     "셀 5개·협동로봇 50대·AMR 20대가 한 존에서 움직여 셀 배치·셀 간 물류·상태머신을 실물 전에 검증할 수단이 필요. 1차년도 DT 7건 산출물의 검증 도구",
+     "① 셀 레이아웃·로봇 작업영역 간섭 검증 ② 셀 간 AMR 물류·대수 산정, 셀 재배정 흐름 ③ 셀 상태머신(IDLE~SAFE-STOP)·셀 PLC 시퀀스 검증 ④ 셀 모델을 USD로 넘겨 VLA 학습 DT(Isaac Sim)와 연결",
+     "Base · MULTIPLE PROCESS · PLC SIMULATION · USD Converter · PLUG-IN User"),
+]
+
+
+def why_tables():
+    c = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td class="note">{E(r)}</td></tr>' for a, b, r in WHY_COMMON)
+    z = "".join(f'<tr><td><a href="#{sl}">{E(zid)}</a></td><th scope="row">{E(nm)}<br><span class="chg">{E(pur)}</span></th>'
+                f'<td>{E(need)}</td><td>{E(use)}</td><td class="nm">{E(opt)}</td></tr>' for zid, sl, nm, pur, need, use, opt in WHY)
+    return ('<h3>공통 — 왜 DMWorks인가</h3><div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>내용</th><th>근거</th></tr></thead>'
+            f'<tbody>{c}</tbody></table></div>'
+            '<h3>존별 구매 필요성과 활용 목적</h3><div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>존</th><th>구분·목적</th><th>구매가 필요한 이유</th><th>활용 목적</th><th>핵심 옵션</th></tr></thead>'
+            f'<tbody>{z}</tbody></table></div>'
+            '<p class="note-box">존마다 목적이 달라 같은 구성을 세 벌 사지 않음(10/6 결정). 유연제조는 가상 시운전·OLP, 적응가공은 강화학습 연계(USD), AI정밀검사는 스캔·측정·리워크, 정밀조립은 배치·물류·상태머신 1좌석이 중심임.</p>')
+
+
 def key_table():
     adj = sum(q * u for z in Q for g, _, _, q, u, v, _ in Q[z]["items"] if v == "adj")
     amc = sum(q * u for z in Q for g, key, _, q, u, *_ in Q[z]["items"] if key == "AMC")
@@ -340,7 +377,7 @@ def page():
   <h1>DMWorks 존별 옵션 구성</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
-  <a href="#sum">요약</a><a href="#opt">단가·제품</a>{"".join(f'<a href="#{z["slug"]}">{z["id"]}</a>' for z in ZONES)}<a href="#z3">A-3</a><a href="#issues">확인 필요</a><a href="#refs">근거</a>
+  <a href="#sum">요약</a><a href="#why">구매 필요성</a><a href="#opt">단가·제품</a>{"".join(f'<a href="#{z["slug"]}">{z["id"]}</a>' for z in ZONES)}<a href="#z3">A-3</a><a href="#issues">확인 필요</a><a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
 <section id="sum" style="margin-top:8px">
@@ -350,8 +387,13 @@ def page():
   <h3>존별 견적 합계</h3>
   {summary_table()}
 </section>
+<section id="why">
+  <p class="eyebrow">1. 구매 필요성</p>
+  <h2>존별 구매 필요성·활용 목적</h2>
+  {why_tables()}
+</section>
 <section id="opt">
-  <p class="eyebrow">1. 견적 단가·제품</p>
+  <p class="eyebrow">2. 견적 단가·제품</p>
   <h2>옵션별 정가 대비 견적 단가, 신규 제품 기능</h2>
   <p class="note-box">정가표 옵션은 모두 정가 × 52%. 아래 7종은 정가표에 없는 제품으로 견적가만 있음. 오른쪽 열은 존별 견적 수량. 검토 표시: <b>적합</b> 존 목적에 맞음 · <b>확인</b> 기종·포맷·역할 확정 후 결정 · <b>조정</b> 줄이거나 빼기를 제안.</p>
   {price_table()}
