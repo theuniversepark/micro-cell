@@ -17,7 +17,7 @@ BAR_CSS = ('<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4p
            'thead{display:table-header-group}th{position:static!important;white-space:normal!important}'
            '.tbl-wrap,.fig{overflow:visible!important}table,table.wide{width:100%!important;min-width:0!important;table-layout:auto}'
            'td,th{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere;word-break:keep-all}'
-           'td.num,td.q,td.u,td.sym{white-space:nowrap!important}td.src a{word-break:break-all}'
+           'td.num,td.q,td.u,td.sym,td.dz,th.dz{white-space:nowrap!important}td.src a{word-break:break-all}'
            'table{font-size:9px!important}table.wide{font-size:7.5px!important}table.wide td.note,table.wide td.basis,table.wide td.uc,table.wide td.src,table.wide td.mk{font-size:7px!important}'
            'p,li{max-width:none!important}figure,svg,tr,.kpis{break-inside:avoid}h2,h3,.eyebrow,.tbl-title{break-after:avoid}'
            'main>section{break-inside:auto}main>section+section{break-before:page}'
