@@ -14,7 +14,7 @@ BAR_CSS = ('<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4p
            '@media print{.webbar,nav.toc,.where,a.tolink[href^="#topo-"]:not(.sw){display:none!important}'
            '.wrap{max-width:none!important;padding-inline:0!important;padding-block:0 8mm!important}'
            '.mast{max-width:none!important;margin:0 0 6mm!important;padding-inline:0!important}.mast>.wrap{padding:7mm 9mm!important}'
-           'thead{display:table-header-group}th{position:static!important;white-space:normal!important}'
+           'thead{display:table-header-group}tfoot{display:table-row-group}th{position:static!important;white-space:normal!important}'
            '.tbl-wrap,.fig{overflow:visible!important}table,table.wide{width:100%!important;min-width:0!important;table-layout:auto}'
            'td,th{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere;word-break:keep-all}'
            'td.num,td.q,td.u,td.sym,td.dz,th.dz{white-space:nowrap!important}td.src a{word-break:break-all}'
