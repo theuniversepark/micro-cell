@@ -112,11 +112,11 @@ HW = [
     ("네트워크·시간동기", "FIB", "광·UTP 배선 및 케이블 트레이", "셀 액세스 스위치–서버실 10G 이중 광(OM4) · Cat6A · 통로 상부 트레이", 1, 0, 0, "식",
      "셀 캐비닛–서버실 백본, 카메라·AP 배선", "존 통로 상부"),
     ("운영·DT", "OWS", "OCS 운영 워크스테이션", "i9 · 64GB · 듀얼 32″ 모니터", 2, 0, 0, "대",
-     "1대 존 전체 관제(OCS·셀 상태·KPI) + 1대 셀 알람 대응(HOLD 승인·재배정)", "로컬 DCC 관제실"),
+     "1대 존 전체 관제(OCS·셀 상태·KPI) + 1대 셀 알람 대응(HOLD 승인·재배정)", "로컬존 DCC 관제실"),
     ("운영·DT", "DWS", "DT·시뮬레이션 워크스테이션", "Xeon W · 256GB · RTX PRO 6000 1 · NVMe 8TB", 2, 0, 0, "대",
-     "1대 DMWorks 검증 DT(가상 시운전) + 1대 Isaac Sim 학습 DT(VLA·S2R), DT 리플레이", "로컬 DCC 관제실"),
+     "1대 DMWorks 검증 DT(가상 시운전) + 1대 Isaac Sim 학습 DT(VLA·S2R), DT 리플레이", "로컬존 DCC 관제실"),
     ("운영·DT", "VW", "관제 비디오월", "55″ 베젤리스 2×2 · 영상 컨트롤러", 1, 0, 0, "식",
-     "셀 영상·DT·KPI 대시보드 표시", "로컬 DCC 관제실"),
+     "셀 영상·DT·KPI 대시보드 표시", "로컬존 DCC 관제실"),
     ("기반시설", "RACK", "서버 랙", "42U · 1,200mm 깊이 · 이중 PDU", 3, 0, 0, "대",
      "Rack A 연산 · Rack B 네트워크·백업 · Rack C 스토리지", "존 서버실"),
     ("기반시설", "UPS", "UPS", "20kVA · 온라인 이중변환 · 30분", 1, 0, 0, "대",
@@ -357,7 +357,7 @@ def topo_svg():
     o.append('<text x="604" y="283" class="lkt">25GbE×4/노드 (코어별 2)</text>')
     link([(412, 446), (385, 446), (385, 262), (330, 262)], "ptp")
     # control room
-    o.append('<rect x="800" y="186" width="300" height="300" rx="8" class="room"/><text x="814" y="208" class="room-t">로컬 DCC 관제실</text>')
+    o.append('<rect x="800" y="186" width="300" height="300" rx="8" class="room"/><text x="814" y="208" class="room-t">로컬존 DCC 관제실</text>')
     dev(820, 230, 125, 50, "OWS×2", "OCS 운영")
     dev(960, 230, 125, 50, "DWS×2", "DT·시뮬레이션")
     dev(820, 300, 265, 60, "비디오월 55″ 2×2", "셀 영상·DT·KPI")
@@ -431,7 +431,8 @@ def floor_svg():
         o.append(f'<rect x="{X}" y="{Y}" width="{Wd}" height="{Hd}" class="blk {kind}{hl}"/>')
         fs = 100 if kind == "cell" else min(64, (Wd - 30) / (len(title) * 0.95))
         ty = Y + 90 if hl else Y + Hd / 2
-        o.append(f'<text x="{X + Wd / 2}" y="{ty}" class="blk-t {kind}" font-size="{(46 if hl else fs):.0f}">{E(title)}</text>')
+        shown = "로컬존 DCC 관제실" if title == "로컬 DCC 관제실" else title
+        o.append(f'<text x="{X + Wd / 2}" y="{ty}" class="blk-t {kind}" font-size="{(46 if hl else fs):.0f}">{E(shown)}</text>')
     # cable tray along aisle (top edge) + riser to server room
     tray_y = 1360
     o.append(f'<line x1="150" y1="{tray_y}" x2="{38.0 * U}" y2="{tray_y}" class="tray-l"/>')
@@ -453,7 +454,7 @@ def floor_svg():
     o.append('<text x="3590" y="2655" class="cabf-t">A</text><text x="3780" y="2655" class="cabf-t">B</text>')
     o.append('<rect x="3890" y="2580" width="100" height="120" class="rackf2"/><text x="3940" y="2655" class="cabf-t" font-size="34">UPS</text>')
     o.append('<rect x="3650" y="2750" width="200" height="90" class="rackf2"/><text x="3750" y="2808" class="cabf-t" font-size="34">CRAC</text>')
-    # control room — 로컬 DCC 관제실(x 3450~4050, y 1640~2380) 가운데 정렬
+    # control room — 로컬존 DCC 관제실(x 3450~4050, y 1640~2380) 가운데 정렬
     o.append('<rect x="3540" y="1840" width="420" height="40" class="vwf"/><text x="3750" y="1940" class="flr-s">비디오월</text>')
     for i in range(4):
         o.append(f'<rect x="{3510 + i * 125}" y="2010" width="105" height="70" class="deskf"/>')
@@ -1042,7 +1043,7 @@ def page():
   <ul class="lg"><li><svg width="16" height="12"><rect width="16" height="12" class="cabf"/></svg>셀 캐비닛</li>
   <li><svg width="16" height="12"><circle cx="6" cy="6" r="6" class="apf"/></svg>Wi-Fi 6E AP</li><li><svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" class="tray-l" style="stroke-width:6"/></svg>케이블 트레이</li>
   <li><svg width="16" height="12"><rect width="16" height="12" class="rackf"/></svg>서버 랙 A·B</li></ul>
-  <figcaption>존 배치도(정밀조립존 셀 구성 계획)의 엣지 서버·네트워크실과 로컬 DCC 관제실을 OCS Cell 설치 공간으로 씀(주황 테두리). 랙·트레이 경로는 실측 후 확정함.</figcaption></figure>
+  <figcaption>존 배치도(정밀조립존 셀 구성 계획)의 엣지 서버·네트워크실과 로컬존 DCC 관제실을 OCS Cell 설치 공간으로 씀(주황 테두리). 랙·트레이 경로는 실측 후 확정함.</figcaption></figure>
 </section>
 
 <section id="size">
