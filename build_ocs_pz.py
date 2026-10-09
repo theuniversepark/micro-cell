@@ -297,7 +297,7 @@ SW_NODE = {
 
 
 def topo_svg():
-    o = ['<svg class="arch plan" viewBox="0 0 1120 996" role="img" aria-label="정밀조립존 OCS Cell 물리 연결 토폴로지" style="max-width:1120px">']
+    o = ['<svg class="arch plan" viewBox="0 0 1120 1012" role="img" aria-label="정밀조립존 OCS Cell 물리 연결 토폴로지" style="max-width:1120px">']
 
     used = set()
 
@@ -335,9 +335,11 @@ def topo_svg():
     # firewall
     dev(380, 136, 90, 40, "FW-1", "", "dv2")
     dev(490, 136, 90, 40, "FW-2", "", "dv2")
-    link([(430, 68), (430, 136)], "l10", "캠퍼스 광 10G×2 · AI Ready 전송 MQTT/REST(TLS)", 438, 86)
+    link([(430, 68), (430, 136)], "l10", "캠퍼스 광 10G×2 · AI Ready 전송 MQTT/REST(TLS)", 438, 95)
     link([(530, 68), (530, 136)], "l10")
     link([(925, 68), (925, 156), (580, 156)], "l10", "검증 API (VPN)", 792, 150)
+    # 정밀조립존 영역 (서버실·관제실·A-3-1~5)
+    o.append('<rect x="8" y="78" width="1104" height="926" rx="12" class="zonebd"/><text x="22" y="94" class="zonebd-t">정밀조립존 (A-3)</text>')
     # server room
     o.append('<rect x="20" y="100" width="760" height="386" rx="8" class="room"/><text x="34" y="122" class="room-t">존 서버실 (28.8㎡) — 방화벽 · Rack A 연산 · Rack B 스토리지·네트워크</text>')
     dev(330, 226, 120, 44, "CORE-1", "L3 25/100G", "dv2")
@@ -507,6 +509,7 @@ EXTRA = """<style>
 .fd{fill:var(--cellbg);stroke:var(--eqline);stroke-width:1}
 .dvt{fill:var(--ink);text-anchor:middle;font-weight:700} .dvs{fill:var(--muted);font-size:10px;text-anchor:middle}
 rect.ext + text{fill:#fff}
+.zonebd{fill:none;stroke:var(--navy2);stroke-width:2.2;stroke-dasharray:14 7} .zonebd-t{fill:var(--navy2);font-size:13px;font-weight:700}
 .room{fill:none;stroke:var(--eqline);stroke-width:1.5;stroke-dasharray:8 5} .room-t{fill:var(--teal);font-size:12.5px;font-weight:700}
 .rack{fill:var(--cellbg);stroke:var(--ink);stroke-width:1.5} .rack-t{fill:var(--muted);font-size:11.5px;font-weight:700}
 .tray{fill:var(--aisle);stroke:var(--teal);stroke-width:1} .tray-t{fill:var(--teal);font-size:11px;font-weight:700}
