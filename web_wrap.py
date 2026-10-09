@@ -48,7 +48,7 @@ def wrap(path):
     open(path, "w", encoding="utf-8").write(HEAD + head + BAR_CSS + "\n</head>\n<body>\n" + bar(name) + "\n" + body + "\n</body>\n</html>\n")
 
 
-INDEX = """<title>Local OCS 설계 기획</title>
+INDEX = """<title>로컬 OCS 구성</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=IBM+Plex+Mono:wght@400&display=swap">
 <style>
 :root{--bg:#F5F7FB;--paper:#fff;--ink:#16213A;--muted:#5A6782;--rule:#D7DFEC;--navy:#10214B;--teal:#0090A0}
@@ -72,7 +72,7 @@ a.open{display:flex;flex-direction:column;gap:6px;color:var(--ink);text-decorati
 </style>
 </head>
 <body>
-<header class="mast"><div class="wrap"><p class="eb">총괄5-세부1 기술실증 테스트베드 · A-3 정밀조립(Micro) ZONE · 설계 추정본</p><h1>Local OCS 설계 기획</h1></div></header>
+<header class="mast"><div class="wrap"><p class="eb">총괄5-세부1 기술실증 테스트베드 · A-3 정밀조립(Micro) ZONE · 설계 추정본</p><h1>로컬 OCS 구성</h1></div></header>
 <main><div class="wrap">
 <div class="cards">
 <div class="card"><a class="open" href="ocs_precision.html"><b>로컬 OCS Zone 구성 - (예시) 정밀조립존</b><span>AAS 기반 수집–저장 아키텍처, 장비 설치·연결 토폴로지, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록</span><em>열기 →</em></a><p class="save"><a href="ocs_precision.pdf" download>PDF 저장</a><a href="ocs_precision.docx" download>Word 저장</a></p></div>

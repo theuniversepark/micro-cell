@@ -1,4 +1,4 @@
-# Local OCS 설계 기획 (micro-cell)
+# 로컬 OCS 구성 (micro-cell)
 
 총괄5-세부1 기술실증 테스트베드의 **A-3 정밀조립(Micro) Zone** 설계 산출물을 코드로 생성하는 저장소임. 로컬 OCS Zone 구성 - (예시) 정밀조립존(Local Server – Edge Gateway 데이터 계층)과 DMWorks 존별 옵션 구성을 HTML·PDF·Word로 빌드함. 셀 구성 계획(`build_page.py`)은 루트 로컬 미리보기로만 만들고 웹에는 올리지 않음.
 
