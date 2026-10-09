@@ -252,7 +252,11 @@ def logical_svg():
     zones = ["유연제조 존", "적응가공 존", "정밀조립 존", "AI정밀검사 존", "이기종 물류 존"]
     for i, zn in enumerate(zones):
         x = 150 + i * 150
+        ex = zn == "정밀조립 존"
         o.append(f'<rect x="{x}" y="692" width="140" height="86" rx="5" class="box"/>')
+        if ex:
+            o.append(f'<rect x="{x - 3}" y="689" width="146" height="92" rx="7" class="exhl"/>')
+            o.append(f'<text x="{x + 70}" y="815" class="extag" text-anchor="middle">▲ 이 페이지의 예시</text>')
         o.append(f'<text x="{x + 70}" y="711" class="boxt" font-weight="700">{zn}</text>')
         for j, t in enumerate(["PLC · FieldBus · AAS", "로봇·AMR + 온디바이스 엣지", "카메라 · F/T · 센서"]):
             o.append(f'<text x="{x + 70}" y="{730 + j * 16}" class="boxs">{E(t)}</text>')
@@ -493,6 +497,7 @@ EXTRA = """<style>
 .boxt{fill:var(--ink);font-size:12.5px;text-anchor:middle} .boxs{fill:var(--muted);font-size:10.5px;text-anchor:middle}
 .mod-t{fill:#fff;font-size:13px;font-weight:700;text-anchor:middle}
 .own{fill:none;stroke:var(--amber);stroke-width:3}
+.exhl{fill:var(--teal);fill-opacity:.12;stroke:var(--teal);stroke-width:3} .extag{fill:var(--teal);font-size:12px;font-weight:700}
 .owntag{fill:var(--amber);font-size:12px;font-weight:700}
 .sfh{fill:var(--teal);font-size:13px;font-weight:700} .sflane{fill:var(--area)} .sflt{fill:var(--muted);font-size:11.5px;font-weight:700}
 .sfres{fill:var(--navy2);stroke:var(--amber);stroke-width:2} .sft-w{fill:#fff;text-anchor:middle;font-weight:700} .sfs-w{fill:#C9D6F0;font-size:10.5px;text-anchor:middle}
@@ -1048,7 +1053,7 @@ def page():
 <section id="logic">
   <p class="eyebrow">1. 논리 구성</p>
   <h2>AAS 기반 수집–저장 공통 아키텍처</h2>
-  <figure class="fig">{logical_svg()}<figcaption>바탕은 「2-2. 피지컬AI 제조 데이터 구축 — AAS 기반 데이터 수집-저장 표준 아키텍처(안)」. 모든 실증 존이 같은 계층 구조로 존마다 OCS Cell(주황 테두리: Local Server + Edge Gateway)을 두고 중앙 Server와 TTA 검증 영역에 연계함. 초록 테두리는 현장(실증 존별 셀)임. 아래 연결 토폴로지·설치 배치·데이터량·HW·SW 목록은 이 공통 구조를 정밀조립존에 적용한 예시임.</figcaption></figure>
+  <figure class="fig">{logical_svg()}<figcaption>바탕은 「2-2. 피지컬AI 제조 데이터 구축 — AAS 기반 데이터 수집-저장 표준 아키텍처(안)」. 모든 실증 존이 같은 계층 구조로 존마다 OCS Cell(주황 테두리: Local Server + Edge Gateway)을 두고 중앙 Server와 TTA 검증 영역에 연계함. 초록 테두리는 현장(실증 존별 셀)임. 청록 강조는 이 페이지의 예시인 정밀조립 존임. 아래 연결 토폴로지·설치 배치·데이터량·HW·SW 목록은 이 공통 구조를 정밀조립존에 적용한 예시임.</figcaption></figure>
 </section>
 
 <section id="topo">
