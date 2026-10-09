@@ -1008,7 +1008,7 @@ REFS = [
      "2026-09-17 · 09-21 · 09-22", "llm-wiki concepts", "실시간 제어 분리, AAS 태그 수, 자체 개발 인력 리스크"),
     ("W9", "llm-wiki", "피지컬AI 의사결정 미팅 — \"OCS 셀 = 존 오케스트레이터 겸 로컬 서버\" · 정밀조립 Zone 운영 시나리오 수정 v3 — 로컬 오케스트레이터 = Manufacturing Agent, DT 검증 계층",
      "2026-10-06", "llm-wiki sources", "요약표 역할(디지털트윈·존 오케스트레이터)"),
-    ("-", "작업 산출물", "셀 구성·현장 장비 수: 정밀조립존 셀 구성 계획(같은 세션 산출물)", "2026-10-07", "정밀조립존 셀 구성 계획 페이지", "존 배치도, 셀별 공정설비 수"),
+    ("-", "작업 산출물", "셀 구성·현장 장비 수: 셀 구성 계획(내부 작업본, 웹 미공개)", "2026-10-07", "저장소 build_page.py · cells_data.py", "존 배치도, 셀별 공정설비 수"),
 ]
 
 
@@ -1034,7 +1034,7 @@ def page():
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{EXTRA}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 · A-3 정밀조립(Micro) Zone · 피지컬AI 제조 데이터 구축(2-2) 수집–저장 표준 아키텍처 적용 · 2026.10.07 작성 · 설계 추정본</p>
+  <p class="eyebrow">총괄5-세부1 · A-3 정밀조립(Micro) Zone · 피지컬AI 제조 데이터 구축(2-2) 수집–저장 표준 아키텍처 적용 · 2026.10.07 작성 · 2026.10.09 갱신 · 설계 추정본</p>
   <h1>로컬 OCS Zone 구성 - (예시) 정밀조립존</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
@@ -1072,7 +1072,7 @@ def page():
   <ul class="lg"><li><svg width="16" height="12"><rect width="16" height="12" class="cabf"/></svg>셀 캐비닛</li>
   <li><svg width="16" height="12"><circle cx="6" cy="6" r="6" class="apf"/></svg>Wi-Fi 6E AP</li><li><svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" class="tray-l" style="stroke-width:6"/></svg>케이블 트레이</li>
   <li><svg width="16" height="12"><rect width="16" height="12" class="rackf"/></svg>서버 랙 A·B</li></ul>
-  <figcaption>존 배치도(정밀조립존 셀 구성 계획)의 엣지 서버·네트워크실과 로컬존 DCC 관제실을 OCS Cell 설치 공간으로 씀(주황 테두리). 랙·트레이 경로는 실측 후 확정함.</figcaption></figure>
+  <figcaption>존 배치도(셀 구성 계획 내부 작업본)의 엣지 서버·네트워크실과 로컬존 DCC 관제실을 OCS Cell 설치 공간으로 씀(주황 테두리). 랙·트레이 경로는 실측 후 확정함.</figcaption></figure>
 </section>
 
 <section id="size">
