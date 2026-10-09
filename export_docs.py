@@ -16,7 +16,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt, RGBColor
 
-PAGES = ["precision_zone.html", "ocs_precision.html", "dmworks_zones.html"]
+PAGES = ["ocs_precision.html", "dmworks_zones.html"]
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 FONT = "맑은 고딕"
 NAVY, NAVY2, TEAL, INK, MUTED = "10214B", "1B3A73", "0090A0", "13203F", "56637F"

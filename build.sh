@@ -4,7 +4,6 @@
 set -e
 cd "$(dirname "$0")"
 python3 build_page.py && python3 build_ocs_pz.py && python3 build_dmworks.py
-OUT_DIR=docs python3 build_page.py
 OUT_DIR=docs python3 build_ocs_pz.py
 OUT_DIR=docs python3 build_dmworks.py
 python3 web_wrap.py

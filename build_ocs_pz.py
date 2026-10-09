@@ -1021,13 +1021,13 @@ def page():
     cap = N_STO * NODE_USABLE
     CHW_TABLE, chw_tot, chw_new = cell_hw_table()
     CSW_TABLE, csw_tot, csw_new = cell_sw_table()
-    return f'''<title>정밀조립존 OCS Cell</title>
+    return f'''<title>OCS Zone 구성 계획(안)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{EXTRA}
 <header class="mast"><div class="wrap">
   <p class="eyebrow">총괄5-세부1 · A-3 정밀조립(Micro) Zone · 피지컬AI 제조 데이터 구축(2-2) 수집–저장 표준 아키텍처 적용 · 2026.10.07 작성 · 설계 추정본</p>
-  <h1>정밀조립존 OCS Cell</h1>
+  <h1>OCS Zone 구성 계획(안)</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
   <a href="#sum">요약</a><a href="#logic">논리 구성도</a><a href="#topo">연결 토폴로지</a><a href="#floor">설치 배치</a>
