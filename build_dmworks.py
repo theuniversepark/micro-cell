@@ -240,7 +240,7 @@ def why_tables():
 
 def key_table():
     amc = sum(q * u for z in Q for g, key, _, q, u, *_ in Q[z]["items"] if key == "AMC")
-    adj_sum = sum(q * u for z in Q for g, key, _, q, u, v, _w in Q[z]["items"] if v == "adj")
+    adj_sum = sum(q * u for z in Q for g, key, d, q, u, v, _w in Q[z]["items"] if v == "adj" and "서버" not in d)
     adj_acs = sum(q * u for g, key, d, q, u, v, _w in Q["A-1-4"]["items"] if v == "adj" and (key.startswith("ACS") or "ACS" in d))
     gpu = 3 * 520000
     scn = sum(u for z in Q for g, _, d, q, u, *_ in Q[z]["items"] if g == "HW" and "스캐너" in d)
@@ -249,7 +249,7 @@ def key_table():
         ("단가 수준", "정가표에 있는 DMWorks 옵션은 모두 정가(Node-Lock) × 52% — 48% 할인. 10/6에 들은 60% 할인보다 낮음", "정가표 대조"),
         ("구성 방식", "3개 존 모두 같은 틀(Base 1 · DM-Monitoring · USD Converter · Live Edit · ACS · PLUG-IN Developer · GPU 서버 · 스캐너 · AMC 4년)에 존별 CAD 포맷·로봇·PLC 메이커만 바꿈.", "10/6 의사결정"),
         ("금액이 큰 항목", f"GPU 서버 3대 {k(gpu)} · 스캐너 3대 {k(scn)} · AMC 4년 선계상 {k(amc)}천원 — 세 가지가 전체의 약 {round((gpu + scn + amc) / QTOTAL * 100)}%(일반관리비 제외 기준)", "견적 항목 합산"),
-        ("10/12·10/15 반영", f"조정: 유연제조·적응가공 ACS(Base·OLP·커스터마이징) 존당 {k(adj_acs)} 제외, 정밀검사 대형 스캐너 560,000 제외, 연산 서버 3대 GPU 8→4장(적응가공 10/15 재견적 385,000, 방화벽·VAT 포함). 조정 대상 10/8 금액 합계 {k(adj_sum)}천원", "10/12 결정 · 10/15 재견적"),
+        ("10/12·10/15 반영", f"조정: 유연제조·적응가공 ACS(Base·OLP·커스터마이징) 존당 {k(adj_acs)} 제외, 정밀검사 대형 스캐너 560,000 제외, 연산 서버 3대 GPU 8→4장(적응가공 10/15 재견적 385,000, 방화벽·VAT 포함). 제외 품목만 10/8 금액으로 {k(adj_sum)}천원(서버는 감액이라 별도)", "10/12 결정 · 10/15 재견적"),
         ("확인 항목", "AMC는 계상 확정(18%×4년) — '5년' 표기·VAT 기준만 남음. 유연제조 CAD Import/Export 삭제 수량, 정밀검사 AIMS(스캐너 제외로 측정 HW 없음)·TESCar(예산 초과 시 감액 1순위). 나머지 SW·스캐너(유연제조·적응가공)는 적합", "존별 검토"),
         ("10/15 재견적", "적응가공 1015-2 = 21.92억(로컬 HW 6.82억·로컬 OCS·보안 0.88억 포함으로 범위 확대). 단가는 10/8 × 1.1(VAT 포함)과 일치 — 할인율은 그대로 정가 × 52%로 보임(추정). 유연제조·정밀검사 재견적은 미반영", "10/15 재견적"),
         ("정밀조립", f"견적 대상이 아님. 같은 단가로 Base·MULTIPLE PROCESS·PLC·Plug-in User·USD Converter 1좌석을 잡으면 약 {k(pz_total())}천원", "견적 단가 적용"),
