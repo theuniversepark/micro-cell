@@ -227,6 +227,23 @@ def zone_rows(z):
     return rows
 
 
+# 견적서 '항목' 열 분류 (10/15 견적서 엑셀 기준)
+SW_CAT = {"AMC": "유지보수", "ACSB": "ACS", "ACSO": "ACS", "PIA": "PIA", "TES": "TESCar", "AIMSS": "AIMS", "AIMSC": "AIMS"}
+HW_CAT = {"GPU": "디지털 트윈·AI 연산 서버", "OPC": "시뮬레이션 연산 시스템", "NB": "시뮬레이션 연산 시스템", "MON": "디지털 트윈 모니터링 시스템"}
+
+
+def quote_cat(z, g, sym, no):
+    if g.startswith("항목1"):
+        return SW_CAT.get(sym, "DMWorks")
+    if g.startswith("항목2"):
+        return ("공장 스캐너" if z["slug"] == "fms" else "제품 스캐너") if sym == "SCN" else HW_CAT[sym]
+    if g.startswith("항목3"):
+        return "데이터 서버"
+    if g.startswith("항목4"):
+        return "로컬 제어 부스 하드웨어" if no == "4-1" else "보안"
+    return "기술 지원"
+
+
 CHK = {"ok": ("적합", "ok"), "spec": ("사양 보완", "chk"), "lump": ("금액 미구분", "adj"), "split": ("금액 미구분", "adj"),
        "maker": ("기종 확인", "chk"), "amc": ("기간 확인", "chk"), "scope": ("범위 명시", "chk"), "prop": ("세분 제안", "chk")}
 CHK_NOTE = {"spec": "규격서에 성능·사양 수치 기재", "lump": "구성품별 금액으로 나눈 견적 필요(총액만이면 불인정)", "split": "구성품별 금액 없음",
@@ -407,11 +424,21 @@ def item_table(z):
     for r in rows:
         if r[0].startswith("항목4"):
             sw_by_node.setdefault("DPS", []).append(r[1])
-    body, cur, seen = [], None, set()
+    csum, ccnt = {}, {}
+    for r in rows:
+        c = (r[0], quote_cat(z, r[0], r[2], r[1]))
+        csum[c] = csum.get(c, 0) + (r[8] or 0)
+        ccnt[c] = ccnt.get(c, 0) + (0 if r[12] else 1)
+    body, cur, ccur, seen = [], None, None, set()
     for g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sub in rows:
         if g != cur:
             cur = g
             body.append(f'<tr class="grp"><th colspan="7" scope="rowgroup">{E(g)}</th><td class="num">{k(gsum[g])}</td><td colspan="3"></td></tr>')
+        c = (g, quote_cat(z, g, sym, no))
+        if c != ccur:
+            ccur = c
+            body.append(f'<tr class="cat"><td class="sym">견적서 항목</td><th colspan="5" scope="rowgroup">{E(c[1])} <span>· {ccnt[c]}품목</span></th>'
+                        f'<td class="num">{k(csum[c])}</td><td colspan="2"></td></tr>')
         rid = ""
         anchor = sym if sym in ("SCN", "GPU", "OPC", "NB", "MON", "DPS", "NAS", "BAK", "EGW", "VNODE", "NET", "RACK") else None
         if anchor and anchor not in seen:
@@ -883,7 +910,7 @@ def page(z):
   <p class="eyebrow">3. 구성품·사양·금액</p>
   <h2>견적서 항목 순서대로 구성품별 사양·금액</h2>
   <p class="note-box">단위 천원. 번호는 견적서 항목 순서(항목1~6)를 따름 — 심의위원 제안대로 규격서·견적서·비교견적서의 구성 항목 순서를 이 순서에 맞추면 됨. 견적서 표지는 'VAT 포함', 참고사항은 '부가세 별도'로 엇갈림.
-  <b>지침 점검</b>: 적합 · 사양 보완(성능 수치 없음) · 기종 확인 · 기간 확인 · 범위 명시 · <b>금액 미구분</b>(총액만 제시 — 불인정 위험).</p>
+  항목마다 견적서 '항목' 열 분류(DMWorks·유지보수·스캐너·연산 서버 등)를 소계와 함께 묶어 표시함. <b>지침 점검</b>: 적합 · 사양 보완(성능 수치 없음) · 기종 확인 · 기간 확인 · 범위 명시 · <b>금액 미구분</b>(총액만 제시 — 불인정 위험).</p>
   {table}
 </section>
 <section id="guide">
@@ -927,7 +954,10 @@ EXTRA = """<style>
 .tag{display:inline-block;font:600 11px var(--mono);padding:1px 7px;border-radius:3px;white-space:nowrap}
 .tag.ok{background:var(--teal);color:#fff} .tag.chk{background:#FFF1E2;color:#9A4A00;border:1px solid #F0C08A} .tag.adj{background:#FDE8E8;color:#A12020;border:1px solid #F2B8B8}
 .chg{font:500 11px var(--mono);color:var(--muted)}
-tr.subrow td{font-size:12.5px;color:var(--muted)} tr.subrow td.sym{padding-left:18px} tr.sub2 td.sym{padding-left:30px} tr.sub2 td.nm{padding-left:14px}
+tr.cat th,tr.cat td{background:color-mix(in srgb, var(--teal) 9%, var(--paper));color:var(--teal);font-weight:700;border-top:1px solid color-mix(in srgb, var(--teal) 35%, transparent)}
+tr.cat td.sym{font:500 10.5px var(--mono);color:var(--muted)} tr.cat th span{font-weight:400;color:var(--muted);font-size:12px}
+table.wide2 tbody tr:not(.grp):not(.cat):not(.subrow) td.sym{padding-left:16px}
+tr.subrow td{font-size:12.5px;color:var(--muted)} tr.subrow td.sym{padding-left:28px} tr.sub2 td.sym{padding-left:40px} tr.sub2 td.nm{padding-left:14px}
 table.wide2{min-width:1500px} table.wide2 td.spec{min-width:300px} table.wide2 td.note{min-width:220px;font-size:12px}
 table.sumtbl th{width:150px}
 </style>"""
