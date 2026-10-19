@@ -979,13 +979,20 @@ def page(z):
   }}
   var qbtn = document.querySelector('.qtoggle'), qpanel = document.getElementById('qpanel');
   if (qbtn) {{
-    var qopen = false, qdone = false;
+    var qopen = false;
     qbtn.addEventListener('click', function(){{
       qopen = !qopen;
       qpanel.hidden = !qopen;
       qbtn.setAttribute('aria-expanded', qopen ? 'true' : 'false');
       qbtn.innerHTML = '<span class="tw" aria-hidden="true">' + (qopen ? '▾' : '▸') + '</span> 견적서 원본 ' + (qopen ? '접기' : '열기');
-      if (qopen && !qdone) document.getElementById('qpw').focus();
+      if (!qopen) {{
+        var fig = qpanel.querySelector('figure'), img = fig.querySelector('img');
+        if (img.src) {{ URL.revokeObjectURL(img.src); img.removeAttribute('src'); }}
+        fig.hidden = true;
+        qpanel.querySelector('form').hidden = false;
+        qpanel.querySelector('.qmsg').textContent = '';
+        document.getElementById('qpw').value = '';
+      }} else document.getElementById('qpw').focus();
     }});
     var b64 = function(s){{ return Uint8Array.from(atob(s), function(c){{ return c.charCodeAt(0); }}); }};
     qpanel.querySelector('form').addEventListener('submit', function(e){{
@@ -1003,7 +1010,6 @@ def page(z):
         fig.querySelector('img').src = URL.createObjectURL(new Blob([buf], {{type: d.type}}));
         fig.hidden = false;
         qpanel.querySelector('form').hidden = true;
-        qdone = true;
         msg.textContent = '';
       }}).catch(function(){{ msg.textContent = '암호가 맞지 않음'; document.getElementById('qpw').select(); }});
     }});
