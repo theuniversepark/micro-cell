@@ -475,6 +475,313 @@ def guide_table(z):
             f'<tbody>{q}</tbody></table></div>')
 
 
+# ------------------------------------------------------------------ 로컬 관제 센터 공간 구성 (2D·3D)
+# 좌표 mm. 서버실 x 0~3400, 운영실 x 3400~8400, 깊이 y 0~5400. 치수는 가정(실측 후 확정)
+ROOM_W, ROOM_D, SPLIT = 8400, 5400, 3400
+TRAY_Z = 2300
+
+
+def space_items(z):
+    """(기호, 이름, 설명, kind, x, y, w, d, h, z0, 링크)"""
+    it = [
+        ("R1", "랙 1 · 네트워크·보안", "방화벽 · 코어 ×2 · PTP · KVM", "rack", 400, 800, 600, 1200, 2000, 0, "NET"),
+        ("R2", "랙 2 · 데이터", "데이터 처리 서버 ×5 · 스토리지 · 백업", "rack", 1000, 800, 600, 1200, 2000, 0, "DPS"),
+        ("R3", "랙 3 · DT·AI 연산", "GPU 서버 4U · 방화벽(DT 구간)", "gpu", 1600, 800, 600, 1200, 2000, 0, "GPU"),
+        ("UPS", "UPS · 배터리", "랙 이중 PDU 급전", "ups", 2400, 800, 800, 900, 1900, 0, "RACK"),
+        ("AC", "항온항습기 (견적 외)", "열부하 약 10kW", "ext", 500, 4500, 1000, 600, 1900, 0, None),
+        ("VW", "DT 모니터링 시스템", "표시장치(구성 가정)", "screen", 4700, 0, 2800, 120, 1400, 800, "MON"),
+        ("D1", "운영 데스크 1", "DT·시뮬레이션 운영 PC", "desk", 4600, 2000, 1300, 800, 750, 0, "OPC"),
+        ("D2", "운영 데스크 2", "운영 노트북 · 스캔 처리", "desk", 6200, 2000, 1300, 800, 750, 0, "NB"),
+    ]
+    if z["slug"] == "fms":
+        it.append(("SCN", "공간 스캐너 보관·충전", "현장 이동형 · 삼각대", "scan", 7600, 4400, 600, 500, 900, 0, "SCN"))
+    elif z["slug"] == "adaptive":
+        it.append(("SCN", "자동 스캔 스테이션", "1.4×1.4m 가정 · 위치 협의", "scan", 6700, 3800, 1400, 1400, 1800, 0, "SCN"))
+    return it
+
+
+def _links_mm(z):
+    """(cls, [(x,y)...], label, (lx,ly)) — 2D·3D 공용, 3D는 TRAY_Z 높이"""
+    L = [
+        ("l25a", [(700, 1400), (2200, 1400)], "", None),
+        ("l10a", [(1300, 1400), (3400, 1400), (7500, 1400)], "운영실 10GbE (천장 트레이 → 데스크·표시장치 하강)", (3600, 1300)),
+        ("l10a", [(5250, 1400), (5250, 2000)], "", None),
+        ("l10a", [(6850, 1400), (6850, 2000)], "", None),
+        ("l10a", [(6100, 1400), (6100, 120)], "", None),
+        ("l25b", [(900, 1400), (900, 5400)], "Cell 캐비닛 이중 광 업링크", (960, 3400)),
+        ("l10", [(500, 1400), (0, 1400)], "건물 광 인입 → 중앙 Server", (60, 650)),
+        ("pw", [(2800, 2100), (700, 2100)], "UPS → 랙 전원", (1500, 2280)),
+    ]
+    if z["slug"] == "fms":
+        L.append(("wl", [(7900, 4400), (7300, 2800)], "스캔 데이터 (Wi-Fi·USB)", (7350, 3700)))
+    elif z["slug"] == "adaptive":
+        L.append(("l1", [(7400, 3800), (7400, 2800)], "스캐너 ↔ 운영 노트북", (7460, 3400)))
+    return L
+
+
+def space_2d(z):
+    s, ox, oy = 0.1, 70, 60
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    W, H = ox * 2 + ROOM_W * s + 40, oy + ROOM_D * s + 150
+    o = [f'<svg class="arch plan" viewBox="0 0 {W:.0f} {H:.0f}" role="img" aria-label="{E(z["short"])} 로컬 관제 센터 2D 평면" style="max-width:{W:.0f}px">']
+    # grid
+    for gx in range(0, ROOM_W + 1, 1000):
+        x, _ = P(gx, 0)
+        o.append(f'<line x1="{x}" y1="{oy}" x2="{x}" y2="{oy + ROOM_D * s}" class="grid"/>')
+    for gy in range(0, ROOM_D + 1, 1000):
+        _, y = P(0, gy)
+        o.append(f'<line x1="{ox}" y1="{y}" x2="{ox + ROOM_W * s}" y2="{y}" class="grid"/>')
+    # rooms
+    o.append(f'<rect x="{ox}" y="{oy}" width="{SPLIT * s}" height="{ROOM_D * s}" class="rm srv"/>')
+    o.append(f'<rect x="{ox + SPLIT * s}" y="{oy}" width="{(ROOM_W - SPLIT) * s}" height="{ROOM_D * s}" class="rm ops"/>')
+    o.append(f'<text x="{ox + 12}" y="{oy + 22}" class="rm-t">서버실 3.4 × 5.4 m</text>')
+    o.append(f'<text x="{ox + SPLIT * s + 12}" y="{oy + 22}" class="rm-t">운영실 (로컬 관제) 5.0 × 5.4 m</text>')
+    # doors
+    for (x1, y1, x2, y2) in [(SPLIT, 3800, SPLIT, 4800), (2000, ROOM_D, 3000, ROOM_D), (5200, ROOM_D, 6400, ROOM_D)]:
+        a, b = P(x1, y1)
+        c, d = P(x2, y2)
+        o.append(f'<line x1="{a}" y1="{b}" x2="{c}" y2="{d}" class="door"/>')
+    # aisles
+    a, b = P(400, 2000)
+    o.append(f'<rect x="{a}" y="{b}" width="{2800 * s}" height="{1000 * s}" class="aisle-c"/><text x="{a + 6}" y="{b + 60}" class="aisle-ct">전면 작업공간 1.0m+ (콜드 아일)</text>')
+    a, b = P(400, 0)
+    o.append(f'<text x="{a + 6}" y="{b + 50}" class="aisle-ct">후면 0.8m (핫 아일)</text>')
+    # items
+    for sym, nm, sub, kind, x, y, w, d, h, z0, ln in space_items(z):
+        a, b = P(x, y)
+        tag = f'<a href="#it-{ln}" class="nlink"><g data-node="{ln}">' if ln else "<g>"
+        o.append(tag + f'<rect x="{a}" y="{b}" width="{w * s}" height="{d * s}" rx="2" class="sp {kind}"/>')
+        if kind in ("rack", "gpu"):
+            o.append(f'<text x="{a + w * s / 2}" y="{b + d * s / 2 + 4}" class="sp-t v">{E(sym)}</text>')
+        elif kind == "ups":
+            o.append(f'<text x="{a + w * s / 2}" y="{b + 30}" class="sp-t v">UPS</text>')
+        elif kind == "screen":
+            o.append(f'<text x="{a + w * s / 2}" y="{b + 30}" class="sp-t">{E(nm)}</text>')
+        else:
+            o.append(f'<text x="{a + w * s / 2}" y="{b + d * s / 2 - 2}" class="sp-t">{E(nm)}</text>'
+                     f'<text x="{a + w * s / 2}" y="{b + d * s / 2 + 12}" class="sp-s">{E(sub)}</text>')
+        o.append("</g></a>" if ln else "</g>")
+    # links
+    for cls, pts, lab, lp in _links_mm(z):
+        d = " ".join(f"{P(x, y)[0]:.1f},{P(x, y)[1]:.1f}" for x, y in pts)
+        o.append(f'<polyline points="{d}" class="lk {cls}"/>')
+        if lab and lp:
+            a, b = P(*lp)
+            o.append(f'<text x="{a}" y="{b}" class="lkt">{E(lab)}</text>')
+    # rack legend under rack row
+    a, b = P(400, 3150)
+    o.append(f'<text x="{a}" y="{b}" class="sp-s" style="text-anchor:start">R1 네트워크·보안 · R2 데이터 · R3 DT·AI 연산 (600×1200, 42U)</text>')
+    # corridor + cells
+    a, b = P(0, ROOM_D)
+    o.append(f'<rect x="{a}" y="{b + 6}" width="{ROOM_W * s}" height="34" class="aisle-c"/><text x="{a + 8}" y="{b + 28}" class="aisle-ct">복도 · 케이블 트레이 → 각 Cell 캐비닛</text>')
+    cells = " · ".join(c[0] for c in z["cells"])
+    o.append(f'<text x="{a + 8}" y="{b + 62}" class="lkt">연결 Cell {len(z["cells"])}개: {E(cells)}</text>')
+    # dims
+    a, b = P(0, 0)
+    o.append(f'<line x1="{a}" y1="{b - 18}" x2="{a + ROOM_W * s}" y2="{b - 18}" class="dim"/><text x="{a + ROOM_W * s / 2}" y="{b - 24}" class="dim-t2">8.4 m (가정)</text>')
+    o.append(f'<line x1="{a - 18}" y1="{b}" x2="{a - 18}" y2="{b + ROOM_D * s}" class="dim"/><text x="{a - 24}" y="{b + ROOM_D * s / 2}" class="dim-t2" transform="rotate(-90 {a - 24} {b + ROOM_D * s / 2})">5.4 m</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def space_3d(z):
+    import math
+    C, S, OX, OY = math.cos(math.pi / 6), 0.07, 410, 230
+
+    def P(x, y, h=0):
+        return (OX + (x - y) * C * S, OY + (x + y) * 0.5 * S - h * S)
+
+    def poly(pts, cls, extra=""):
+        return f'<polygon points="{" ".join(f"{a:.1f},{b:.1f}" for a, b in pts)}" class="{cls}"{extra}/>'
+
+    o = [f'<svg class="arch plan" viewBox="0 0 960 730" role="img" aria-label="{E(z["short"])} 로컬 관제 센터 3D" style="max-width:960px">']
+    # floors
+    o.append(poly([P(0, 0), P(SPLIT, 0), P(SPLIT, ROOM_D), P(0, ROOM_D)], "fl srv"))
+    o.append(poly([P(SPLIT, 0), P(ROOM_W, 0), P(ROOM_W, ROOM_D), P(SPLIT, ROOM_D)], "fl ops"))
+    for gx in range(0, ROOM_W + 1, 1000):
+        a, b = P(gx, 0)
+        c, d = P(gx, ROOM_D)
+        o.append(f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}" class="grid"/>')
+    for gy in range(0, ROOM_D + 1, 1000):
+        a, b = P(0, gy)
+        c, d = P(ROOM_W, gy)
+        o.append(f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}" class="grid"/>')
+    # back walls (x=0 plane, y=0 plane) + partition low cut
+    WH = 2700
+    o.append(poly([P(0, 0), P(0, ROOM_D), P(0, ROOM_D, WH), P(0, 0, WH)], "wall"))
+    o.append(poly([P(0, 0), P(ROOM_W, 0), P(ROOM_W, 0, WH), P(0, 0, WH)], "wall"))
+    o.append(poly([P(SPLIT, 0), P(SPLIT, 3800), P(SPLIT, 3800, WH), P(SPLIT, 0, WH)], "wall part"))
+    lab = []
+
+    def box(x, y, w, d, h, z0, kind, link=None):
+        x1, y1, z1 = x + w, y + d, z0 + h
+        top = [P(x, y, z1), P(x1, y, z1), P(x1, y1, z1), P(x, y1, z1)]
+        fr = [P(x1, y, z0), P(x1, y1, z0), P(x1, y1, z1), P(x1, y, z1)]
+        fl = [P(x, y1, z0), P(x1, y1, z0), P(x1, y1, z1), P(x, y1, z1)]
+        g = (f'<a href="#it-{link}" class="nlink"><g data-node="{link}">' if link else "<g>")
+        g += poly(fl, f"bx {kind} fL") + poly(fr, f"bx {kind} fR") + poly(top, f"bx {kind} fT")
+        if kind in ("rack", "gpu"):  # 전면 유닛 줄
+            for k in range(1, 8):
+                zz = z0 + h * k / 8
+                a, b = P(x, y1, zz)
+                c, dd = P(x1, y1, zz)
+                g += f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{dd:.1f}" class="ru"/>'
+        g += "</g></a>" if link else "</g>"
+        return g
+
+    items = sorted(space_items(z), key=lambda r: (r[4] + r[6] / 2) + (r[5] + r[7] / 2))
+    for sym, nm, sub, kind, x, y, w, d, h, z0, ln in items:
+        o.append(box(x, y, w, d, h, z0, kind, ln))
+        if kind == "desk":  # 모니터
+            o.append(box(x + 200, y + 100, w - 400, 60, 420, h, "screen"))
+        lab.append((P(x + w / 2, y + d / 2, z0 + h + 250), nm, kind))
+    # trays + drops
+    for cls, pts, lb, lp in _links_mm(z):
+        zz = 2100 if cls == "pw" else (900 if cls in ("wl", "l1") else TRAY_Z)
+        d = " ".join(f"{P(x, y, zz)[0]:.1f},{P(x, y, zz)[1]:.1f}" for x, y in pts)
+        o.append(f'<polyline points="{d}" class="lk {cls}"/>')
+    for x, y, zt in [(5250, 2000, 1170), (6850, 2000, 1170), (6100, 120, 2200), (900, 5400, 0)]:
+        a, b = P(x, y, TRAY_Z)
+        c, d = P(x, y, zt)
+        o.append(f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}" class="lk drop3"/>')
+    a, b = P(900, ROOM_D + 600, 0)
+    o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="lkt" text-anchor="middle">→ Cell 캐비닛 {len(z["cells"])}개</text>')
+    a, b = P(0, 1400, TRAY_Z)
+    o.append(f'<text x="{a - 6:.0f}" y="{b - 8:.0f}" class="lkt" text-anchor="end">건물 광 인입 → 중앙 Server</text>')
+    for (a, b), nm, kind in lab:
+        if kind == "screen":
+            continue
+        o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t">{E(nm.split(" · ")[0] if kind in ("rack", "gpu") else nm)}</text>')
+    a, b = P(5900, 0, 2350)
+    o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t">DT 모니터링 시스템 (표시장치)</text>')
+    a, b = P(1700, 0, WH + 120)
+    o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t" font-size="13">서버실</text>')
+    a, b = P(5900, 0, WH + 380)
+    o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t" font-size="13">운영실 (로컬 관제)</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+RACKS = [
+    ("R1 · 네트워크·보안", "NET", [(42, 2, "패치패널 ×2", "net"), (40, 1, "방화벽 (OT/IT 경계)", "net"), (39, 1, "코어 스위치 1", "net"), (38, 1, "코어 스위치 2", "net"),
+                                  (37, 1, "관리망 스위치 (가정)", "opt"), (36, 1, "PTP 시간동기", "net"), (20, 1, "KVM 콘솔", "net")]),
+    ("R2 · 데이터", "DPS", [(42, 2, "패치패널", "net"), (36, 2, "데이터 처리 서버 1", "srv"), (34, 2, "데이터 처리 서버 2", "srv"), (32, 2, "데이터 처리 서버 3", "srv"),
+                           (30, 2, "데이터 처리 서버 4", "srv"), (28, 2, "데이터 처리 서버 5", "srv"), (24, 2, "통합 스토리지 (60TB raw)", "sto"), (20, 2, "백업 스토리지", "sto")]),
+    ("R3 · DT·AI 연산", "GPU", [(42, 2, "패치패널", "net"), (40, 1, "방화벽 (DT 연산 구간)", "net"), (16, 4, "DT·AI 연산 서버 (GPU ×4)", "gpu"), (11, 4, "증설 여유 4U", "opt")]),
+]
+
+
+def rack_svg():
+    UH, W, gap, top = 11, 240, 40, 34
+    o = [f'<svg class="arch plan" viewBox="0 0 {3 * W + 2 * gap + 60} {top + 42 * UH + 30}" role="img" aria-label="랙 실장도" style="max-width:{3 * W + 2 * gap + 60}px">']
+    for i, (title, link, units) in enumerate(RACKS):
+        x = 40 + i * (W + gap)
+        o.append(f'<a href="#it-{link}" class="nlink"><text x="{x + W / 2}" y="{top - 12}" class="dvt" font-size="12.5">{E(title)}</text></a>')
+        o.append(f'<rect x="{x}" y="{top}" width="{W}" height="{42 * UH}" class="rk"/>')
+        for u in range(0, 43, 6):
+            yy = top + (42 - u) * UH
+            if i == 0:
+                o.append(f'<text x="{x - 6}" y="{yy + 3}" class="u-n">{u if u else ""}</text>')
+        for ut, n, nm, kind in units:
+            yy = top + (42 - ut) * UH
+            o.append(f'<rect x="{x + 6}" y="{yy + 1}" width="{W - 12}" height="{n * UH - 2}" rx="1.5" class="ru-b {kind}"/>'
+                     f'<text x="{x + W / 2}" y="{yy + n * UH / 2 + 3.5}" class="ru-t">{E(nm)} · {n}U</text>')
+        used = sum(n for _, n, _, k in units if k != "opt")
+        o.append(f'<text x="{x + W / 2}" y="{top + 42 * UH + 18}" class="sp-s">사용 {used}U / 42U</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+POWER = [  # (장비, 수량, kW, 근거)
+    ("DT·AI 연산 서버", 1, 3.8, "GPU 600W ×4 + CPU ×2 + 기타, 최대 부하 (추정)"),
+    ("데이터 처리 서버", 5, 0.6, "2U 2소켓, 평상 부하 (추정)"),
+    ("통합 스토리지", 1, 1.0, "올플래시 2U (추정)"),
+    ("백업 스토리지", 1, 0.4, "(추정)"),
+    ("네트워크·보안·시간동기", 1, 0.8, "방화벽 ×2 · 코어 ×2 · 관리·PTP·KVM (추정)"),
+]
+
+
+def power_table():
+    it_kw = sum(q * kw for _, q, kw, _ in POWER)
+    rows = "".join(f'<tr><td class="nm">{E(n)}</td><td class="q">{q}</td><td class="num">{kw:.1f}</td><td class="num">{q * kw:.1f}</td><td class="note">{E(b)}</td></tr>' for n, q, kw, b in POWER)
+    ups = it_kw / 0.8
+    foot = (f'<tr class="tot strong"><th colspan="3">서버실 IT 부하</th><td class="num">{it_kw:.1f} kW</td><td></td></tr>'
+            f'<tr class="tot"><th colspan="3">UPS (부하율 80%)</th><td class="num">{ups:.1f} kW↑</td><td class="note">15kVA급 이상 권장 — 견적서 UPS 용량 미기재</td></tr>'
+            f'<tr class="tot"><th colspan="3">냉방 (IT 부하 + 10%)</th><td class="num">{it_kw * 1.1:.1f} kW</td><td class="note">약 {it_kw * 1.1 / 3.517:.1f} RT — 항온항습기는 견적에 없음</td></tr>')
+    return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>장비</th><th style="text-align:center">수량</th><th class="r">대당 kW</th><th class="r">합계 kW</th><th>근거</th></tr></thead>'
+            f'<tbody>{rows}</tbody><tfoot>{foot}</tfoot></table></div>')
+
+
+SPACE_REQ = [
+    ("서버실 면적", "3.4 × 5.4 m (약 18㎡) — 42U 랙 3대 + UPS·배터리 + 항온항습기, 전면 1.0m·후면 0.8m 작업공간", "가정 치수. 창조2관 3층 실측 후 확정"),
+    ("운영실 면적", "5.0 × 5.4 m (약 27㎡) — 표시장치 벽면, 운영 데스크 2석" + ", 스캔 장비 공간", "기업 실증 참관 인원에 따라 확대"),
+    ("전기", "서버실 전용 분전반(3상 380V), 랙별 이중 PDU, UPS 경유 급전", "분전반·배선 공사는 견적에 없음"),
+    ("냉방", "IT 부하 약 9kW 상시 → 항온항습기 10kW급, 서버실 전용", "견적에 없음 — 별도 확보 필요"),
+    ("통신 인입", "건물 광 인입(중앙 Server·DCC 연계), 복도 상부 트레이로 Cell 캐비닛 이중 광", "건물 측 광 경로 확인"),
+    ("이전", "'29년 메타팩토리 이전 시 랙 단위 이설 — 랙 3대·UPS를 그대로 옮기는 구성", "이설 비용·중단 기간 운영계획에 반영"),
+]
+
+
+def space_req_table():
+    body = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, b, c in SPACE_REQ)
+    return f'<div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>구성</th><th>비고</th></tr></thead><tbody>{body}</tbody></table></div>'
+
+
+LEGEND_SP = [("l10", "건물 광 인입 (중앙 Server)"), ("l25a", "랙 간 25GbE · 상부 트레이"), ("l10a", "운영실 10GbE (데스크·표시장치)"), ("l25b", "Cell 캐비닛 이중 광 업링크"),
+             ("pw", "UPS 전원"), ("l1", "스캐너 연결 (유선)"), ("wl", "스캐너 연결 (무선)")]
+
+
+def legend_sp():
+    return '<ul class="lg">' + "".join(
+        f'<li><svg width="34" height="10" aria-hidden="true"><line x1="0" y1="5" x2="34" y2="5" class="lk {c}"/></svg>{E(t)}</li>' for c, t in LEGEND_SP) + "</ul>"
+
+
+def space_section(z):
+    return f'''<section id="space">
+  <p class="eyebrow">2. 로컬 관제 센터 공간 구성</p>
+  <h2>서버실·운영실 2D 평면과 3D 배치, 연결 경로</h2>
+  <p class="note-box">견적서 항목2·3·4 장비를 (임시) 창조2관 3층에 서버실 + 운영실로 설치하는 경우의 배치안. 치수·랙 실장·전력은 가정이며, 견적서에 없는 항온항습기·분전반 공사는 점선·비고로 표시함. 장비를 누르면 구성품 표의 해당 행으로 이동함.</p>
+  <h3>2D 평면 (1칸 = 1m)</h3>
+  <figure class="fig">{space_2d(z)}{legend_sp()}</figure>
+  <h3>3D 배치 (아이소메트릭, 앞쪽 벽 생략)</h3>
+  <figure class="fig">{space_3d(z)}{legend_sp()}
+  <figcaption>천장 트레이(높이 2.3m)를 따라 랙 → 운영실 데스크·표시장치로 내려가고, 서버실 앞쪽 벽을 지나 복도 트레이로 각 Cell 캐비닛에 연결됨.</figcaption></figure>
+  <h3>랙 실장도 (42U)</h3>
+  <figure class="fig">{rack_svg()}</figure>
+  <h3>공간·전력·냉방 요건</h3>
+  {space_req_table()}
+  {power_table()}
+</section>'''
+
+
+SPACE_CSS = """<style>
+.grid{stroke:var(--rule);stroke-width:.6}
+.rm{stroke:var(--ink);stroke-width:2.5} .rm.srv{fill:var(--cellbg)} .rm.ops{fill:var(--paper)}
+.rm-t{fill:var(--teal);font-size:12.5px;font-weight:700}
+.door{stroke:var(--paper);stroke-width:5} .aisle-c{fill:var(--aisle)} .aisle-ct{fill:var(--teal);font-size:10.5px}
+.sp{stroke:var(--ink);stroke-width:1.2} .sp.rack{fill:var(--navy2)} .sp.gpu{fill:var(--teal)} .sp.ups{fill:var(--amber)}
+.sp.ext{fill:none;stroke-dasharray:5 3;stroke:var(--muted)} .sp.screen{fill:var(--ink)} .sp.desk{fill:var(--grp)} .sp.scan{fill:var(--cam);fill-opacity:.35}
+.sp-t{fill:var(--ink);font-size:11px;font-weight:700;text-anchor:middle} .sp-t.v{fill:#fff}
+.sp-s{fill:var(--muted);font-size:10px;text-anchor:middle}
+.dim{stroke:var(--muted);stroke-width:1} .dim-t2{fill:var(--muted);font-size:11px;text-anchor:middle;font-family:var(--mono)}
+.lk.pw{stroke:var(--amber);stroke-width:2;stroke-dasharray:7 4}
+.lk.drop3{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 3}
+.fl.srv{fill:var(--cellbg);stroke:var(--ink);stroke-width:1.5} .fl.ops{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+.wall{fill:var(--grp);fill-opacity:.55;stroke:var(--muted);stroke-width:1} .wall.part{fill-opacity:.35}
+.bx{stroke:var(--ink);stroke-width:.8;stroke-linejoin:round}
+.bx.rack{fill:var(--navy2)} .bx.gpu{fill:var(--teal)} .bx.ups{fill:var(--amber)} .bx.desk{fill:var(--muted)} .bx.screen{fill:var(--ink)}
+.bx.scan{fill:var(--cam)} .bx.ext{fill:var(--paper);stroke-dasharray:4 3}
+.bx.fT{fill-opacity:.55} .bx.fR{fill-opacity:.8} .bx.fL{fill-opacity:1}
+.ru{stroke:#fff;stroke-opacity:.35;stroke-width:.6}
+.iso-t{fill:var(--ink);font-size:11px;font-weight:700;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+.rk{fill:var(--cellbg);stroke:var(--ink);stroke-width:2}
+.ru-b{stroke:var(--ink);stroke-width:.6} .ru-b.net{fill:var(--grp)} .ru-b.srv{fill:var(--navy2)} .ru-b.sto{fill:var(--eqline);fill-opacity:.6}
+.ru-b.gpu{fill:var(--teal)} .ru-b.opt{fill:none;stroke-dasharray:4 3;stroke:var(--muted)}
+.ru-t{fill:var(--ink);font-size:9.5px;text-anchor:middle;paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+.u-n{fill:var(--muted);font-size:9px;text-anchor:end;font-family:var(--mono)}
+</style>"""
+
+
 REFS = [
     ("Q", "견적서", "이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 (10/15 최종)", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류"),
     ("G1", "이메일", "유지연 팀장 「자체장비 심의시 질의&제안사항 공유 및 중장위 심의 준비(~10.21/수) 안내」 — 공통 제안의견·중장위 제출서류", "2026-10-18", "Outlook"),
@@ -491,13 +798,13 @@ def page(z):
     return f'''<title>{E(z["short"])} OCS 시뮬레이션 Cell</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
-{CSS}{PZ_EXTRA}{EXTRA}
+{CSS}{PZ_EXTRA}{EXTRA}{SPACE_CSS}
 <header class="mast"><div class="wrap">
   <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · 10/15 최종 견적({E(z["no"])}) 기준 · 10/18 중장위 심의 준비 지침 적용 · 2026.10.19 작성 · 검토본</p>
   <h1>{E(z["name"])}</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
-  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a><a href="#refs">근거</a>
+  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a><a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
 <section id="sum" style="margin-top:8px">
@@ -515,15 +822,16 @@ def page(z):
   <h3>주요 장비 용도·설치 위치</h3>
   {roles_table(z)}
 </section>
+{space_section(z)}
 <section id="items">
-  <p class="eyebrow">2. 구성품·사양·금액</p>
+  <p class="eyebrow">3. 구성품·사양·금액</p>
   <h2>견적서 항목 순서대로 구성품별 사양·금액</h2>
   <p class="note-box">단위 천원. 번호는 견적서 항목 순서(항목1~6)를 따름 — 심의위원 제안대로 규격서·견적서·비교견적서의 구성 항목 순서를 이 순서에 맞추면 됨. 견적서 표지는 'VAT 포함', 참고사항은 '부가세 별도'로 엇갈림.
   <b>지침 점검</b>: 적합 · 사양 보완(성능 수치 없음) · 기종 확인 · 기간 확인 · 범위 명시 · <b>금액 미구분</b>(총액만 제시 — 불인정 위험).</p>
   {table}
 </section>
 <section id="guide">
-  <p class="eyebrow">3. 중장위 심의 준비 지침 점검</p>
+  <p class="eyebrow">4. 중장위 심의 준비 지침 점검</p>
   <h2>10/18 공통 지침·10/16 질의 대응 현황</h2>
   {guide_table(z)}
 </section>
