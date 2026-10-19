@@ -3,7 +3,8 @@ import glob
 import os
 import re
 
-PAGES = [("index.html", "목차"), ("ocs_precision.html", "로컬 OCS Zone 구성 - (예시) 정밀조립존"), ("dmworks_zones.html", "DMWorks 존별 옵션")]
+PAGES = [("index.html", "목차"), ("ocs_precision.html", "로컬 OCS Zone 구성 - (예시) 정밀조립존"), ("dmworks_zones.html", "DMWorks 존별 옵션"),
+         ("ocs_sim_fms.html", "유연제조 OCS Cell"), ("ocs_sim_adaptive.html", "적응가공 OCS Cell"), ("ocs_sim_qms.html", "AI정밀검사 OCS Cell")]
 HEAD = '<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
 BAR_CSS = ('<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 20px;'
            'font:600 13px "Noto Sans KR",sans-serif}.webbar a{color:#C9D6F0;text-decoration:none}.webbar a.on{color:#00C2D1}'
@@ -25,7 +26,7 @@ BAR_CSS = ('<style>.webbar{background:#0A1636;display:flex;flex-wrap:wrap;gap:4p
            ':root{color-scheme:light}}</style>')
 
 
-EXPORTS = ("ocs_precision.html", "dmworks_zones.html")
+EXPORTS = ("ocs_precision.html", "dmworks_zones.html", "ocs_sim_fms.html", "ocs_sim_adaptive.html", "ocs_sim_qms.html")
 
 
 def dl(name):
@@ -76,7 +77,10 @@ a.open{display:flex;flex-direction:column;gap:6px;color:var(--ink);text-decorati
 <main><div class="wrap">
 <div class="cards">
 <div class="card"><a class="open" href="ocs_precision.html"><b>로컬 OCS Zone 구성 - (예시) 정밀조립존</b><span>AAS 기반 수집–저장 아키텍처, 장비 설치·연결 토폴로지, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록</span><em>열기 →</em></a><p class="save"><a href="ocs_precision.pdf" download>PDF 저장</a><a href="ocs_precision.docx" download>Word 저장</a></p></div>
-<div class="card"><a class="open" href="dmworks_zones.html"><b>DMWorks 존별 옵션 구성</b><span>이지로보틱스 10/8 견적 3건(정가×52%) 기준, 존별 구매 필요성·해야 할 일·옵션, 품목별 검토, 재견적 쟁점</span><em>열기 →</em></a><p class="save"><a href="dmworks_zones.pdf" download>PDF 저장</a><a href="dmworks_zones.docx" download>Word 저장</a></p></div>
+<div class="card"><a class="open" href="dmworks_zones.html"><b>DMWorks 존별 옵션 구성</b><span>이지로보틱스 10/15 최종 견적 3건(정가×57.2%) 기준, 존별 구매 필요성·해야 할 일·옵션, 품목별 검토, 계약 전 쟁점</span><em>열기 →</em></a><p class="save"><a href="dmworks_zones.pdf" download>PDF 저장</a><a href="dmworks_zones.docx" download>Word 저장</a></p></div>
+<div class="card"><a class="open" href="ocs_sim_fms.html"><b>유연제조(FMS) 통합 OCS 시뮬레이션 Cell</b><span>10/15 최종 견적 항목 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액, 10/18 중장위 심의 지침 점검</span><em>열기 →</em></a><p class="save"><a href="ocs_sim_fms.pdf" download>PDF 저장</a><a href="ocs_sim_fms.docx" download>Word 저장</a></p></div>
+<div class="card"><a class="open" href="ocs_sim_adaptive.html"><b>적응가공(Adaptive) 통합 OCS 시뮬레이션 Cell</b><span>10/15 최종 견적 항목 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액, 10/18 중장위 심의 지침 점검</span><em>열기 →</em></a><p class="save"><a href="ocs_sim_adaptive.pdf" download>PDF 저장</a><a href="ocs_sim_adaptive.docx" download>Word 저장</a></p></div>
+<div class="card"><a class="open" href="ocs_sim_qms.html"><b>AI 정밀검사(QMS) 통합 OCS 시뮬레이션 Cell</b><span>10/15 최종 견적 항목 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액, 10/18 중장위 심의 지침 점검</span><em>열기 →</em></a><p class="save"><a href="ocs_sim_qms.pdf" download>PDF 저장</a><a href="ocs_sim_qms.docx" download>Word 저장</a></p></div>
 </div>
 <section class="ref"><p class="eb2">참고 자료</p><h2>피지컬AI를 위한 AAS 기반 데이터 수집–저장 표준 아키텍처(안)</h2><a href="data_collection_architecture.png" target="_blank" rel="noopener"><img src="data_collection_architecture.png" width="1919" height="1080" alt="중앙 Server·Local Server·Edge Gateway Server·Field 계층과 검증 영역으로 구성된 AAS 기반 데이터 수집–저장 표준 아키텍처"></a><p class="cap">출처: 기술실증 테스트베드 발표자료 「2-2. 피지컬AI 제조 데이터 구축(4/6)」 68쪽. 정밀조립존 OCS Cell(Local Server–Edge Gateway 데이터 계층) 설계의 기준 그림. 그림을 누르면 원본 크기로 열림.</p></section>
 <p class="foot">금액 단위 천원, VAT 별도 · 소스: <a href="https://github.com/theuniversepark/micro-cell">github.com/theuniversepark/micro-cell</a></p>

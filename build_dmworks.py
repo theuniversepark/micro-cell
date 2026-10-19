@@ -1,5 +1,5 @@
 """DMWorks 존별 옵션 구성 페이지 → dmworks_zones.html
-근거: 이지로보틱스 10/8 견적서(견26CAMTIC-DMWorks-1008-1~3)·제안서, DMWorks 3.0 정가표(2026.01), 9/30 방문 Q&A, 10/6 의사결정."""
+근거: 이지로보틱스 10/15 최종 견적서(견26CAMTIC-DMWorks-1015-1~3), 10/8 견적서(1008-1~3)·제안서, DMWorks 3.0 정가표(2026.01), 9/30 방문 Q&A, 10/6 의사결정."""
 import html
 import re
 
@@ -7,7 +7,7 @@ import build_page as bp
 from privacy import out
 
 E = html.escape
-RATE = 0.52  # 10/8 견적 단가 = 정가(Node-Lock) × 52% (전 옵션 동일)
+RATE = 0.572  # 10/15 최종 견적 단가 = 정가(Node-Lock) × 57.2% (= 10/8 견적 52% × 1.1, 전 옵션 동일)
 
 # ------------------------------------------------------------------ 정가표 옵션 (천원)
 # key: (옵션, 코드, 정가 Node-Lock, 기능, 9/30 확인·제약)
@@ -23,106 +23,117 @@ OPT = {
     "PID": ("DM PLUG-IN For Developer", "DMW-011", 42000, "API로 전용 기능·UI 개발(AI·PLC·MES 연계)", "개발한 Plug-in 실행에는 For User 필요"),
     "PIU": ("DM PLUG-IN For User", "DMW-012", 14000, "개발된 Plug-in 실행 환경", ""),
 }
-# 정가표에 없는 신규 제품 (10/8 견적·제안서) — 단가는 견적가
+# 정가표에 없는 신규 제품 (10/8 제안서) — 단가는 10/15 최종 견적가
 NEW = {
-    "MON": ("DM-Monitoring", 32000, "설비 실시간 연동으로 DT 동작 일치, CELL/ZONE 운영 정보(생산량·진행률·CT) 분할 화면, 권한 관리", "OCS Cell 관제(OWS·존 오케스트레이터 UI)와 기능이 겹침 → 역할 구분 필요"),
-    "USD": ("Omniverse USD Converter", 14400, "Workcell을 Tree 구조 유지한 USD로 변환·Nucleus 업로드, 물리 설정 정보 반영. 기구 정의 변환은 '협의 후 개발 예정'", "9/30 '지오메트리만' 문제를 푸는 항목. 기구 정의는 아직 개발 전"),
-    "LE": ("Omniverse Live Edit", 10400, "DMWorks–Omniverse Live Session으로 위치·동작 실시간 동기화", "9/30 업체 스스로 'DT 운영용 비추천(지연)'"),
-    "ACSB": ("ACS BASE", 26000, "검사 결과(결함 위치 3D 좌표)로 로봇 리워크 프로그램·레시피 자동 생성 기본 환경", "리워크 공정이 있는 존에만 의미. AI 알고리즘 연동 가능"),
-    "ACSO": ("ACS OLP (컨트롤러당)", 17200, "리워크 경로를 로봇 컨트롤러 형식 OLP로 생성", "OLP와 같은 컨트롤러 2종씩 계상"),
-    "AIMSS": ("AIMS Simulator (컨트롤러당)", 48000, "가상 측정 작업장·캘리브레이션·측정 시뮬레이션·로봇 OLP", "레이저트래커·스캐너 로봇 자동 측정(CMM 수준)"),
-    "AIMSC": ("AIMS Controller (컨트롤러당)", 36000, "측정 시스템 통합 제어·데이터 수집·실시간 결과 모니터링", ""),
-    "PIA": ("PIA (Predictive Inspect & Analysis)", 32000, "3D 스캔 데이터 경량화·컬러맵·섹션·차트 시각화로 품질 예측", "측정 결과 분석 SW(9/30 소개)"),
-    "TES": ("TESCar", 60000, "스캔 데이터로 저항 점용접 품질 자동 판정·최적 용접조건 제시", "차체 스폿용접 특화 → 유연제조(용접) 쪽 기능에 가까움"),
+    "MON": ("DM-Monitoring", 35200, "설비 실시간 연동으로 DT 동작 일치, CELL/ZONE 운영 정보(생산량·진행률·CT) 분할 화면, 권한 관리", "OCS Cell 관제(OWS·존 오케스트레이터 UI)와 기능이 겹침 → 역할 구분 필요"),
+    "USD": ("Omniverse USD Converter", 15840, "Workcell을 Tree 구조 유지한 USD로 변환·Nucleus 업로드, 물리 설정 정보 반영. 기구 정의 변환은 '협의 후 개발 예정'", "9/30 '지오메트리만' 문제를 푸는 항목. 기구 정의는 아직 개발 전"),
+    "LE": ("Omniverse Live Edit", 11440, "DMWorks–Omniverse Live Session으로 위치·동작 실시간 동기화", "9/30 업체 스스로 'DT 운영용 비추천(지연)'"),
+    "ACSB": ("ACS BASE", 28600, "검사 결과(결함 위치 3D 좌표)로 로봇 리워크 프로그램·레시피 자동 생성 기본 환경", "리워크 공정이 있는 존에만 의미. AI 알고리즘 연동 가능"),
+    "ACSO": ("ACS OLP (컨트롤러당)", 18920, "리워크 경로를 로봇 컨트롤러 형식 OLP로 생성", "OLP와 같은 컨트롤러 2종 계상"),
+    "AIMSS": ("AIMS Simulator (컨트롤러당)", 52800, "가상 측정 작업장·캘리브레이션·측정 시뮬레이션·로봇 OLP", "레이저트래커·스캐너 로봇 자동 측정(CMM 수준)"),
+    "AIMSC": ("AIMS Controller (컨트롤러당)", 39600, "측정 시스템 통합 제어·데이터 수집·실시간 결과 모니터링", ""),
+    "PIA": ("PIA (Predictive Inspect & Analysis)", 35200, "3D 스캔 데이터 경량화·컬러맵·섹션·차트 시각화로 품질 예측", "측정 결과 분석 SW(9/30 소개)"),
+    "TES": ("TESCar", 66000, "스캔 데이터로 저항 점용접 품질 자동 판정·최적 용접조건 제시", "차체 스폿용접 특화 → 유연제조(용접) 쪽 기능에 가까움"),
 }
 
-# ------------------------------------------------------------------ 10/8 견적 (천원)
+# ------------------------------------------------------------------ 10/15 최종 견적 (천원)
 # (구분, key, 상세, 수량, 단가, 검토 [ok|chk|adj], 검토 의견)
+# 일반관리비·이윤은 (OCS SW + OCS HW + 기술지원)의 10% — 로컬 HW·로컬 OCS·보안은 제외. ga는 견적서 기재값
+AMC_NOTE = "견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 '5년 AMC 포함'이라 표기와 계산이 다름"
+SRV = "DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)"
+LHW = "데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)"
+LHW_NOTE = "견적서 '상세 사양 별도 협의'. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인"
+LOCAL = [
+    ("로컬 OCS·보안", "", "로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)", 1, 49500, "ok", "로컬 OCS 운영 데이터 저장"),
+    ("로컬 OCS·보안", "", "보안 스택(IAM/PKI) — Keycloak + HIWARE", 1, 38500, "ok", "로컬 OCS 접근·인증 관리"),
+]
+OCS_HW = [
+    ("OCS HW", "", SRV, 1, 385000, "ok", "10/12 결정 GPU 8→4장 반영, 방화벽 포함"),
+    ("OCS HW", "", "디지털트윈·시뮬레이션 운영 PC", 1, 13200, "ok", ""),
+    ("OCS HW", "", "시뮬레이션 운영 노트북", 1, 7150, "ok", ""),
+    ("OCS HW", "", "DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업", 1, 55000, "ok", ""),
+]
 Q = {
-    "A-1-4": {"no": "견26CAMTIC-DMWorks-1008-1", "total": 1638000, "items": [
-        ("SW", "BASE", "", 1, 73944, "ok", "필수. 모니터링은 DM-Monitoring이 맡아 Base는 1카피"),
-        ("SW", "MON", "", 1, 32000, "ok", "DT 모니터링 화면(운영 관제는 OCS Cell)"),
-        ("SW", "CADI", "STL·CATIA·PRO/E·AUTOCAD", 4, 4680, "chk", "10/15 재견적에서 삭제 수량 반영 — 재견적 원본으로 남은 포맷 수 확인"),
-        ("SW", "CADE", "STL·VRML·OBJ", 3, 4680, "chk", "10/15 재견적에서 삭제 수량 반영 — 재견적 원본으로 남은 포맷 수 확인"),
-        ("SW", "OLP", "HYUNDAI·KAWASAKI", 2, 12480, "ok", "로봇 오프라인 프로그래밍(컨트롤러 2종)"),
-        ("SW", "RRS", "HYUNDAI", 1, 10400, "ok", "현대 Hi5 컨트롤러 사이클타임 정밀 산출"),
-        ("SW", "PC", "", 1, 19760, "ok", "공장 스캐너 데이터 반영"),
-        ("SW", "MP", "", 1, 23920, "ok", "혼류 라인·AMR 물류"),
-        ("SW", "PLC", "LS·MITSUBISHI", 2, 22984, "ok", "PLC 가상 시운전 2종(DMWorks 동시 시뮬레이션 2기종 경험 범위)"),
-        ("SW", "PID", "", 1, 21840, "ok", "존 전용 Plug-in 개발"),
-        ("SW", "PIU", "", 1, 7280, "ok", ""),
-        ("SW", "USD", "", 1, 14400, "ok", "Isaac Sim 학습 DT 연계 핵심"),
-        ("SW", "LE", "", 1, 10400, "ok", "Omniverse 리뷰 세션 실시간 동기화"),
-        ("SW", "ACSB", "", 1, 26000, "adj", "10/12 결정: ACS는 정밀검사존만 유지 → 제외 (10/15 적응가공 재견적에도 없음)"),
-        ("SW", "ACSO", "HYUNDAI·KAWASAKI", 2, 17200, "adj", "10/12 결정: ACS는 정밀검사존만 유지 → 제외 (10/15 적응가공 재견적에도 없음)"),
-        ("유지보수", "AMC", "연 18% × 4년", 4, 68045.76, "chk", "계상은 10/12 결정(18%×4년). 견적서 '5년 AMC' 표기와 ×4 계산 불일치, VAT 포함 여부 확인"),
-        ("HW", "", "공장 스캐너 RTC700 (HW·운영 SW 포함)", 1, 156000, "ok", "대형 공간 스캔으로 공장·셀 가상 작업장 구축"),
-        ("HW", "", "DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 1.5TB · RTX PRO 6000 ×8)", 1, 520000, "adj", "10/12 결정: GPU 8→4장. 10/15 적응가공 재견적은 RTX PRO 6000 ×4 + 방화벽 385,000(VAT 포함)으로 교체"),
-        ("HW", "", "디지털트윈 운영 PC", 1, 12000, "ok", ""),
-        ("HW", "", "운영 노트북", 1, 6500, "ok", ""),
-        ("HW", "", "구성품 구매·설치·시스템 연동 셋업", 1, 50000, "ok", ""),
-        ("기술지원", "", "CELL 구성 설비별 DT 연동 기능 Customizing", 1, 20000, "ok", ""),
-        ("기술지원", "", "DB 연동 시각화 UI Customizing", 1, 45000, "ok", "DB 데이터를 DT 화면에 시각화"),
-        ("기술지원", "", "DM PLUG-IN 기능 Customizing", 1, 10000, "ok", "AAS 출력·OpenUSD 물성 전달 범위 명시"),
-        ("기술지원", "", "ACS 시스템 Customizing", 1, 20000, "adj", "10/12 결정: ACS는 정밀검사존만 유지 → 제외 (10/15 적응가공 재견적에도 없음)"),
+    "A-1-4": {"no": "견26CAMTIC-DMWorks-1015-1", "total": 1991000, "ga": 125088.606, "items": [
+        ("SW", "BASE", "", 1, 81338.4, "ok", "필수. 모니터링은 DM-Monitoring이 맡아 Base는 1카피"),
+        ("SW", "MON", "", 1, 35200, "ok", "DT 모니터링 화면(운영 관제는 OCS Cell)"),
+        ("SW", "CADI", "STL·CATIA·AUTOCAD", 3, 5148, "ok", "10/15 최종에서 4→3종(PRO/E 삭제)"),
+        ("SW", "CADE", "JT", 1, 5148, "ok", "10/15 최종에서 3→1종(STL·VRML·OBJ → JT)"),
+        ("SW", "OLP", "HYUNDAI·KAWASAKI", 2, 13728, "ok", "로봇 오프라인 프로그래밍(컨트롤러 2종)"),
+        ("SW", "RRS", "HYUNDAI", 1, 11440, "ok", "현대 Hi5 컨트롤러 사이클타임 정밀 산출"),
+        ("SW", "PC", "", 1, 21736, "ok", "공장 스캐너 데이터 반영"),
+        ("SW", "MP", "", 1, 26312, "ok", "혼류 라인·AMR 물류"),
+        ("SW", "PLC", "LS·MITSUBISHI", 2, 25282.4, "ok", "PLC 가상 시운전 2종(DMWorks 동시 시뮬레이션 2기종 경험 범위)"),
+        ("SW", "PID", "", 1, 24024, "ok", "존 전용 Plug-in 개발"),
+        ("SW", "PIU", "", 1, 8008, "ok", ""),
+        ("SW", "USD", "", 1, 15840, "ok", "Isaac Sim 학습 DT 연계 핵심"),
+        ("SW", "LE", "", 1, 11440, "ok", "Omniverse 리뷰 세션 실시간 동기화"),
+        ("유지보수", "AMC", "연 18% × 4년", 4, 60111.216, "chk", AMC_NOTE),
+        ("OCS HW", "", "광대역 공장 스캐너 RTC700 (HW·운영 SW 포함)", 1, 171600, "ok", "대형 공간 스캔으로 공장·셀 가상 작업장 구축"),
+        *OCS_HW,
+        ("로컬 HW", "", LHW, 1, 528000, "chk", LHW_NOTE),
+        *LOCAL,
+        ("기술지원", "", "CELL 구성 설비별 DT 연동 기능 Customizing", 1, 11000, "ok", "다른 두 존(22,000)의 절반으로 감액"),
+        ("기술지원", "", "DB 연동 시각화 UI Customizing", 1, 28050, "ok", "다른 두 존(44,000)보다 감액. DB 데이터를 DT 화면에 시각화"),
+        ("기술지원", "", "DM PLUG-IN 기능 Customizing", 1, 5500, "ok", "AAS 출력·OpenUSD 물성 전달 범위 명시. 다른 두 존(11,000)의 절반"),
     ]},
-    "A-2-5": {"no": "견26CAMTIC-DMWorks-1008-2", "total": 1620000, "items": [
-        ("SW", "BASE", "", 1, 73944, "ok", "필수"),
-        ("SW", "MON", "", 1, 32000, "ok", "DT 모니터링 화면(운영 관제는 OCS Cell)"),
-        ("SW", "CADI", "NX·JT·SOLID EDGE·SOLIDWORKS", 4, 4680, "ok", "가공기·지그 원본 포맷 반입"),
-        ("SW", "CADE", "AAS·JT·IGES·FBX", 4, 4680, "ok", "AAS·중립 포맷 내보내기"),
-        ("SW", "OLP", "YASKAWA·KUKA", 2, 12480, "ok", "머신텐딩 로봇 오프라인 프로그래밍"),
-        ("SW", "PC", "", 1, 19760, "ok", "제품 스캐너 점군을 가상 작업장에 반영"),
-        ("SW", "MP", "", 1, 23920, "ok", "팔레트·AMR 물류"),
-        ("SW", "PLC", "SIEMENS", 1, 22984, "ok", "PLC 메이커 확정 시 일치 여부 확인"),
-        ("SW", "PID", "", 1, 21840, "ok", "존 전용 Plug-in 개발"),
-        ("SW", "PIU", "", 1, 7280, "ok", ""),
-        ("SW", "USD", "", 1, 14400, "ok", "강화학습 환경(Isaac Lab) 연계"),
-        ("SW", "LE", "", 1, 10400, "ok", "Omniverse 리뷰 세션 실시간 동기화"),
-        ("SW", "ACSB", "", 1, 26000, "adj", "10/12 결정: ACS는 정밀검사존만 유지 → 제외 (10/15 적응가공 재견적에도 없음)"),
-        ("SW", "ACSO", "YASKAWA·KUKA", 2, 17200, "adj", "10/12 결정: ACS는 정밀검사존만 유지 → 제외 (10/15 적응가공 재견적에도 없음)"),
-        ("유지보수", "AMC", "연 18% × 4년", 4, 62879.04, "chk", "계상은 10/12 결정(18%×4년). 견적서 '5년 AMC' 표기와 ×4 계산 불일치, VAT 포함 여부 확인 — 10/15 재견적 57,200×4(ACS 제외분)"),
-        ("HW", "", "제품 스캐너 소형(자동) HyperScan (HW·운영 SW 포함)", 1, 190000, "ok", "가공 소재·제품 자동 스캔, 점군을 가상 작업장에 반영"),
-        ("HW", "", "DT·AI 연산 서버 (RTX PRO 6000 ×8, 사양 동일)", 1, 520000, "adj", "10/12 결정: GPU 8→4장. 10/15 적응가공 재견적은 RTX PRO 6000 ×4 + 방화벽 385,000(VAT 포함)으로 교체"),
-        ("HW", "", "디지털트윈 운영 PC", 1, 12000, "ok", ""),
-        ("HW", "", "운영 노트북", 1, 6500, "ok", ""),
-        ("HW", "", "구성품 구매·설치·시스템 연동 셋업", 1, 50000, "ok", ""),
-        ("기술지원", "", "CELL 구성 설비별 DT 연동 기능 Customizing", 1, 20000, "ok", ""),
-        ("기술지원", "", "DB 연동 시각화 UI Customizing", 1, 45000, "ok", "DB 데이터를 DT 화면에 시각화"),
-        ("기술지원", "", "DM PLUG-IN 기능 Customizing", 1, 10000, "ok", ""),
-        ("기술지원", "", "ACS 시스템 Customizing", 1, 20000, "adj", "10/12 결정: ACS는 정밀검사존만 유지 → 제외 (10/15 적응가공 재견적에도 없음)"),
+    "A-2-5": {"no": "견26CAMTIC-DMWorks-1015-2", "total": 2192000, "ga": 129299.178, "items": [
+        ("SW", "BASE", "", 1, 81338.4, "ok", "필수"),
+        ("SW", "MON", "", 1, 35200, "ok", "DT 모니터링 화면(운영 관제는 OCS Cell)"),
+        ("SW", "CADI", "NX·JT·SOLID EDGE·SOLIDWORKS", 4, 5148, "ok", "가공기·지그 원본 포맷 반입"),
+        ("SW", "CADE", "AAS·JT·IGES·FBX", 4, 5148, "ok", "AAS·중립 포맷 내보내기"),
+        ("SW", "OLP", "YASKAWA·KUKA", 2, 13728, "ok", "머신텐딩 로봇 오프라인 프로그래밍"),
+        ("SW", "PC", "", 1, 21736, "ok", "제품 스캐너 점군을 가상 작업장에 반영"),
+        ("SW", "MP", "", 1, 26312, "ok", "팔레트·AMR 물류"),
+        ("SW", "PLC", "SIEMENS", 1, 25282.4, "ok", "PLC 메이커 확정 시 일치 여부 확인"),
+        ("SW", "PID", "", 1, 24024, "ok", "존 전용 Plug-in 개발"),
+        ("SW", "PIU", "", 1, 8008, "ok", ""),
+        ("SW", "USD", "", 1, 15840, "ok", "강화학습 환경(Isaac Lab) 연계"),
+        ("SW", "LE", "", 1, 11440, "ok", "Omniverse 리뷰 세션 실시간 동기화"),
+        ("유지보수", "AMC", "연 18% × 4년", 4, 57207.744, "chk", AMC_NOTE),
+        ("OCS HW", "", "소형 제품 스캐너(자동) HyperScan (HW·운영 SW 포함)", 1, 209000, "ok", "가공 소재·제품 자동 스캔, 점군을 가상 작업장에 반영"),
+        *OCS_HW,
+        ("로컬 HW", "", LHW, 1, 682000, "chk", LHW_NOTE),
+        *LOCAL,
+        ("기술지원", "", "CELL 구성 설비별 DT 연동 기능 Customizing", 1, 22000, "ok", ""),
+        ("기술지원", "", "DB 연동 시각화 UI Customizing", 1, 44000, "ok", "DB 데이터를 DT 화면에 시각화"),
+        ("기술지원", "", "DM PLUG-IN 기능 Customizing", 1, 11000, "ok", ""),
     ]},
-    "A-4-5": {"no": "견26CAMTIC-DMWorks-1008-3", "total": 2531000, "items": [
-        ("SW", "BASE", "", 1, 73944, "ok", "필수"),
-        ("SW", "MON", "", 1, 32000, "ok", "DT 모니터링 화면(품질 관제는 QMS·OCS)"),
-        ("SW", "CADI", "STEP·OBJ·AAS·PARASOLID", 4, 4680, "ok", "검사 대상 CAD 포맷 반입"),
-        ("SW", "CADE", "AAS·STP·PARASOLID", 3, 4680, "ok", "역설계 결과 내보내기"),
-        ("SW", "OLP", "FANUC·ABB", 2, 12480, "ok", "검사·리워크 로봇 오프라인 프로그래밍"),
-        ("SW", "RRS", "FANUC", 1, 10400, "ok", "FANUC 컨트롤러 사이클타임 정밀 산출"),
-        ("SW", "PC", "", 1, 19760, "ok", "스캔 기반 가상 작업장"),
-        ("SW", "MP", "", 1, 23920, "ok", "검사 라인·AMR 물류"),
-        ("SW", "PLC", "ROCKWELL", 1, 22984, "ok", "검사 라인 PLC 가상 시운전"),
-        ("SW", "PID", "", 1, 21840, "ok", "검사 전용 Plug-in 개발"),
-        ("SW", "PIU", "", 1, 7280, "ok", ""),
-        ("SW", "USD", "", 1, 14400, "ok", "합성 결함 데이터(Omniverse) 연계"),
-        ("SW", "LE", "", 1, 10400, "ok", "Omniverse 리뷰 세션 실시간 동기화"),
-        ("SW", "ACSB", "", 1, 26000, "ok", "판정→재검사→리워크 폐루프와 직접 맞음"),
-        ("SW", "ACSO", "FANUC·ABB", 2, 17200, "ok", "구매계획(안)은 FANUC·KUKA — 리워크 로봇 메이커로 한쪽에 맞춤"),
-        ("SW", "PIA", "", 1, 32000, "ok", "스캔 결과 분석·시각화"),
-        ("SW", "TES", "", 1, 60000, "chk", "차체 스폿용접 특화. 존 예산 0.10억 초과(R2) 시 감액 1순위 — 유지하려면 대상 부품의 용접부 검사 근거 필요"),
-        ("SW", "AIMSS", "FANUC·ABB", 2, 48000, "chk", "레이저트래커 측정용 — 스캐너 제외로 측정 HW가 없어짐. 함께 제외하거나 유지 근거 명시"),
-        ("SW", "AIMSC", "FANUC·ABB", 2, 36000, "chk", "측정 시스템 제어용 — 제어할 스캐너가 빠져 AIMS Simulator와 같이 판단"),
-        ("유지보수", "AMC", "연 18% × 4년", 4, 110708.64, "chk", "계상은 10/12 결정(18%×4년). 견적서 '5년 AMC' 표기와 ×4 계산 불일치, VAT 포함 여부 확인. AIMS·TESCar 조정 시 함께 감소"),
-        ("HW", "", "대형 제품 스캐너(자동화) AT960SR + AS1 (HW·운영 SW 포함)", 1, 560000, "adj", "10/12 결정: 정밀검사 스캐너 제외(측정 환경 변화 적음). R2 구매계획서에서도 제외"),
-        ("HW", "", "DT·AI 연산 서버 (RTX PRO 6000 ×8, 사양 동일)", 1, 520000, "adj", "10/12 결정: GPU 8→4장. 10/15 적응가공 재견적은 RTX PRO 6000 ×4 + 방화벽 385,000(VAT 포함)으로 교체"),
-        ("HW", "", "디지털트윈 운영 PC", 1, 12000, "ok", ""),
-        ("HW", "", "운영 노트북", 1, 6500, "ok", ""),
-        ("HW", "", "구성품 구매·설치·시스템 연동 셋업", 1, 50000, "ok", ""),
-        ("기술지원", "", "CELL 구성 설비별 DT 연동 기능 Customizing", 1, 20000, "ok", ""),
-        ("기술지원", "", "DB 연동 시각화 UI Customizing", 1, 45000, "ok", "DB 데이터를 DT 화면에 시각화"),
-        ("기술지원", "", "DM PLUG-IN 기능 Customizing", 1, 10000, "ok", ""),
-        ("기술지원", "", "ACS 시스템 Customizing", 1, 20000, "ok", ""),
+    "A-4-5": {"no": "견26CAMTIC-DMWorks-1015-3", "total": 2610000, "ga": 172301.082, "items": [
+        ("SW", "BASE", "", 1, 81338.4, "ok", "필수"),
+        ("SW", "MON", "", 1, 35200, "ok", "DT 모니터링 화면(품질 관제는 QMS·OCS)"),
+        ("SW", "CADI", "STEP·OBJ·AAS·PARASOLID", 4, 5148, "ok", "검사 대상 CAD 포맷 반입"),
+        ("SW", "CADE", "AAS·STP·PARASOLID", 3, 5148, "ok", "역설계 결과 내보내기"),
+        ("SW", "OLP", "FANUC·ABB", 2, 13728, "ok", "검사·리워크 로봇 오프라인 프로그래밍"),
+        ("SW", "RRS", "FANUC", 1, 11440, "ok", "FANUC 컨트롤러 사이클타임 정밀 산출"),
+        ("SW", "PC", "", 1, 21736, "ok", "스캔 기반 가상 작업장"),
+        ("SW", "MP", "", 1, 26312, "ok", "검사 라인·AMR 물류"),
+        ("SW", "PLC", "ROCKWELL", 1, 25282.4, "ok", "검사 라인 PLC 가상 시운전"),
+        ("SW", "PID", "", 1, 24024, "ok", "검사 전용 Plug-in 개발"),
+        ("SW", "PIU", "", 1, 8008, "ok", ""),
+        ("SW", "USD", "", 1, 15840, "ok", "합성 결함 데이터(Omniverse) 연계"),
+        ("SW", "LE", "", 1, 11440, "ok", "Omniverse 리뷰 세션 실시간 동기화"),
+        ("SW", "ACSB", "", 1, 28600, "ok", "판정→재검사→리워크 폐루프와 직접 맞음(10/12 결정: ACS는 정밀검사존만)"),
+        ("SW", "ACSO", "FANUC·ABB", 2, 18920, "chk", "구매계획(안)은 FANUC·KUKA — 리워크 로봇 메이커로 한쪽에 맞춤"),
+        ("SW", "PIA", "", 1, 35200, "ok", "스캔 결과 분석·시각화"),
+        ("SW", "TES", "", 1, 66000, "chk", "차체 스폿용접 특화. 감액이 필요하면 1순위 — 유지하려면 대상 부품의 용접부 검사 근거 필요"),
+        ("SW", "AIMSS", "FANUC·ABB", 2, 52800, "chk", "레이저트래커 측정용 — 10/15 최종에서 스캐너는 빠졌는데 AIMS는 남음. 측정 HW 없이 쓸 근거 명시 필요"),
+        ("SW", "AIMSC", "FANUC·ABB", 2, 39600, "chk", "측정 시스템 제어용 — 제어할 스캐너가 빠져 AIMS Simulator와 같이 판단"),
+        ("유지보수", "AMC", "연 18% × 4년", 4, 121779.504, "chk", AMC_NOTE + ". AIMS·TESCar 조정 시 함께 감소"),
+        *OCS_HW,
+        ("로컬 HW", "", LHW, 1, 627000, "chk", LHW_NOTE),
+        *LOCAL,
+        ("기술지원", "", "CELL 구성 설비별 DT 연동 기능 Customizing", 1, 22000, "ok", ""),
+        ("기술지원", "", "DB 연동 시각화 UI Customizing", 1, 44000, "ok", "DB 데이터를 DT 화면에 시각화"),
+        ("기술지원", "", "DM PLUG-IN 기능 Customizing", 1, 11000, "ok", ""),
+        ("기술지원", "", "ACS 시스템 Customizing", 1, 22000, "ok", "ACS 리워크 연동"),
     ]},
+}
+# 10/8 견적(1008-1~3) 대비 변경 — 공통: 단가 전반 ×1.1, 연산 서버 8GPU 520,000 → 4GPU+방화벽 385,000, 로컬 HW·로컬 OCS·보안 추가
+CHANGES = {
+    "A-1-4": "16.38억 → 19.91억. CAD IMPORT 4→3종·EXPORT 3→1종, ACS(Base·OLP·Customizing) 삭제, 기술지원 감액(75,000 → 44,550), 로컬 HW 528,000·로컬 OCS·보안 88,000 추가",
+    "A-2-5": "16.20억 → 21.92억. ACS(Base·OLP·Customizing) 삭제, DB 연동 UI 45,000 → 44,000(×1.1 전), 로컬 HW 682,000·로컬 OCS·보안 88,000 추가",
+    "A-4-5": "25.31억 → 26.10억. 대형 제품 스캐너 AT960SR+AS1(560,000) 삭제, ACS·AIMS·PIA·TESCar 유지, 로컬 HW 627,000·로컬 OCS·보안 88,000 추가",
 }
 
 ZONES = [
@@ -150,7 +161,7 @@ ZONES = [
                ("합성 결함 데이터(Omniverse) 연계", "USD Converter")]},
 ]
 
-# 정밀조립: 10/8 견적 없음 → 견적 단가로 산정
+# 정밀조립: 견적 없음 → 10/15 최종 견적 단가로 산정
 PZ = [("BASE", 1, "DT 워크스테이션 1대용"), ("MP", 1, "셀 간 AMR 물류·배치"), ("PLC", 1, "셀 상태머신·PLC 시퀀스 검증"),
       ("PIU", 1, "A-1-4에서 개발한 AAS 출력 플러그인 실행"), ("USD", 1, "Isaac Sim 학습 DT(VLA)로 셀 전달")]
 
@@ -170,10 +181,10 @@ def name_of(key):
 def parts(zid):
     it = Q[zid]["items"]
     sw = sum(q * u for g, _, _, q, u, *_ in it if g in ("SW", "유지보수"))
-    hw = sum(q * u for g, _, _, q, u, *_ in it if g == "HW")
+    hw = sum(q * u for g, _, _, q, u, *_ in it if g == "OCS HW")
+    loc = sum(q * u for g, _, _, q, u, *_ in it if g in ("로컬 HW", "로컬 OCS·보안"))
     ts = sum(q * u for g, _, _, q, u, *_ in it if g == "기술지원")
-    ga = (sw + hw + ts) * 0.10
-    return sw, hw, ts, ga
+    return sw, hw, loc, ts, Q[zid]["ga"]
 
 
 def pz_total():
@@ -240,18 +251,16 @@ def why_tables():
 
 def key_table():
     amc = sum(q * u for z in Q for g, key, _, q, u, *_ in Q[z]["items"] if key == "AMC")
-    adj_sum = sum(q * u for z in Q for g, key, d, q, u, v, _w in Q[z]["items"] if v == "adj" and "서버" not in d)
-    adj_acs = sum(q * u for g, key, d, q, u, v, _w in Q["A-1-4"]["items"] if v == "adj" and (key.startswith("ACS") or "ACS" in d))
-    gpu = 3 * 520000
-    scn = sum(u for z in Q for g, _, d, q, u, *_ in Q[z]["items"] if g == "HW" and "스캐너" in d)
+    srv = sum(q * u for z in Q for g, _, d, q, u, *_ in Q[z]["items"] if d == SRV)
+    scn = sum(q * u for z in Q for g, _, d, q, u, *_ in Q[z]["items"] if g == "OCS HW" and "스캐너" in d)
+    loc = sum(parts(z)[2] for z in Q)
     rows = [
-        ("견적 개요", f"이지로보틱스가 10/8 존별 3건을 보냄. 유연제조 {k(Q['A-1-4']['total'])} · 적응가공 {k(Q['A-2-5']['total'])} · AI정밀검사 {k(Q['A-4-5']['total'])} = 합계 {k(QTOTAL)}천원(VAT 별도). SW·HW·기술지원에 일반관리비·이윤 10%를 더한 턴키 견적. 과제기간 4개월, Network-Lock 라이선스", "10/8 견적서"),
-        ("단가 수준", "정가표에 있는 DMWorks 옵션은 모두 정가(Node-Lock) × 52% — 48% 할인. 10/6에 들은 60% 할인보다 낮음", "정가표 대조"),
-        ("구성 방식", "3개 존 모두 같은 틀(Base 1 · DM-Monitoring · USD Converter · Live Edit · ACS · PLUG-IN Developer · GPU 서버 · 스캐너 · AMC 4년)에 존별 CAD 포맷·로봇·PLC 메이커만 바꿈.", "10/6 의사결정"),
-        ("금액이 큰 항목", f"GPU 서버 3대 {k(gpu)} · 스캐너 3대 {k(scn)} · AMC 4년 선계상 {k(amc)}천원 — 세 가지가 전체의 약 {round((gpu + scn + amc) / QTOTAL * 100)}%(일반관리비 제외 기준)", "견적 항목 합산"),
-        ("10/12·10/15 반영", f"조정: 유연제조·적응가공 ACS(Base·OLP·커스터마이징) 존당 {k(adj_acs)} 제외, 정밀검사 대형 스캐너 560,000 제외, 연산 서버 3대 GPU 8→4장(적응가공 10/15 재견적 385,000, 방화벽·VAT 포함). 제외 품목만 10/8 금액으로 {k(adj_sum)}천원(서버는 감액이라 별도)", "10/12 결정 · 10/15 재견적"),
-        ("확인 항목", "AMC는 계상 확정(18%×4년) — '5년' 표기·VAT 기준만 남음. 유연제조 CAD Import/Export 삭제 수량, 정밀검사 AIMS(스캐너 제외로 측정 HW 없음)·TESCar(예산 초과 시 감액 1순위). 나머지 SW·스캐너(유연제조·적응가공)는 적합", "존별 검토"),
-        ("10/15 재견적", "적응가공 1015-2 = 21.92억(로컬 HW 6.82억·로컬 OCS·보안 0.88억 포함으로 범위 확대). 단가는 10/8 × 1.1(VAT 포함)과 일치 — 할인율은 그대로 정가 × 52%로 보임(추정). 유연제조·정밀검사 재견적은 미반영", "10/15 재견적"),
+        ("견적 개요", f"이지로보틱스 10/15 최종 견적 3건(1015-1~3). 유연제조 {k(Q['A-1-4']['total'])} · 적응가공 {k(Q['A-2-5']['total'])} · AI정밀검사 {k(Q['A-4-5']['total'])} = 합계 {k(QTOTAL)}천원. 10/14 수정 구매계획서(스토리지 서버 포함) 기준 재견적으로, 10/12 비용 조정 결정이 반영됨. 과제기간 4개월, Network-Lock 라이선스", "10/15 최종 견적서"),
+        ("견적 구조", "① OCS SW(DMWorks + AMC) ② OCS HW(스캐너·연산 서버·운영 PC·모니터링) ③ 로컬 HW(데이터 서버·스토리지·네트워크·서버실) ④ 로컬 OCS·보안(TSDB·IAM/PKI) ⑤ 기술지원 ⑥ 일반관리비·이윤 = (①+②+⑤)의 10%. ③·④는 10/8 견적에 없던 항목", "10/15 최종 견적서"),
+        ("단가 수준", "정가표 옵션은 모두 정가(Node-Lock) × 57.2% = 10/8 견적 단가(× 52%) × 1.1. 표지 'VAT 포함'이면 할인율은 그대로 48%, 참고사항 '부가세 별도'면 42.8%로 낮아짐. 10/6에 들은 60% 할인은 미반영", "정가표 대조"),
+        ("10/12 결정 반영", "유연제조·적응가공 ACS 삭제(정밀검사만 유지), 정밀검사 대형 스캐너 삭제, 연산 서버 GPU 8→4장 + 방화벽(385,000), AMC 18% × 4년 계상, 유연제조 CAD IMPORT 4→3종·EXPORT 3→1종", "10/12 결정 · 10/15 견적"),
+        ("금액이 큰 항목", f"로컬 HW 3존 {k(loc)} · 연산 서버 3대 {k(srv)} · AMC 4년 {k(amc)} · 스캐너 2대 {k(scn)}천원 — 네 가지가 전체의 약 {round((loc + srv + amc + scn) / QTOTAL * 100)}%", "견적 항목 합산"),
+        ("확인 항목", "AMC '5년' 표기와 ×4 계산 불일치, 표지 VAT 포함 vs 참고사항 부가세 별도. 로컬 HW 상세 사양(견적서 '별도 협의'). 정밀검사 AIMS(측정 HW 없음)·TESCar·ACS OLP 메이커. 나머지 SW·HW는 적합", "존별 검토"),
         ("정밀조립", f"견적 대상이 아님. 같은 단가로 Base·MULTIPLE PROCESS·PLC·Plug-in User·USD Converter 1좌석을 잡으면 약 {k(pz_total())}천원", "견적 단가 적용"),
     ]
     body = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, b, c in rows)
@@ -259,20 +268,19 @@ def key_table():
 
 
 def summary_table():
-    rows, t = [], [0, 0, 0, 0, 0]
+    rows, t = [], [0] * 6
     for z in ZONES:
-        sw, hw, ts, ga = parts(z["id"])
-        tot = Q[z["id"]]["total"]
-        for i, v in enumerate((sw, hw, ts, ga, tot)):
+        vals = (*parts(z["id"]), Q[z["id"]]["total"])
+        for i, v in enumerate(vals):
             t[i] += v
         rows.append(f'<tr><td><a href="#{z["slug"]}">{E(z["id"])}</a></td><td class="nm">{E(z["name"])}</td><td class="note">{E(Q[z["id"]]["no"])}</td>'
-                    f'<td class="num">{k(sw)}</td><td class="num">{k(hw)}</td><td class="num">{k(ts)}</td><td class="num">{k(ga)}</td><td class="num"><b>{k(tot)}</b></td></tr>')
+                    + "".join(f'<td class="num">{k(v)}</td>' for v in vals[:-1]) + f'<td class="num"><b>{k(vals[-1])}</b></td></tr>')
     rows.append(f'<tr><td><a href="#z3">A-3</a></td><td class="nm">정밀조립존</td><td class="note">견적 없음 · 견적 단가로 산정</td>'
-                f'<td class="num">{k(pz_total())}</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">{k(pz_total())}</td></tr>')
+                f'<td class="num">{k(pz_total())}</td>' + '<td class="num">–</td>' * 4 + f'<td class="num">{k(pz_total())}</td></tr>')
     rows.append(f'<tr class="tot strong"><th colspan="3">견적 합계 (3개 존)</th>' + "".join(f'<td class="num">{k(v)}</td>' for v in t) + "</tr>")
-    return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">SW(유지보수 포함)</th><th class="r">HW</th>'
-            '<th class="r">기술지원</th><th class="r">일반관리비·이윤 10%</th><th class="r">견적 합계</th></tr></thead>'
-            f'<tbody>{"".join(rows)}</tbody></table></div><p class="note-box">단위 천원, VAT 별도. 견적 합계는 업체 단위절삭(백만 원 미만 버림) 후 금액이라 항목 합과 조금 다름.</p>')
+    return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">OCS SW(AMC 포함)</th><th class="r">OCS HW</th>'
+            '<th class="r">로컬 HW·OCS·보안</th><th class="r">기술지원</th><th class="r">일반관리비·이윤</th><th class="r">견적 합계</th></tr></thead>'
+            f'<tbody>{"".join(rows)}</tbody></table></div><p class="note-box">단위 천원. 견적서 표지는 \'VAT 포함\', 참고사항은 \'부가세 별도\'로 엇갈림. 일반관리비·이윤은 (OCS SW + OCS HW + 기술지원)의 10%로 로컬 HW·로컬 OCS·보안에는 붙지 않음. 견적 합계는 업체 단위절삭(백만 원 미만 버림) 후 금액.</p>')
 
 
 def price_table():
@@ -282,7 +290,7 @@ def price_table():
         qp = lp * RATE
         use = "".join(f'<td class="dz">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
         rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">{E(code)}</span></td><td class="num">{k(lp)}</td><td class="num"><b>{k(qp)}</b></td>'
-                    f'<td class="q">52%</td><td>{E(func)}</td><td class="note">{E(note)}</td>{use}</tr>')
+                    f'<td class="q">57.2%</td><td>{E(func)}</td><td class="note">{E(note)}</td>{use}</tr>')
     for key, (n, qp, func, note) in NEW.items():
         use = "".join(f'<td class="dz">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
         rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>{k(qp)}</b></td>'
@@ -308,8 +316,7 @@ def quote_table(zid):
         dd = det if key else ""
         rows.append(f'<tr><td class="nm">{E(nm)}</td><td>{E(dd)}</td><td class="q"><b>{q}</b></td><td class="num">{k(u)}</td>'
                     f'<td class="num">{k(q * u)}</td><td>{tag(v)}</td><td>{E(why)}</td></tr>')
-    sw, hw, ts, ga = parts(zid)
-    foot = (f'<tr class="tot"><th colspan="4">일반관리비·기업이윤 (SW+HW+기술지원의 10%)</th><td class="num">{k(ga)}</td><td colspan="2"></td></tr>'
+    foot = (f'<tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">{k(Q[zid]["ga"])}</td><td colspan="2"></td></tr>'
             f'<tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">{k(Q[zid]["total"])}</td><td colspan="2">{E(Q[zid]["no"])}</td></tr>')
     return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th>'
             '<th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead>'
@@ -322,18 +329,19 @@ def pz_table():
         u = OPT[key][2] * RATE if key in OPT else NEW[key][1]
         tot += u * q
         rows.append(f'<tr><td class="nm">{E(name_of(key))}</td><td class="q"><b>{q}</b></td><td class="num">{k(u)}</td><td class="num">{k(u * q)}</td><td>{E(why)}</td></tr>')
-    rows.append(f'<tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">{k(tot)}</td><td>견적 단가(정가×52%) 적용</td></tr>')
+    rows.append(f'<tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">{k(tot)}</td><td>10/15 최종 견적 단가(정가×57.2%) 적용</td></tr>')
     return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>쓰는 이유</th></tr></thead>'
             f'<tbody>{"".join(rows)}</tbody></table></div>')
 
 
 ISSUES = [
-    ("견적", "할인율", "정가 대비 48% 할인(×52%). 10/15 적응가공 재견적 단가도 10/8 × 1.1(VAT 포함)이라 할인율 변동 없음(추정). 10/6 회의의 60% 할인 미반영", "SW 금액 약 30% 차이", "60% 할인 적용 가능 여부 협의"),
-    ("견적", "AMC 표기·VAT", "계상은 10/12 결정으로 확정(18%×4년). 10/15 재견적도 참고사항 '5년 AMC 포함'과 표의 ×4 계산이 다르고, 표지 'VAT 포함'과 참고사항 '부가세 별도'가 엇갈림", "예산 대비 판단 기준이 흔들림(VAT 10%)", "업체에 AMC 기간·VAT 기준 서면 확인"),
-    ("견적", "재견적 기준 전환", "적응가공은 10/15 재견적(1015-2, 21.92억)이 나와 로컬 HW·로컬 OCS·보안까지 범위가 넓어짐. 유연제조·정밀검사 재견적은 미확인", "이 페이지 금액은 10/8 기준이라 심의 금액과 다름", "3개 존 10/15 재견적 원본 확보 후 견적 기준 교체"),
-    ("예산", "존별 예산 초과", "R2·10/14 수정본 기준 유연제조 21.20억(+0.20)·적응가공 23.41억(+0.21)·정밀검사 26.10억(+0.10) — 3개 존 모두 예산 초과", "추가 감액 필요", "정밀검사 AIMS·TESCar, 유연제조 CAD 포맷 수부터 검토"),
+    ("견적", "VAT·할인율", "10/15 최종 견적서 표지는 'VAT 포함', 참고사항은 '부가세 별도'. 단가는 10/8 × 1.1(정가 × 57.2%). VAT 포함이면 할인율 48% 유지, 별도면 42.8%로 낮아짐. 10/6 회의의 60% 할인 미반영", "VAT 기준에 따라 총액 10% 차이", "업체에 VAT 기준 서면 확인, 60% 할인 적용 가능 여부 협의"),
+    ("견적", "AMC 기간", "계상은 10/12 결정대로 18% × 4년. 참고사항은 여전히 '5년 AMC 포함'", "유지보수 기간 해석이 갈림", "업체에 AMC 기간 서면 확인"),
+    ("견적", "로컬 HW 사양", "로컬 HW가 존마다 5.28·6.82·6.27억으로 다르고 품목 구성은 같음. 견적서에 '상세 사양 별도 협의'. 10/15 재견적 때 늘어난 금액을 데이터 서버 금액으로 맞춰 총액을 유지했다고 전달됨", "품목별 근거 없이 심의 대응이 어려움", "존별 데이터 서버·스토리지·네트워크 사양·수량 내역 요청"),
+    ("예산", "구매계획서 대비", "10/14 수정 구매계획서 존별 합계 21.20·23.41·26.10억(외산 SW 1년 구독 포함). 최종 견적은 19.91·21.92·26.10억 — 적응가공은 X-cloud 1.497억을 빼면 21.91억으로 거의 같음", "외산 SW는 별도 견적으로 더해짐(추정)", "외산 SW 구독 견적 포함 존별 총액이 예산 안인지 재확인"),
+    ("구성", "정밀검사 AIMS·TESCar", "대형 스캐너는 빠졌는데 AIMS Simulator·Controller(합 184,800)와 TESCar(66,000)가 남음", "측정 HW 없는 측정 SW, 차체 용접 특화 SW에 심의 질문 예상", "유지 근거 명시 또는 감액"),
     ("로봇·PLC", "메이커 정합", "R2 구매계획서 셀별 항목에 같은 메이커로 반영됨(현대·가와사키 / 야스카와·쿠카 / 화낙·ABB, PLC LS·미쓰비시 / 지멘스 / 로크웰). 정밀검사 ACS OLP는 견적 FANUC·ABB, 구매계획(안) FANUC·KUKA로 불일치", "실제 발주 기종과 다르면 옵션 교체 필요", "실발주 로봇·PLC와 일치 확인, 정밀검사 ACS OLP 한쪽으로 통일"),
-    ("범위", "정밀조립 미포함", "견적 3건에 정밀조립존 DT·시뮬레이션이 없음. DMWorks 라이선스 4카피를 다음 주 우편 수령 예정(교육장·개인 PC 시험용)", "정밀조립 1차년도 DT 수단 공백", "수령 라이선스로 정밀조립 1좌석 대체 가능 여부 확인, 안 되면 1좌석 추가 견적"),
+    ("범위", "정밀조립 미포함", "견적 3건에 정밀조립존 DT·시뮬레이션이 없음. DMWorks 라이선스 4카피를 우편 수령 예정(교육장·개인 PC 시험용)", "정밀조립 1차년도 DT 수단 공백", "수령 라이선스로 정밀조립 1좌석 대체 가능 여부 확인, 안 되면 1좌석 추가 견적"),
 ]
 
 
@@ -344,6 +352,7 @@ def issues_table():
 
 
 REFS = [
+    ("Q0", "최종 견적", "이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 — 유연제조(1015-1, 19.91억)·적응가공(1015-2, 21.92억)·AI정밀검사(1015-3, 26.10억)", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류 / [A-1-4]·[A-2-5]·[A-4-5]"),
     ("Q1", "견적", "캠틱종합기술원 3D가상 환경 구축 및 DMWorks 구매 견적서 — 유연제조(1008-1)·적응가공(1008-2)·AI정밀검사(1008-3)", "2026-10-08", "OneDrive Workspace / Customers / 이지로보틱스 / 2026-10-08"),
     ("Q2", "제안서", "캠틱종합기술원 시뮬레이션 환경 구축 제안서 — 제품 설명(DM-Monitoring·USD Converter·Live Edit·ACS·AIMS·PIA·TESCar), DT 구축 절차, 교육 3단계", "2026-10-08", "같은 폴더"),
     ("E1", "이메일", "송기정 부원장 전달 '기술 실증 테스트베드 시스템 도입 수정 제안서 및 견적서' — 10/7 미팅 후 재접수, DMWorks 옵션 추가·공급 가능 SW 포함·HW 반영", "2026-10-08", "OneDrive Workspace / Email"),
@@ -351,7 +360,8 @@ REFS = [
     ("M1", "회의록", "이지로보틱스 DMWorks 방문 Q&A — USD·PLC·AAS·OLP 제약, 라이선스·교육", "2026-09-30", "OneDrive Workspace / MoM / 2026-09-30"),
     ("W2", "llm-wiki 결정", "OCS 시뮬레이션 셀 비용 조정 — 외산 SW 1년 구독·ACS 검사존만·Field 엣지 최대 삭제·검사존 스캐너 제외·AMC 반영·GPU 4장", "2026-10-12", "llm-wiki decisions"),
     ("P1", "구매계획서", "OCS 시뮬레이션 셀 구매계획서 R2(부원장 검토)·10/14 수정본(스토리지 서버 포함) — 존별 21.20·23.41·26.10억, AMC 18%×4년", "2026-10-14", "llm-wiki sources"),
-    ("Q3", "재견적", "적응가공 디지털 트윈 시뮬레이션 시스템 구축 견적서(1015-2, 21.92억)·엠아이테크 비교견적(24.00억)", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / [A-2-5]"),
+    ("Q3", "비교견적", "엠아이테크 적응가공 비교견적(24.00억) 외 존별 비교견적", "2026-10-15", "같은 폴더"),
+    ("E2", "이메일", "허태한 상무 셀별 재견적 송부 → 이형수 본부장 3본부 전달 — 유연제조 CAD IMPORT/EXPORT 삭제, 서버 수량 조절·방화벽 추가, 데이터 서버 금액 조정으로 총액 유지", "2026-10-15", "OneDrive Workspace / Email"),
     ("W1", "llm-wiki 결정", "OCS 시뮬레이션 셀 존별 목적·구성 문서화 후 견적 확정 — 60% 할인 제안, 스캐너 공동활용, GPU 서버 4.05억", "2026-10-06", "llm-wiki decisions"),
 ]
 
@@ -369,7 +379,8 @@ def page():
   <h2>{E(z["name"])} · 견적 {k(Q[z["id"]]["total"])}천원</h2>
   <h3>해야 할 일과 필요한 기능</h3>
   {task_table(z)}
-  <h3>10/8 견적 구성과 검토 <span class="chg">(단위 천원 · VAT 별도)</span></h3>
+  <h3>10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
+  <p class="note-box">10/8 견적 대비: {E(CHANGES[z["id"]])}. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
   {quote_table(z["id"])}
 </section>''' for z in ZONES)
     return f'''<title>DMWorks 존별 옵션 구성</title>
@@ -377,7 +388,7 @@ def page():
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{EXTRA}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · 이지로보틱스 10/8 견적서(1008-1~3) 기준 · 10/12 비용 조정·10/15 재견적 검토 반영 · 2026.10.16 갱신 · 검토본</p>
+  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · 이지로보틱스 10/15 최종 견적서(1015-1~3) 기준 · 10/12 비용 조정 반영 · 2026.10.19 갱신 · 검토본</p>
   <h1>DMWorks 존별 옵션 구성</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
@@ -386,7 +397,7 @@ def page():
 <main class="wrap">
 <section id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
-  <h2>10/8 견적 3개 존 · 합계 {k(QTOTAL)}천원</h2>
+  <h2>10/15 최종 견적 3개 존 · 합계 {k(QTOTAL)}천원</h2>
   {key_table()}
   <h3>존별 견적 합계</h3>
   {summary_table()}
@@ -399,19 +410,19 @@ def page():
 <section id="opt">
   <p class="eyebrow">2. 견적 단가·제품</p>
   <h2>옵션별 정가 대비 견적 단가, 신규 제품 기능</h2>
-  <p class="note-box">정가표 옵션은 모두 정가 × 52%. 아래 7종은 정가표에 없는 제품으로 견적가만 있음. 오른쪽 열은 존별 견적 수량. 검토 표시: <b>적합</b> 존 목적에 맞음 · <b>확인</b> 계상 조건 확인 후 결정 · <b>조정</b> 10/12 결정·10/15 재견적에 따라 제외·변경.</p>
+  <p class="note-box">정가표 옵션은 모두 정가 × 57.2%(10/8 견적 52% × 1.1). 아래 9종은 정가표에 없는 제품으로 견적가만 있음. 오른쪽 열은 존별 10/15 최종 견적 수량. 검토 표시: <b>적합</b> 존 목적에 맞음 · <b>확인</b> 계상 조건 확인 후 결정.</p>
   {price_table()}
 </section>
 {zsecs}
 <section id="z3">
   <p class="eyebrow">A-3 · 셀 배치·물류·상태머신 검증 · 견적 없음</p>
   <h2>정밀조립존 (OCS 셀 없음 · DT 워크스테이션 1대)</h2>
-  <p class="note-box">10/8 견적 대상에 없음. 같은 견적 단가로 1좌석을 산정함. 협동로봇(국산)은 OLP 목록에 없어 제외.</p>
+  <p class="note-box">10/15 최종 견적 대상에 없음. 같은 견적 단가로 1좌석을 산정함. 협동로봇(국산)은 OLP 목록에 없어 제외.</p>
   {pz_table()}
 </section>
 <section id="issues">
   <p class="eyebrow">확인 필요 사항</p>
-  <h2>재견적 전에 정리할 쟁점</h2>
+  <h2>계약 전에 정리할 쟁점</h2>
   {issues_table()}
 </section>
 <section id="refs">
@@ -426,6 +437,6 @@ def page():
 if __name__ == "__main__":
     open(out("dmworks_zones.html"), "w", encoding="utf-8").write(page())
     for z in Q:
-        sw, hw, ts, ga = parts(z)
-        print(z, k(sw), k(hw), k(ts), k(ga), k(sw + hw + ts + ga), "quote", k(Q[z]["total"]))
+        sw, hw, loc, ts, ga = parts(z)
+        print(z, k(sw), k(hw), k(loc), k(ts), k(ga), k(sw + hw + loc + ts + ga), "quote", k(Q[z]["total"]), "ga10%", k((sw + hw + ts) * 0.10))
     print("pz", k(pz_total()))

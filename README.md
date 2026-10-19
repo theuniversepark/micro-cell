@@ -12,7 +12,8 @@
 | 파일 | 내용 |
 |---|---|
 | `docs/ocs_precision.html` | 로컬 OCS Zone 구성 - (예시) 정밀조립존 — AAS 기반 수집–저장 공통 아키텍처, 물리 연결 토폴로지, 설치 배치, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록 |
-| `docs/dmworks_zones.html` | DMWorks 존별 옵션 구성 — 이지로보틱스 10/8 견적 3건(정가×52%) 기준 존별 구매 필요성·해야 할 일·옵션, 품목별 검토(적합·확인·조정), 정밀조립 1좌석 추정, 재견적 쟁점 |
+| `docs/dmworks_zones.html` | DMWorks 존별 옵션 구성 — 이지로보틱스 10/15 최종 견적 3건(1015-1~3, 정가×57.2%) 기준 존별 구매 필요성·해야 할 일·옵션, 품목별 검토(적합·확인), 10/8 대비 변경, 정밀조립 1좌석 추정, 계약 전 쟁점 |
+| `docs/ocs_sim_fms.html` · `ocs_sim_adaptive.html` · `ocs_sim_qms.html` | 유연제조·적응가공·AI정밀검사 통합 OCS 시뮬레이션 Cell — 10/15 최종 견적 항목 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액(일반 명칭), 10/18 중장위 심의 지침 점검 |
 
 ## 구조
 
@@ -25,6 +26,7 @@
 | `privacy.py` | 단가 마스킹 스위치(`PUBLIC=1`이면 DMWorks 금액 0·비공개 표기), 출력 폴더(`OUT_DIR`) |
 | `web_wrap.py` | `docs/`를 독립 웹 페이지로 감쌈(doctype·이동 바) + `index.html` 생성 |
 | `build_dmworks.py` | DMWorks 존별 옵션 구성 페이지 생성 |
+| `build_ocs_sim.py` | OCS 시뮬레이션 Cell 3종 페이지 생성 |
 | `export_docs.py` | `docs/*.pdf`(Chrome 인쇄, A3 가로)·`docs/*.docx`(python-docx, 도면 PNG 삽입) 생성 — 웹의 PDF·Word 저장 버튼용 |
 | `build.sh` | 전체 빌드 |
 
