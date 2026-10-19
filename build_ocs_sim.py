@@ -49,9 +49,23 @@ LOCAL_SUB = [  # (기호, 구성품, 사양, 수량 표기)
     ("BAK", "백업 스토리지", "견적서에 사양 없음", "1식"),
     ("EGW", "Edge Gateway", "견적서에 사양·수량 없음", "–"),
     ("VNODE", "영상 수집 노드", "견적서에 사양·수량 없음", "–"),
-    ("NET", "네트워크 — 코어·TSN·방화벽·PTP·AP·배선", "견적서에 사양·수량 없음", "1식"),
+    ("NET", "네트워크 — 코어·TSN·방화벽·PTP·AP·배선", "견적서에 사양·수량 없음 — 아래 8개 구성품으로 세분 제안(연결 구성도 기준)", "1식"),
     ("RACK", "서버실 — 랙·캐비닛·UPS·KVM", "견적서에 사양·수량 없음", "1식"),
 ]
+
+
+def net_sub(n):
+    """3-1-f 네트워크 세분 제안 (구성품, 사양, 수량, 단위). n = 연결 Cell 수. 코어 2대 이중화·Cell 이중 업링크 가정"""
+    return [
+        ("방화벽 (OT/IT 경계)", "차세대 방화벽 · 10GbE 이상 · 산업 프로토콜(OPC UA·MQTT) 검사 · VPN — 항목2 연산 서버 포함 방화벽과 같은 장비인지 확인(같으면 삭제)", "1", "대"),
+        ("코어 스위치 (L3)", f"25GbE(SFP28) 24포트 이상 + 100GbE 2포트 이상 · 2대 이중화(MLAG) · PTP 중계(Boundary Clock). 대당 소요 약 {13 + n}포트", "2", "대"),
+        ("관리망 스위치", "1GbE 24포트 · 서버 원격관리(IPMI/BMC)·장비 관리 전용", "1", "대"),
+        ("PTP 시간동기 장치 (그랜드마스터)", "IEEE 1588v2·802.1AS · NTP 겸용 · OCXO 홀드오버 · GNSS 수신(안테나 설치 가능 시)", "1", "대"),
+        ("Cell TSN 산업용 스위치", "관리형 · GbE 8포트 이상(PoE+ 2포트 포함, AP 급전) + 10G SFP+ 업링크 2 · IEEE 802.1AS·Qbv. Cell당 1대", str(n), "대"),
+        ("산업용 무선 AP", "Wi-Fi 6E · PoE 급전 · 로밍 50ms 이하 · 관리 컨트롤러(또는 클라우드 관리) 포함. Cell당 1대", str(n), "대"),
+        ("광 트랜시버·연결 케이블", f"10G SFP+ SR {4 * n}개(Cell 이중 업링크 양단) · 25G DAC 약 18개(서버·스토리지–코어) · 100G DAC 2개(코어 간) · 10GBASE-T 모듈 2개(운영실)", "1", "식"),
+        ("배선·케이블 트레이·패치패널 (설치 포함)", f"OM4 광 이중 {2 * n}회선(코어–Cell 캐비닛) · Cat6A(운영실 2회선·관리망) · 패치패널 4개 · 통로 상부 트레이(길이 실측) · 포설·성단·시험", "1", "식"),
+    ]
 
 # ------------------------------------------------------------------ 존별 10/15 최종 견적 (천원)
 # SW: (번호, key, 상세(일반), 수량, 단가, 견적서 기재 품목)
@@ -187,6 +201,9 @@ def zone_rows(z):
                  "데이터 처리 서버 - HP3 ProLiant DL380 GEN12 x 5 등 · NAS(Dell PowerStore 1200T) · 백업 스토리지 · Edge Gateway · 영상 수집 노드 · 네트워크 · 서버실", None, "lump", False))
     for i, (sym, nm, sp, qs) in enumerate(LOCAL_SUB):
         rows.append(("항목3. 로컬 HW", f"3-1-{'abcdefg'[i]}", sym, nm, sp, qs, "", None, None, "", sym, "split", True))
+        if sym == "NET":
+            for j, (nm2, sp2, q2, u2) in enumerate(net_sub(len(z["cells"])), 1):
+                rows.append(("항목3. 로컬 HW", f"3-1-f-{j}", sym, nm2, sp2, q2, u2, None, None, "", sym, "prop", 2))
     rows.append(("항목4. 로컬 OCS·보안", "4-1", "TSDB", "운영 시계열 DB (클러스터·계층형)", "Cell 상태·이벤트·공정값 시계열 저장·조회, 계층형 클러스터 구성", 1, "식", 49500, 49500,
                  "Operational TSDB - Machbase Cluster Edition (계층)", "DPS", "ok", False))
     rows.append(("항목4. 로컬 OCS·보안", "4-2", "SEC", "통합 인증·접근통제 (IAM/PKI · 서버 접근제어)", "사용자·장비 인증(SSO·PKI 인증서), 서버·DB 접근통제·감사로그", 1, "식", 38500, 38500,
@@ -197,10 +214,10 @@ def zone_rows(z):
 
 
 CHK = {"ok": ("적합", "ok"), "spec": ("사양 보완", "chk"), "lump": ("금액 미구분", "adj"), "split": ("금액 미구분", "adj"),
-       "maker": ("기종 확인", "chk"), "amc": ("기간 확인", "chk"), "scope": ("범위 명시", "chk")}
+       "maker": ("기종 확인", "chk"), "amc": ("기간 확인", "chk"), "scope": ("범위 명시", "chk"), "prop": ("세분 제안", "chk")}
 CHK_NOTE = {"spec": "규격서에 성능·사양 수치 기재", "lump": "구성품별 금액으로 나눈 견적 필요(총액만이면 불인정)", "split": "구성품별 금액 없음",
             "maker": "Cell 실발주 기종과 일치 확인. 제출 서류엔 제조사명 대신 '제어기 n종'", "amc": "견적서 참고사항 '5년 AMC' vs 계산 ×4",
-            "scope": "개발 범위·산출물·투입 M/M 명시"}
+            "scope": "개발 범위·산출물·투입 M/M 명시", "prop": "구성도 기준 제안 수량 — 견적사 금액·수량 기재 요청"}
 
 
 # ------------------------------------------------------------------ 연결 토폴로지
@@ -377,7 +394,7 @@ def item_table(z):
             nmh += f' <a href="#topo-{anchor}" class="tolink">도면 ↑</a>'
         elif node:
             nmh += f'<span class="where">설치: {E(NODE_NAME.get(node, node))} <a href="#topo-{node}" class="tolink">↑</a></span>'
-        cls = ' class="subrow"' if sub else ""
+        cls = ' class="subrow sub2"' if sub == 2 else (' class="subrow"' if sub else "")
         rowid = rid or f' id="r-{no}"'
         if rid:
             body.append(f'<tr id="r-{no}" hidden></tr>')
@@ -871,7 +888,7 @@ EXTRA = """<style>
 .tag{display:inline-block;font:600 11px var(--mono);padding:1px 7px;border-radius:3px;white-space:nowrap}
 .tag.ok{background:var(--teal);color:#fff} .tag.chk{background:#FFF1E2;color:#9A4A00;border:1px solid #F0C08A} .tag.adj{background:#FDE8E8;color:#A12020;border:1px solid #F2B8B8}
 .chg{font:500 11px var(--mono);color:var(--muted)}
-tr.subrow td{font-size:12.5px;color:var(--muted)} tr.subrow td.sym{padding-left:18px}
+tr.subrow td{font-size:12.5px;color:var(--muted)} tr.subrow td.sym{padding-left:18px} tr.sub2 td.sym{padding-left:30px} tr.sub2 td.nm{padding-left:14px}
 table.wide2{min-width:1500px} table.wide2 td.spec{min-width:300px} table.wide2 td.note{min-width:220px;font-size:12px}
 table.sumtbl th{width:150px}
 </style>"""
