@@ -4,8 +4,11 @@
 심의위원 공통 지침에 따라 품목은 일반 명칭·사양으로 적고, 견적서 기재 품목명(업체·모델)은 내부 대조 열에만 둠."""
 import html
 
+import base64
+import os
+
 import build_ocs_pz as pz
-from privacy import out
+from privacy import OUT_DIR, out
 
 E = html.escape
 CSS, PZ_EXTRA = pz.CSS, pz.EXTRA
@@ -258,6 +261,10 @@ def topo_svg(z):
     o = [f'<svg class="arch plan" viewBox="0 0 1120 {H}" role="img" aria-label="{E(z["name"])} 장비 설치·연결 구성" style="max-width:1120px">']
 
     def dev(x, y, w, h, t, s="", cls="dv", fs=12, sym=None, sub_cls="dvs"):
+        na = cls in ("ext", "dvx", "fdx")  # OCS Cell 구매범위 밖 — 흐리게
+        if na:
+            cls = "dvn" if cls == "ext" else cls
+            o.append('<g class="na">')
         if sym:
             o.append(f'<a href="#it-{sym}" class="nlink" aria-label="{E(t)} — 구성품 표로 이동"><g data-node="{sym}" id="topo-{sym}">')
         o.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="4" class="{cls}"/>')
@@ -266,6 +273,8 @@ def topo_svg(z):
             o.append(f'<text x="{x + w / 2}" y="{y + h / 2 + 13}" class="{sub_cls}">{E(s)}</text>')
         if sym:
             o.append("</g></a>")
+        if na:
+            o.append("</g>")
 
     def link(pts, cls, label="", lx=None, ly=None, anchor="start"):
         o.append(f'<polyline points="{" ".join(f"{x},{y}" for x, y in pts)}" class="lk {cls}"/>')
@@ -370,8 +379,8 @@ def topo_svg(z):
     for i, (cid, cname, yr, loc, fdev) in enumerate(cells):
         x = 20 + i * (cw + 12)
         o.append(f'<rect x="{x:.0f}" y="{y0}" width="{cw:.0f}" height="330" rx="6" class="cab"/>')
-        o.append(f'<text x="{x + 10:.0f}" y="{y0 + 18}" class="cab-t" font-size="11.5">{E(cname)}</text>')
-        o.append(f'<text x="{x + 10:.0f}" y="{y0 + 34}" class="lkt">{E(cid)} · {E(yr)} 구축 · 장비 5종 · {E(loc)}{" (층간 광)" if loc not in z["site"] else ""}</text>')
+        o.append(f'<g class="na"><text x="{x + 10:.0f}" y="{y0 + 18}" class="cab-t" font-size="11.5">{E(cname)}</text>')
+        o.append(f'<text x="{x + 10:.0f}" y="{y0 + 34}" class="lkt">{E(cid)} · {E(yr)} 구축 · 장비 5종 · {E(loc)}{" (층간 광)" if loc not in z["site"] else ""}</text></g>')
         mid = x + cw / 2
         link([(x + cw - 30, ty + 16), (x + cw - 30, y0)], "l25a")
         link([(x + cw - 16, ty + 16), (x + cw - 16, y0)], "l25b")
@@ -389,9 +398,7 @@ def topo_svg(z):
             dev(round(fx), fy, round(bw), 44, d, f"{cid} 구매 (예상)", "fdx", 11)
         link([(x + 10 + bw / 2, y0 + 130), (x + 10 + bw / 2, y0 + 166)], "l1")
         link([(x + 20 + bw * 1.5, y0 + 130), (x + 20 + bw * 1.5, y0 + 166)], "wl")
-        o.append(f'<text x="{mid:.0f}" y="{y0 + 292}" class="lkt" text-anchor="middle">PLC 가상 시운전 · 로봇 프로그램 다운로드는</text>')
-        o.append(f'<text x="{mid:.0f}" y="{y0 + 308}" class="lkt" text-anchor="middle">Edge Gateway 경유 (직접 병렬 경로 없음)</text>')
-    o.append(f'<text x="560" y="{H - 16}" class="lkt" text-anchor="middle">점선 테두리 = 각 Cell 구매 장비(본 장비 구매범위 아님, 품목은 예상) · 랙·운영실 제목을 누르면 2장 평면, 노드를 누르면 구성품 표로 이동</text>')
+    o.append(f'<text x="560" y="{H - 16}" class="lkt" text-anchor="middle">흐린 회색 글씨 = OCS Cell 구매범위 밖(중앙 Server·각 Cell 이름과 Cell 구매 장비, 품목은 예상) · 랙·운영실 제목을 누르면 2장 평면, 노드를 누르면 구성품 표로 이동</text>')
     o.append("</svg>")
     return "".join(o)
 
@@ -438,8 +445,8 @@ def item_table(z):
         if c != ccur:
             ccur = c
             cn += 1
-            body.append(f'<tr class="cat" data-cat="c{cn}" tabindex="0" role="button" aria-expanded="true" title="눌러서 접기·펼치기">'
-                        f'<td class="sym"><span class="tw" aria-hidden="true">▾</span>견적서 항목</td><th colspan="5" scope="rowgroup">{E(c[1])} <span>· {ccnt[c]}품목</span></th>'
+            body.append(f'<tr class="cat" data-cat="c{cn}" tabindex="0" role="button" aria-expanded="false" title="눌러서 접기·펼치기">'
+                        f'<td class="sym"><span class="tw" aria-hidden="true">▸</span>견적서 항목</td><th colspan="5" scope="rowgroup">{E(c[1])} <span>· {ccnt[c]}품목</span></th>'
                         f'<td class="num">{k(csum[c])}</td><td colspan="2"></td></tr>')
         cin = f' data-in="c{cn}"'
         rid = ""
@@ -456,7 +463,7 @@ def item_table(z):
             nmh += f' <a href="#topo-{anchor}" class="tolink">도면 ↑</a>'
         elif node:
             nmh += f'<span class="where">설치: {E(NODE_NAME.get(node, node))} <a href="#topo-{node}" class="tolink">↑</a></span>'
-        cls = ' class="subrow sub2"' if sub == 2 else (' class="subrow"' if sub else "")
+        cls = ' class="subrow sub2 cx"' if sub == 2 else (' class="subrow cx"' if sub else ' class="cx"')
         rowid = rid or f' id="r-{no}"'
         if rid:
             body.append(f'<tr id="r-{no}" hidden></tr>')
@@ -877,6 +884,30 @@ REFS = [
 ]
 
 
+def quote_section(z):
+    """견적서 원본 — 기본 접힘, 펼칠 때 암호 입력 후 브라우저에서 복호화(AES-GCM). 공개본(docs/)은 담당자 연락처·직인을 가린 이미지 (prep_quotes.py)"""
+    pub = os.path.basename(os.path.normpath(OUT_DIR)) == "docs"
+    path = f"quote_private/{z['slug']}.json"
+    if pub or not os.path.exists(path):
+        path, pub = f"quote_public/{z['slug']}.json", True
+    if not os.path.exists(path):
+        return ""
+    data = open(path).read().replace("</", "<\\/")
+    note = " 공개본은 공급사 담당자 연락처와 직인을 가렸음." if pub else ""
+    return f'''<section id="quote">
+  <p class="eyebrow">5. 견적서 원본</p>
+  <h2>{E(z["no"])} (2026.10.15)</h2>
+  <p class="note-box">이지로보틱스 「캠틱종합기술원 디지털 트윈 시뮬레이션 시스템 구축 견적서」 PDF 중 이 존 쪽. 업체·모델명이 그대로 있어 내부 대조용이며, 암호를 넣어야 열림(PDF·Word 저장본에는 넣지 않음).{note}</p>
+  <button type="button" class="qtoggle" aria-expanded="false" aria-controls="qpanel"><span class="tw" aria-hidden="true">▸</span> 견적서 원본 열기</button>
+  <div id="qpanel" class="qpanel" hidden>
+    <form class="qform"><label for="qpw">암호</label><input id="qpw" type="password" inputmode="numeric" autocomplete="off" required>
+      <button type="submit">열기</button><span class="qmsg" role="status" aria-live="polite"></span></form>
+    <figure class="fig quote" hidden><img alt="{E(z["no"])} 견적서 원본"></figure>
+  </div>
+  <script type="application/json" id="qdata">{data}</script>
+</section>'''
+
+
 def page(z):
     table, pre = item_table(z)
     gs = group_sums(z)
@@ -891,7 +922,7 @@ def page(z):
   <h1>{E(z["name"])}</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
-  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a><a href="#refs">근거</a>
+  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a><a href="#quote">견적서 원본</a><a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
 <section id="sum" style="margin-top:8px">
@@ -923,6 +954,7 @@ def page(z):
   <h2>10/18 공통 지침·10/16 질의 대응 현황</h2>
   {guide_table(z)}
 </section>
+{quote_section(z)}
 <section id="refs">
   <p class="eyebrow">근거</p>
   <h2>근거 문서</h2>
@@ -944,6 +976,37 @@ def page(z):
   function reveal(el){{
     var c = el && el.getAttribute && el.getAttribute('data-in');
     if (c) setCat(document.querySelector('tr[data-cat="' + c + '"]'), true);
+  }}
+  var qbtn = document.querySelector('.qtoggle'), qpanel = document.getElementById('qpanel');
+  if (qbtn) {{
+    var qopen = false, qdone = false;
+    qbtn.addEventListener('click', function(){{
+      qopen = !qopen;
+      qpanel.hidden = !qopen;
+      qbtn.setAttribute('aria-expanded', qopen ? 'true' : 'false');
+      qbtn.innerHTML = '<span class="tw" aria-hidden="true">' + (qopen ? '▾' : '▸') + '</span> 견적서 원본 ' + (qopen ? '접기' : '열기');
+      if (qopen && !qdone) document.getElementById('qpw').focus();
+    }});
+    var b64 = function(s){{ return Uint8Array.from(atob(s), function(c){{ return c.charCodeAt(0); }}); }};
+    qpanel.querySelector('form').addEventListener('submit', function(e){{
+      e.preventDefault();
+      var msg = qpanel.querySelector('.qmsg'), pw = document.getElementById('qpw').value;
+      var d = JSON.parse(document.getElementById('qdata').textContent);
+      if (!(window.crypto && crypto.subtle)) {{ msg.textContent = '이 브라우저에서는 열 수 없음 (HTTPS 필요)'; return; }}
+      msg.textContent = '확인 중…';
+      crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']).then(function(k){{
+        return crypto.subtle.deriveKey({{name: 'PBKDF2', salt: b64(d.salt), iterations: d.iter, hash: 'SHA-256'}}, k, {{name: 'AES-GCM', length: 256}}, false, ['decrypt']);
+      }}).then(function(key){{
+        return crypto.subtle.decrypt({{name: 'AES-GCM', iv: b64(d.iv)}}, key, b64(d.ct));
+      }}).then(function(buf){{
+        var fig = qpanel.querySelector('figure');
+        fig.querySelector('img').src = URL.createObjectURL(new Blob([buf], {{type: d.type}}));
+        fig.hidden = false;
+        qpanel.querySelector('form').hidden = true;
+        qdone = true;
+        msg.textContent = '';
+      }}).catch(function(){{ msg.textContent = '암호가 맞지 않음'; document.getElementById('qpw').select(); }});
+    }});
   }}
   document.addEventListener('keydown', function(e){{
     var row = e.target.closest && e.target.closest('tr.cat');
@@ -974,6 +1037,9 @@ def page(z):
 
 EXTRA = """<style>
 .fdx{fill:var(--cellbg);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.dvn{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3}
+.na text{fill:#8C93A8!important;font-weight:400!important;opacity:.5;paint-order:normal!important;stroke:none!important}
+.na rect{opacity:.55}
 .lkt.flow{fill:var(--teal);font-weight:700}
 .tag{display:inline-block;font:600 11px var(--mono);padding:1px 7px;border-radius:3px;white-space:nowrap}
 .tag.ok{background:var(--teal);color:#fff} .tag.chk{background:#FFF1E2;color:#9A4A00;border:1px solid #F0C08A} .tag.adj{background:#FDE8E8;color:#A12020;border:1px solid #F2B8B8}
@@ -984,6 +1050,14 @@ tr.cat .tw{display:inline-block;width:1.1em;color:var(--teal);font-size:12px} tr
 .catbar button{font:500 12px var(--mono);color:var(--teal);background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:3px 12px;cursor:pointer}
 .catbar button:hover,.catbar button:focus-visible{border-color:var(--teal);outline:none}
 @media print{tr.cx{display:table-row!important}.catbar{display:none}}
+.fig.quote{text-align:center} .fig.quote img{width:100%;max-width:880px;height:auto;border:1px solid var(--rule);background:#fff}
+.qtoggle{font:700 14px var(--font);color:var(--teal);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 16px;cursor:pointer;margin:6px 0}
+.qtoggle:hover,.qtoggle:focus-visible{border-color:var(--teal);outline:none} .qtoggle .tw{display:inline-block;width:1em}
+.qform{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;font-size:13.5px}
+.qform input{font:500 15px var(--mono);width:9em;padding:6px 10px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink)}
+.qform button{font:600 13px var(--font);color:#fff;background:var(--teal);border:0;border-radius:4px;padding:7px 16px;cursor:pointer}
+.qmsg{color:#A12020;font-size:12.5px}
+@media print{#quote{display:none}}
 tr.cat th,tr.cat td{background:color-mix(in srgb, var(--teal) 9%, var(--paper));color:var(--teal);font-weight:700;border-top:1px solid color-mix(in srgb, var(--teal) 35%, transparent)}
 tr.cat td.sym{font:500 10.5px var(--mono);color:var(--muted)} tr.cat th span{font-weight:400;color:var(--muted);font-size:12px}
 table.wide2 tbody tr:not(.grp):not(.cat):not(.subrow) td.sym{padding-left:16px}

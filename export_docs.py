@@ -1,6 +1,8 @@
 """docs/*.html → docs/*.pdf (Chrome 인쇄, A3 가로) · docs/*.docx (python-docx로 직접 생성, A3 가로).
 GitHub Pages의 PDF·Word 저장 버튼용. Chrome이 없으면 건너뜀.
 실행: uv run --with python-docx --with beautifulsoup4 python export_docs.py"""
+import base64
+import io
 import os
 import re
 import subprocess
@@ -132,7 +134,7 @@ def tight(par, before=0, after=0, line=1.0):
 # ------------------------------------------------------------------ HTML → docx
 def clean(soup):
     """화면 전용 요소(이동 바·목차·'도면 ↑'·'탑재 SW ↓' 안내·막대그래프)는 문서에서 뺌."""
-    for sel in ["nav", "script", "div.catbar", "span.where", 'a.tolink[href^="#topo-"]:not(.sw)', "span.meter"]:
+    for sel in ["nav", "script", "div.catbar", "section#quote", "span.where", 'a.tolink[href^="#topo-"]:not(.sw)', "span.meter"]:
         for e in soup.select(sel):
             e.decompose()
 
@@ -378,6 +380,10 @@ class Writer:
                 self.table(ch)
             elif n == "svg":
                 self.figure_svg(ch)
+            elif n == "img" and ch.get("src", "").startswith("data:image"):
+                p = self.doc.add_paragraph()
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                p.add_run().add_picture(io.BytesIO(base64.b64decode(ch["src"].split(",", 1)[1])), height=Mm(245))
             elif n == "figcaption":
                 self.para(ch, 8, MUTED, italic=True)
             elif n == "dl":
