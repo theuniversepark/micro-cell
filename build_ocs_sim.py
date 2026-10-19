@@ -429,7 +429,7 @@ def item_table(z):
         c = (r[0], quote_cat(z, r[0], r[2], r[1]))
         csum[c] = csum.get(c, 0) + (r[8] or 0)
         ccnt[c] = ccnt.get(c, 0) + (0 if r[12] else 1)
-    body, cur, ccur, seen = [], None, None, set()
+    body, cur, ccur, seen, cn = [], None, None, set(), 0
     for g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sub in rows:
         if g != cur:
             cur = g
@@ -437,8 +437,11 @@ def item_table(z):
         c = (g, quote_cat(z, g, sym, no))
         if c != ccur:
             ccur = c
-            body.append(f'<tr class="cat"><td class="sym">견적서 항목</td><th colspan="5" scope="rowgroup">{E(c[1])} <span>· {ccnt[c]}품목</span></th>'
+            cn += 1
+            body.append(f'<tr class="cat" data-cat="c{cn}" tabindex="0" role="button" aria-expanded="true" title="눌러서 접기·펼치기">'
+                        f'<td class="sym"><span class="tw" aria-hidden="true">▾</span>견적서 항목</td><th colspan="5" scope="rowgroup">{E(c[1])} <span>· {ccnt[c]}품목</span></th>'
                         f'<td class="num">{k(csum[c])}</td><td colspan="2"></td></tr>')
+        cin = f' data-in="c{cn}"'
         rid = ""
         anchor = sym if sym in ("SCN", "GPU", "OPC", "NB", "MON", "DPS", "NAS", "BAK", "EGW", "VNODE", "NET", "RACK") else None
         if anchor and anchor not in seen:
@@ -457,7 +460,7 @@ def item_table(z):
         rowid = rid or f' id="r-{no}"'
         if rid:
             body.append(f'<tr id="r-{no}" hidden></tr>')
-        body.append(f'<tr{rowid}{cls}><td class="sym">{E(no)}</td><td class="nm">{nmh}</td><td class="spec">{E(sp)}</td><td class="q"><b>{E(str(q))}</b></td><td class="u">{E(unit)}</td>'
+        body.append(f'<tr{rowid}{cls}{cin}><td class="sym">{E(no)}</td><td class="nm">{nmh}</td><td class="spec">{E(sp)}</td><td class="q"><b>{E(str(q))}</b></td><td class="u">{E(unit)}</td>'
                     f'<td class="num">{k(u) if u is not None else "–"}</td><td class="num">{k(amt) if amt is not None else "미구분"}</td>'
                     f'<td>{tag(chk)}<span class="where">{E(CHK_NOTE.get(chk, ""))}</span></td><td class="note">{E(lab)}</td></tr>')
     pre = sum(r[8] for r in rows if r[8] is not None)
@@ -465,7 +468,9 @@ def item_table(z):
     foot = (f'<tr class="tot"><th colspan="7">항목6. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목5) {k(base)}의 10%, 견적서 기재값</th><td class="num">{k(z["ga"])}</td><td colspan="2"></td></tr>'
             f'<tr class="tot"><th colspan="7">합계 (단위절삭 전)</th><td class="num">{k(pre + z["ga"])}</td><td colspan="2"></td></tr>'
             f'<tr class="tot strong"><th colspan="7">견적 합계 (단위절삭 후)</th><td class="num">{k(z["total"])}</td><td colspan="2">{E(z["no"])}</td></tr>')
-    return ('<div class="tbl-wrap"><table class="bom wide2"><thead><tr><th>번호</th><th>구성품 (일반 명칭)</th><th>세부 사양</th><th style="text-align:center">수량</th><th>단위</th>'
+    return ('<div class="catbar"><button type="button" data-all="open">모두 펼치기</button><button type="button" data-all="close">모두 접기</button>'
+            '<span>견적서 항목 행을 누르면 하위 구성품을 접거나 펼침</span></div>'
+            '<div class="tbl-wrap"><table class="bom wide2"><thead><tr><th>번호</th><th>구성품 (일반 명칭)</th><th>세부 사양</th><th style="text-align:center">수량</th><th>단위</th>'
             '<th class="r">단가</th><th class="r">금액</th><th>지침 점검</th><th>견적서 기재 품목 <span class="chg">(내부 대조용 · 제출 문서에는 쓰지 않음)</span></th></tr></thead>'
             f'<tbody>{"".join(body)}</tbody><tfoot>{foot}</tfoot></table></div>'), pre
 
@@ -931,13 +936,32 @@ def page(z):
     var els = id.indexOf('topo-') === 0 ? Array.prototype.slice.call(document.querySelectorAll('[data-node="' + id.slice(5) + '"]')) : [document.getElementById(id)];
     els.forEach(function(n){{ if (n) n.classList.add('flash'); }});
   }}
+  function setCat(row, open){{
+    row.setAttribute('aria-expanded', open ? 'true' : 'false');
+    row.querySelector('.tw').textContent = open ? '▾' : '▸';
+    Array.prototype.forEach.call(document.querySelectorAll('tr[data-in="' + row.getAttribute('data-cat') + '"]'), function(r){{ r.classList.toggle('cx', !open); }});
+  }}
+  function reveal(el){{
+    var c = el && el.getAttribute && el.getAttribute('data-in');
+    if (c) setCat(document.querySelector('tr[data-cat="' + c + '"]'), true);
+  }}
+  document.addEventListener('keydown', function(e){{
+    var row = e.target.closest && e.target.closest('tr.cat');
+    if (row && (e.key === 'Enter' || e.key === ' ')) {{ e.preventDefault(); setCat(row, row.getAttribute('aria-expanded') !== 'true'); }}
+  }});
   document.addEventListener('click', function(e){{
+    var row = e.target.closest && e.target.closest('tr.cat');
+    if (row) {{ setCat(row, row.getAttribute('aria-expanded') !== 'true'); return; }}
+    var all = e.target.closest && e.target.closest('button[data-all]');
+    if (all) {{ Array.prototype.forEach.call(document.querySelectorAll('tr.cat'), function(r){{ setCat(r, all.getAttribute('data-all') === 'open'); }}); return; }}
     Array.prototype.forEach.call(document.querySelectorAll('.flash'), function(n){{ n.classList.remove('flash'); }});
     var a = e.target.closest && e.target.closest('a[href^="#it-"], a[href^="#r-"], a[href^="#topo-"]');
     if (!a) return;
     var id = a.getAttribute('href').slice(1), t = document.getElementById(id);
     if (!t) return;
     e.preventDefault();
+    var lst0 = a.getAttribute('data-flash');
+    (lst0 ? lst0.split(',') : [id]).forEach(function(x){{ var n = document.getElementById(x); reveal(n); if (n && n.hasAttribute('hidden')) reveal(n.nextElementSibling); }});
     t.scrollIntoView({{behavior: reduce ? 'auto' : 'smooth', block: 'center'}});
     var lst = a.getAttribute('data-flash');
     (lst ? lst.split(',') : [id]).forEach(flash);
@@ -954,6 +978,12 @@ EXTRA = """<style>
 .tag{display:inline-block;font:600 11px var(--mono);padding:1px 7px;border-radius:3px;white-space:nowrap}
 .tag.ok{background:var(--teal);color:#fff} .tag.chk{background:#FFF1E2;color:#9A4A00;border:1px solid #F0C08A} .tag.adj{background:#FDE8E8;color:#A12020;border:1px solid #F2B8B8}
 .chg{font:500 11px var(--mono);color:var(--muted)}
+tr.cat{cursor:pointer} tr.cat:hover th,tr.cat:hover td{filter:brightness(.97)} tr.cat:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+tr.cat .tw{display:inline-block;width:1.1em;color:var(--teal);font-size:12px} tr.cx{display:none}
+.catbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px;font-size:12.5px;color:var(--muted)}
+.catbar button{font:500 12px var(--mono);color:var(--teal);background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:3px 12px;cursor:pointer}
+.catbar button:hover,.catbar button:focus-visible{border-color:var(--teal);outline:none}
+@media print{tr.cx{display:table-row!important}.catbar{display:none}}
 tr.cat th,tr.cat td{background:color-mix(in srgb, var(--teal) 9%, var(--paper));color:var(--teal);font-weight:700;border-top:1px solid color-mix(in srgb, var(--teal) 35%, transparent)}
 tr.cat td.sym{font:500 10.5px var(--mono);color:var(--muted)} tr.cat th span{font-weight:400;color:var(--muted);font-size:12px}
 table.wide2 tbody tr:not(.grp):not(.cat):not(.subrow) td.sym{padding-left:16px}
