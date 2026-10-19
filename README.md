@@ -23,7 +23,7 @@
 | `build_page.py` | 셀 구성 계획 페이지 생성, 공통 CSS·BOM 표 헬퍼 |
 | `ocs_pz_products.py` / `build_ocs_pz.py` | 로컬 OCS Zone 구성 - (예시) 정밀조립존 제품·출처·수량 근거·Use Case, 페이지·도면·데이터량 산정 |
 | `private_prices.py` | 정밀조립존 DMWorks 1좌석 단가(10/8 견적 단가 기준) |
-| `privacy.py` | 단가 마스킹 스위치(`PUBLIC=1`이면 DMWorks 금액 0·비공개 표기), 출력 폴더(`OUT_DIR`) |
+| `privacy.py` | 단가 마스킹 스위치(`PUBLIC=1`이면 DMWorks 정가·견적 단가와 이를 포함한 소계·일반관리비·합계를 '비공개' 표기, 정밀조립존 DMWorks는 0원), 출력 폴더(`OUT_DIR`) |
 | `web_wrap.py` | `docs/`를 독립 웹 페이지로 감쌈(doctype·이동 바) + `index.html` 생성 |
 | `build_dmworks.py` | DMWorks 존별 옵션 구성 페이지 생성 |
 | `build_ocs_sim.py` | OCS 시뮬레이션 Cell 3종 페이지 생성 |
@@ -33,6 +33,9 @@
 ## 빌드
 
 ```sh
-./build.sh            # docs/*.html 전체본 생성 (DMWorks 단가 포함)
-PUBLIC=1 ./build.sh   # DMWorks 단가를 0원·비공개로 가린 버전
+./build.sh            # docs/*.html·pdf·docx 전체본 생성 (DMWorks 단가 포함 — 2026-10-08 사용자 결정으로 공개)
+PUBLIC=1 ./build.sh   # DMWorks 단가와 이를 포함한 소계·합계를 '비공개'로 가린 버전 (OCS 시뮬레이션 Cell 견적서 원본 절 제외)
+NO_DOCS=1 ./build.sh  # HTML만 생성 (PDF·Word는 갱신 안 함)
 ```
+
+PDF·Word 생성(`export_docs.py`)이 실패하면 빌드가 실패로 끝남. 새 파일은 임시 경로에서 만들어 검증한 뒤 교체하므로 실패 시 이전 파일이 새 결과로 보고되지 않음.

@@ -1,6 +1,7 @@
 """docs/*.html → docs/*.pdf (Chrome 인쇄, A3 가로) · docs/*.docx (python-docx로 직접 생성, A3 가로).
-GitHub Pages의 PDF·Word 저장 버튼용. Chrome이 없으면 건너뜀.
-실행: uv run --with python-docx --with beautifulsoup4 python export_docs.py"""
+GitHub Pages의 PDF·Word 저장 버튼용. Chrome 실행·PDF·도면 PNG·Word 생성 중 하나라도 실패하면 오류로 끝냄(종료 코드 1).
+새 파일은 임시 경로에 만들어 검증한 뒤 교체하므로, 실패해도 이전 파일을 새 결과로 보고하지 않음.
+실행: uv run --with python-docx --with beautifulsoup4 python export_docs.py [폴더(기본 docs)]"""
 import base64
 import io
 import os
@@ -27,14 +28,48 @@ CONTENT_W = PAGE_W - 2 * MARGIN
 FIG_PX = 2000
 
 
+class ExportError(RuntimeError):
+    pass
+
+
 # ------------------------------------------------------------------ Chrome
 def chrome(*args):
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", *args],
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False, timeout=180)
+    try:
+        r = subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", *args],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=180)
+    except subprocess.TimeoutExpired:
+        raise ExportError(f"Chrome 시간 초과(180초): {args[-1]}")
+    if r.returncode != 0:
+        tail = r.stderr.decode("utf-8", "replace").strip().splitlines()[-3:]
+        raise ExportError(f"Chrome 종료 코드 {r.returncode}: {args[-1]} {' / '.join(tail)}")
+
+
+def fresh(path, magic):
+    """방금 만든 파일인지 확인 — 없거나 비었거나 형식 머리글이 다르면 실패"""
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        raise ExportError(f"출력 파일이 생성되지 않음: {path}")
+    with open(path, "rb") as f:
+        if not f.read(len(magic)) == magic:
+            raise ExportError(f"출력 파일 형식이 맞지 않음: {path}")
+
+
+def replace_with(dst, make, magic):
+    """dst와 같은 폴더의 임시 파일에 make(tmp)로 생성 → 검증 → 교체. 실패하면 임시 파일만 지우고 dst는 건드리지 않음"""
+    tmp = os.path.join(os.path.dirname(dst) or ".", f".{os.path.basename(dst)}.tmp{os.path.splitext(dst)[1]}")
+    if os.path.exists(tmp):
+        os.remove(tmp)
+    try:
+        r = make(tmp)
+        fresh(tmp, magic)
+        os.replace(tmp, dst)
+        return r
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
 
 
 def pdf(src, dst):
-    chrome("--no-pdf-header-footer", f"--print-to-pdf={dst}", "file://" + os.path.abspath(src))
+    replace_with(dst, lambda tmp: chrome("--no-pdf-header-footer", f"--print-to-pdf={os.path.abspath(tmp)}", "file://" + os.path.abspath(src)), b"%PDF-")
 
 
 def svg_png(svg, css, tmp, n):
@@ -46,8 +81,11 @@ def svg_png(svg, css, tmp, n):
     open(page, "w", encoding="utf-8").write(
         f'<!doctype html><meta charset="utf-8">{css}<style>:root{{color-scheme:light}}html,body{{margin:0;background:#fff}}'
         f'svg{{display:block;width:{FIG_PX}px;height:{H}px;max-width:none!important}}</style>{svg}')
+    if os.path.exists(shot):
+        os.remove(shot)
     chrome(f"--window-size={FIG_PX},{H}", "--force-device-scale-factor=1", f"--screenshot={shot}", "file://" + page)
-    return (shot if os.path.exists(shot) else None), w / h
+    fresh(shot, b"\x89PNG")
+    return shot, w / h
 
 
 # ------------------------------------------------------------------ docx helpers
@@ -244,8 +282,6 @@ class Writer:
             return
         shot, ratio = svg_png(str(svg), self.css, self.tmp, self.nfig)
         self.nfig += 1
-        if not shot:
-            return
         w = CONTENT_W
         if w / ratio > Mm(max_h_mm):
             w = int(Mm(max_h_mm) * ratio)
@@ -403,21 +439,30 @@ def docx(src, dst):
     css = "".join(re.findall(r"<style>.*?</style>", s, re.S))
     soup = BeautifulSoup(s, "html.parser")
     clean(soup)
-    w = Writer(css, tempfile.mkdtemp())
-    if soup.find("header", class_="mast"):
-        w.walk(soup.find("header", class_="mast"))
-    w.walk(soup.find("main"))
-    if soup.title:
-        w.doc.core_properties.title = soup.title.get_text()
-    w.doc.save(dst)
+    with tempfile.TemporaryDirectory() as tmp:
+        w = Writer(css, tmp)
+        if soup.find("header", class_="mast"):
+            w.walk(soup.find("header", class_="mast"))
+        w.walk(soup.find("main"))
+        if soup.title:
+            w.doc.core_properties.title = soup.title.get_text()
+        replace_with(dst, w.doc.save, b"PK")
     return w.nfig
 
 
 if __name__ == "__main__":
+    root = sys.argv[1] if len(sys.argv) > 1 else "docs"
     if not os.path.exists(CHROME):
-        sys.exit("Chrome 없음 — PDF·Word 생성 건너뜀")
+        sys.exit(f"Chrome 없음({CHROME}) — PDF·Word를 만들 수 없음")
+    failed = []
     for p in PAGES:
-        src = os.path.join("docs", p)
-        pdf(src, src.replace(".html", ".pdf"))
-        n = docx(src, src.replace(".html", ".docx"))
-        print(p, "pdf", os.path.exists(src.replace(".html", ".pdf")), "docx", os.path.exists(src.replace(".html", ".docx")), f"figs={n}")
+        src = os.path.join(root, p)
+        try:
+            pdf(src, src.replace(".html", ".pdf"))
+            n = docx(src, src.replace(".html", ".docx"))
+            print(p, "pdf·docx 갱신", f"figs={n}")
+        except Exception as e:  # 나머지 페이지는 계속 만들고 마지막에 실패로 끝냄
+            failed.append(p)
+            print(p, "실패:", e, file=sys.stderr)
+    if failed:
+        sys.exit(f"PDF·Word 생성 실패 {len(failed)}건: {', '.join(failed)}")

@@ -8,7 +8,7 @@ import base64
 import os
 
 import build_ocs_pz as pz
-from privacy import OUT_DIR, out
+from privacy import OUT_DIR, PUBLIC, PUBLIC_NOTE, money as km, out, pick
 
 E = html.escape
 CSS, PZ_EXTRA = pz.CSS, pz.EXTRA
@@ -16,6 +16,16 @@ CSS, PZ_EXTRA = pz.CSS, pz.EXTRA
 
 def k(n):
     return f"{n:,.0f}"
+
+
+def gk(g):
+    """견적서 항목별 금액 표기 — 항목1(DMWorks SW·AMC)은 공개본에서 가림"""
+    return km if g.startswith("항목1") else k
+
+
+def won(n):
+    """DMWorks 금액이 들어간 총액 표기 — 공개본은 '비공개'"""
+    return km(n) if PUBLIC else f"{k(n)}천원"
 
 
 # ------------------------------------------------------------------ 일반 명칭·사양 (업체·모델명 없음)
@@ -440,14 +450,14 @@ def item_table(z):
     for g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sub in rows:
         if g != cur:
             cur = g
-            body.append(f'<tr class="grp"><th colspan="7" scope="rowgroup">{E(g)}</th><td class="num">{k(gsum[g])}</td><td colspan="3"></td></tr>')
+            body.append(f'<tr class="grp"><th colspan="6" scope="rowgroup">{E(g)}</th><td class="num">{gk(g)(gsum[g])}</td><td colspan="2"></td></tr>')
         c = (g, quote_cat(z, g, sym, no))
         if c != ccur:
             ccur = c
             cn += 1
             body.append(f'<tr class="cat" data-cat="c{cn}" tabindex="0" role="button" aria-expanded="false" title="눌러서 접기·펼치기">'
                         f'<td class="sym"><span class="tw" aria-hidden="true">▸</span>견적서 항목</td><th colspan="5" scope="rowgroup">{E(c[1])} <span>· {ccnt[c]}품목</span></th>'
-                        f'<td class="num">{k(csum[c])}</td><td colspan="2"></td></tr>')
+                        f'<td class="num">{gk(g)(csum[c])}</td><td colspan="2"></td></tr>')
         cin = f' data-in="c{cn}"'
         rid = ""
         anchor = sym if sym in ("SCN", "GPU", "OPC", "NB", "MON", "DPS", "NAS", "BAK", "EGW", "VNODE", "NET", "RACK") else None
@@ -468,13 +478,13 @@ def item_table(z):
         if rid:
             body.append(f'<tr id="r-{no}" hidden></tr>')
         body.append(f'<tr{rowid}{cls}{cin}><td class="sym">{E(no)}</td><td class="nm">{nmh}</td><td class="spec">{E(sp)}</td><td class="q"><b>{E(str(q))}</b></td><td class="u">{E(unit)}</td>'
-                    f'<td class="num">{k(u) if u is not None else "–"}</td><td class="num">{k(amt) if amt is not None else "미구분"}</td>'
+                    f'<td class="num">{gk(g)(u) if u is not None else "–"}</td><td class="num">{gk(g)(amt) if amt is not None else "미구분"}</td>'
                     f'<td>{tag(chk)}<span class="where">{E(CHK_NOTE.get(chk, ""))}</span></td><td class="note">{E(lab)}</td></tr>')
     pre = sum(r[8] for r in rows if r[8] is not None)
     base = sum(r[8] for r in rows if r[8] is not None and (r[0].startswith("항목1") or r[0].startswith("항목2") or r[0].startswith("항목5")))
-    foot = (f'<tr class="tot"><th colspan="7">항목6. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목5) {k(base)}의 10%, 견적서 기재값</th><td class="num">{k(z["ga"])}</td><td colspan="2"></td></tr>'
-            f'<tr class="tot"><th colspan="7">합계 (단위절삭 전)</th><td class="num">{k(pre + z["ga"])}</td><td colspan="2"></td></tr>'
-            f'<tr class="tot strong"><th colspan="7">견적 합계 (단위절삭 후)</th><td class="num">{k(z["total"])}</td><td colspan="2">{E(z["no"])}</td></tr>')
+    foot = (f'<tr class="tot"><th colspan="6">항목6. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목5){pick(f" {k(base)}", "")}의 10%, 견적서 기재값</th><td class="num">{km(z["ga"])}</td><td colspan="2"></td></tr>'
+            f'<tr class="tot"><th colspan="6">합계 (단위절삭 전)</th><td class="num">{km(pre + z["ga"])}</td><td colspan="2"></td></tr>'
+            f'<tr class="tot strong"><th colspan="6">견적 합계 (단위절삭 후)</th><td class="num">{km(z["total"])}</td><td colspan="2">{E(z["no"])}</td></tr>')
     return ('<div class="catbar"><button type="button" data-all="open">모두 펼치기</button><button type="button" data-all="close">모두 접기</button>'
             '<span>견적서 항목 행을 누르면 하위 구성품을 접거나 펼침</span></div>'
             '<div class="tbl-wrap"><table class="bom wide2"><thead><tr><th>번호</th><th>구성품 (일반 명칭)</th><th>세부 사양</th><th style="text-align:center">수량</th><th>단위</th>'
@@ -497,9 +507,9 @@ def summary_table(z):
     amc = [s for s in z["sw"] if s[1] == "AMC"][0]
     rows = [
         ("장비명", f'{z["name"]} — 사업계획서·심의요청서 장비명과 같게 씀. 견적서 건명은 「{z["title"]}」로 달라 수정 요청 필요'),
-        ("견적", f'{z["no"]} (2026.10.15) · 합계 {k(z["total"])}천원 · 비교견적 {k(z["cmp"])}천원(발표자료 별첨 3)'),
-        ("구성 (견적서 6개 항목)", " · ".join(f"{g.split('. ')[1]} {k(v)}" for g, v in gs.items()) + f' · 일반관리비·이윤 {k(z["ga"])}천원'),
-        ("SW 라이선스", f'네트워크 라이선스(Network-Lock), 모듈별 1카피(포맷·제어기·PLC 단위 모듈은 수량만큼). 유지보수 연 18% × 4년 {k(amc[3] * amc[4])}천원이 항목1에 포함'),
+        ("견적", f'{z["no"]} (2026.10.15) · 합계 {won(z["total"])} · 비교견적 {k(z["cmp"])}천원(발표자료 별첨 3)'),
+        ("구성 (견적서 6개 항목)", " · ".join(f"{g.split('. ')[1]} {gk(g)(v)}" for g, v in gs.items()) + f' · 일반관리비·이윤 {won(z["ga"])}'),
+        ("SW 라이선스", f'네트워크 라이선스(Network-Lock), 모듈별 1카피(포맷·제어기·PLC 단위 모듈은 수량만큼). 유지보수 연 18% × 4년{pick(f" {k(amc[3] * amc[4])}천원", "")}이 항목1에 포함'),
         ("설치 장소", f"(임시) {z['site']} → (최종) 연구클러스터 메타팩토리 공장동. 이전 시 랙 단위 이설·재연결 (연구개발계획서 · 10/16 발표자료)"),
         ("대상 품목·공정", f"{z['plan'][2]} / {z['plan'][3]} (연구개발계획서 1차년도 {z['plan'][1]})"),
         ("Zone Cell 구성", f"{z['zone'].split(' (')[0]} {z['plan'][0]} = 이 OCS Cell({z['id']}, '26 · 4종) + "
@@ -886,6 +896,8 @@ REFS = [
 
 def quote_section(z):
     """견적서 원본 — 기본 접힘, 펼칠 때 암호 입력 후 브라우저에서 복호화(AES-GCM). 공개본(docs/)은 담당자 연락처·직인을 가린 이미지 (prep_quotes.py)"""
+    if PUBLIC:
+        return ""
     pub = os.path.basename(os.path.normpath(OUT_DIR)) == "docs"
     path = f"quote_private/{z['slug']}.json"
     if pub or not os.path.exists(path):
@@ -911,7 +923,8 @@ def quote_section(z):
 def page(z):
     table, pre = item_table(z)
     gs = group_sums(z)
-    kp = "".join(f'<div><b>{k(v / 1000)}</b><span>{E(g.split(". ")[1])} (백만원)</span></div>' for g, v in gs.items())
+    qsec = quote_section(z)
+    kp = "".join(f'<div><b>{gk(g)(v / 1000)}</b><span>{E(g.split(". ")[1])} (백만원)</span></div>' for g, v in gs.items())
     refs = "".join(f'<tr><td class="sym">[{a}]</td><td class="u">{E(b)}</td><td>{E(c)}</td><td class="u">{E(d)}</td><td class="note">{E(e)}</td></tr>' for a, b, c, d, e in REFS)
     return f'''<title>{E(z["short"])} OCS 시뮬레이션 Cell</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -922,13 +935,13 @@ def page(z):
   <h1>{E(z["name"])}</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
-  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a><a href="#quote">견적서 원본</a><a href="#refs">근거</a>
+  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a>{'<a href="#quote">견적서 원본</a>' if qsec else ""}<a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
 <section id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
-  <h2>견적 {k(z["total"])}천원 · 견적서 6개 항목을 서버실·운영실·Cell 캐비닛에 배치</h2>
-  <div class="kpis">{kp}</div>
+  <h2>견적 {won(z["total"])} · 견적서 6개 항목을 서버실·운영실·Cell 캐비닛에 배치</h2>
+  {f'<p class="note-box">{E(PUBLIC_NOTE)}</p>' if PUBLIC else ""}<div class="kpis">{kp}</div>
   {summary_table(z)}
 </section>
 <section id="topo">
@@ -954,7 +967,7 @@ def page(z):
   <h2>10/18 공통 지침·10/16 질의 대응 현황</h2>
   {guide_table(z)}
 </section>
-{quote_section(z)}
+{qsec}
 <section id="refs">
   <p class="eyebrow">근거</p>
   <h2>근거 문서</h2>
@@ -979,9 +992,11 @@ def page(z):
   }}
   var qbtn = document.querySelector('.qtoggle'), qpanel = document.getElementById('qpanel');
   if (qbtn) {{
-    var qopen = false;
+    var qopen = false, qgen = 0;  // qgen: 열기·접기·제출마다 증가 — 늦게 끝난 이전 복호화 결과를 버림
+    var qcur = function(gen){{ return qopen && gen === qgen; }};
     qbtn.addEventListener('click', function(){{
       qopen = !qopen;
+      qgen++;
       qpanel.hidden = !qopen;
       qbtn.setAttribute('aria-expanded', qopen ? 'true' : 'false');
       qbtn.innerHTML = '<span class="tw" aria-hidden="true">' + (qopen ? '▾' : '▸') + '</span> 견적서 원본 ' + (qopen ? '접기' : '열기');
@@ -997,7 +1012,7 @@ def page(z):
     var b64 = function(s){{ return Uint8Array.from(atob(s), function(c){{ return c.charCodeAt(0); }}); }};
     qpanel.querySelector('form').addEventListener('submit', function(e){{
       e.preventDefault();
-      var msg = qpanel.querySelector('.qmsg'), pw = document.getElementById('qpw').value;
+      var gen = ++qgen, msg = qpanel.querySelector('.qmsg'), pw = document.getElementById('qpw').value;
       var d = JSON.parse(document.getElementById('qdata').textContent);
       if (!(window.crypto && crypto.subtle)) {{ msg.textContent = '이 브라우저에서는 열 수 없음 (HTTPS 필요)'; return; }}
       msg.textContent = '확인 중…';
@@ -1006,12 +1021,14 @@ def page(z):
       }}).then(function(key){{
         return crypto.subtle.decrypt({{name: 'AES-GCM', iv: b64(d.iv)}}, key, b64(d.ct));
       }}).then(function(buf){{
-        var fig = qpanel.querySelector('figure');
-        fig.querySelector('img').src = URL.createObjectURL(new Blob([buf], {{type: d.type}}));
+        if (!qcur(gen)) return;
+        var fig = qpanel.querySelector('figure'), img = fig.querySelector('img');
+        if (img.src) URL.revokeObjectURL(img.src);
+        img.src = URL.createObjectURL(new Blob([buf], {{type: d.type}}));
         fig.hidden = false;
         qpanel.querySelector('form').hidden = true;
         msg.textContent = '';
-      }}).catch(function(){{ msg.textContent = '암호가 맞지 않음'; document.getElementById('qpw').select(); }});
+      }}).catch(function(){{ if (!qcur(gen)) return; msg.textContent = '암호가 맞지 않음'; document.getElementById('qpw').select(); }});
     }});
   }}
   document.addEventListener('keydown', function(e){{

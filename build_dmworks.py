@@ -4,7 +4,7 @@ import html
 import re
 
 import build_page as bp
-from privacy import out
+from privacy import PUBLIC, PUBLIC_NOTE, money as km, out, pick
 
 E = html.escape
 RATE = 0.572  # 10/15 최종 견적 단가 = 정가(Node-Lock) × 57.2% (= 10/8 견적 52% × 1.1, 전 옵션 동일)
@@ -170,6 +170,11 @@ def k(n):
     return f"{n:,.0f}"
 
 
+def won(n):
+    """DMWorks 금액이 들어간 총액 표기 — 공개본은 '비공개'"""
+    return km(n) if PUBLIC else f"{k(n)}천원"
+
+
 def name_of(key):
     if key in OPT:
         return OPT[key][0]
@@ -255,16 +260,21 @@ def key_table():
     scn = sum(q * u for z in Q for g, _, d, q, u, *_ in Q[z]["items"] if g == "OCS HW" and "스캐너" in d)
     loc = sum(parts(z)[2] for z in Q)
     rows = [
-        ("견적 개요", f"이지로보틱스 10/15 최종 견적 3건(1015-1~3). 유연제조 {k(Q['A-1-4']['total'])} · 적응가공 {k(Q['A-2-5']['total'])} · AI정밀검사 {k(Q['A-4-5']['total'])} = 합계 {k(QTOTAL)}천원. 10/14 수정 구매계획서(스토리지 서버 포함) 기준 재견적으로, 10/12 비용 조정 결정이 반영됨. 과제기간 4개월, Network-Lock 라이선스", "10/15 최종 견적서"),
+        ("견적 개요", pick(f"이지로보틱스 10/15 최종 견적 3건(1015-1~3). 유연제조 {k(Q['A-1-4']['total'])} · 적응가공 {k(Q['A-2-5']['total'])} · AI정밀검사 {k(Q['A-4-5']['total'])} = 합계 {k(QTOTAL)}천원. ",
+                           "이지로보틱스 10/15 최종 견적 3건(1015-1~3) — 유연제조·적응가공·AI정밀검사, 견적 합계는 공개본에서 비공개. ") + "10/14 수정 구매계획서(스토리지 서버 포함) 기준 재견적으로, 10/12 비용 조정 결정이 반영됨. 과제기간 4개월, Network-Lock 라이선스", "10/15 최종 견적서"),
         ("견적 구조", "① OCS SW(DMWorks + AMC) ② OCS HW(스캐너·연산 서버·운영 PC·모니터링) ③ 로컬 HW(데이터 서버·스토리지·네트워크·서버실) ④ 로컬 OCS·보안(TSDB·IAM/PKI) ⑤ 기술지원 ⑥ 일반관리비·이윤 = (①+②+⑤)의 10%. ③·④는 10/8 견적에 없던 항목", "10/15 최종 견적서"),
         ("단가 수준", "정가표 옵션은 모두 정가(Node-Lock) × 57.2% = 10/8 견적 단가(× 52%) × 1.1. 표지 'VAT 포함'이면 할인율은 그대로 48%, 참고사항 '부가세 별도'면 42.8%로 낮아짐. 10/6에 들은 60% 할인은 미반영", "정가표 대조"),
         ("10/12 결정 반영", "유연제조·적응가공 ACS 삭제(정밀검사만 유지), 정밀검사 대형 스캐너 삭제, 연산 서버 GPU 8→4장 + 방화벽(385,000), AMC 18% × 4년 계상, 유연제조 CAD IMPORT 4→3종·EXPORT 3→1종", "10/12 결정 · 10/15 견적"),
-        ("금액이 큰 항목", f"로컬 HW 3존 {k(loc)} · 연산 서버 3대 {k(srv)} · AMC 4년 {k(amc)} · 스캐너 2대 {k(scn)}천원 — 네 가지가 전체의 약 {round((loc + srv + amc + scn) / QTOTAL * 100)}%", "견적 항목 합산"),
+        ("금액이 큰 항목", pick(f"로컬 HW 3존 {k(loc)} · 연산 서버 3대 {k(srv)} · AMC 4년 {k(amc)} · 스캐너 2대 {k(scn)}천원 — 네 가지가 전체의 약 {round((loc + srv + amc + scn) / QTOTAL * 100)}%",
+                                f"로컬 HW 3존 {k(loc)} · 연산 서버 3대 {k(srv)} · 스캐너 2대 {k(scn)}천원 · AMC 4년(DMWorks SW 기준이라 비공개)"), "견적 항목 합산"),
         ("확인 항목", "AMC '5년' 표기와 ×4 계산 불일치, 표지 VAT 포함 vs 참고사항 부가세 별도. 로컬 HW 상세 사양(견적서 '별도 협의'). 정밀검사 AIMS(측정 HW 없음)·TESCar·ACS OLP 메이커. 나머지 SW·HW는 적합", "존별 검토"),
-        ("정밀조립", f"견적 대상이 아님. 같은 단가로 Base·MULTIPLE PROCESS·PLC·Plug-in User·USD Converter 1좌석을 잡으면 약 {k(pz_total())}천원", "견적 단가 적용"),
+        ("정밀조립", "견적 대상이 아님. 같은 단가로 Base·MULTIPLE PROCESS·PLC·Plug-in User·USD Converter 1좌석을 잡으면 " + pick(f"약 {k(pz_total())}천원", "금액은 비공개"), "견적 단가 적용"),
     ]
     body = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, b, c in rows)
     return f'<div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>내용</th><th>근거</th></tr></thead><tbody>{body}</tbody></table></div>'
+
+
+SUM_FMT = (km, k, k, k, km)  # OCS SW(DMWorks·AMC) · OCS HW · 로컬 · 기술지원 · 일반관리비(SW 포함 기준) — 공개본은 DMWorks 포함 금액만 가림
 
 
 def summary_table():
@@ -274,10 +284,10 @@ def summary_table():
         for i, v in enumerate(vals):
             t[i] += v
         rows.append(f'<tr><td><a href="#{z["slug"]}">{E(z["id"])}</a></td><td class="nm">{E(z["name"])}</td><td class="note">{E(Q[z["id"]]["no"])}</td>'
-                    + "".join(f'<td class="num">{k(v)}</td>' for v in vals[:-1]) + f'<td class="num"><b>{k(vals[-1])}</b></td></tr>')
+                    + "".join(f'<td class="num">{f(v)}</td>' for f, v in zip(SUM_FMT, vals[:-1])) + f'<td class="num"><b>{km(vals[-1])}</b></td></tr>')
     rows.append(f'<tr><td><a href="#z3">A-3</a></td><td class="nm">정밀조립존</td><td class="note">견적 없음 · 견적 단가로 산정</td>'
-                f'<td class="num">{k(pz_total())}</td>' + '<td class="num">–</td>' * 4 + f'<td class="num">{k(pz_total())}</td></tr>')
-    rows.append(f'<tr class="tot strong"><th colspan="3">견적 합계 (3개 존)</th>' + "".join(f'<td class="num">{k(v)}</td>' for v in t) + "</tr>")
+                f'<td class="num">{km(pz_total())}</td>' + '<td class="num">–</td>' * 4 + f'<td class="num">{km(pz_total())}</td></tr>')
+    rows.append(f'<tr class="tot strong"><th colspan="3">견적 합계 (3개 존)</th>' + "".join(f'<td class="num">{f(v)}</td>' for f, v in zip(SUM_FMT + (km,), t)) + "</tr>")
     return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">OCS SW(AMC 포함)</th><th class="r">OCS HW</th>'
             '<th class="r">로컬 HW·OCS·보안</th><th class="r">기술지원</th><th class="r">일반관리비·이윤</th><th class="r">견적 합계</th></tr></thead>'
             f'<tbody>{"".join(rows)}</tbody></table></div><p class="note-box">단위 천원. 견적서 표지는 \'VAT 포함\', 참고사항은 \'부가세 별도\'로 엇갈림. 일반관리비·이윤은 (OCS SW + OCS HW + 기술지원)의 10%로 로컬 HW·로컬 OCS·보안에는 붙지 않음. 견적 합계는 업체 단위절삭(백만 원 미만 버림) 후 금액.</p>')
@@ -287,13 +297,14 @@ def price_table():
     rows = []
     for key in ["BASE", "CADI", "CADE", "OLP", "RRS", "PC", "MP", "PLC", "PID", "PIU"]:
         n, code, lp, func, note = OPT[key]
+        func = re.sub(r"\s*\d{1,3}(?:,\d{3})+", "", func) if PUBLIC else func  # 기능 설명 속 정가
         qp = lp * RATE
         use = "".join(f'<td class="dz">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
-        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">{E(code)}</span></td><td class="num">{k(lp)}</td><td class="num"><b>{k(qp)}</b></td>'
+        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">{E(code)}</span></td><td class="num">{km(lp)}</td><td class="num"><b>{km(qp)}</b></td>'
                     f'<td class="q">57.2%</td><td>{E(func)}</td><td class="note">{E(note)}</td>{use}</tr>')
     for key, (n, qp, func, note) in NEW.items():
         use = "".join(f'<td class="dz">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
-        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>{k(qp)}</b></td>'
+        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>{km(qp)}</b></td>'
                     f'<td class="q">–</td><td>{E(func)}</td><td class="note">{E(note)}</td>{use}</tr>')
     head = "".join(f"<th class='dz'>{E(z['id'])}</th>" for z in ZONES)
     return ('<div class="tbl-wrap"><table class="bom wide"><thead><tr><th>옵션·제품</th><th class="r">정가</th><th class="r">견적 단가</th><th style="text-align:center">비율</th>'
@@ -305,19 +316,24 @@ def task_table(z):
     return f'<div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>필요한 기능·옵션</th></tr></thead><tbody>{body}</tbody></table></div>'
 
 
+def fm(g):
+    """견적 구분별 금액 표기 — DMWorks SW·AMC는 공개본에서 가림"""
+    return km if g in ("SW", "유지보수") else k
+
+
 def quote_table(zid):
     rows, cur = [], None
     for g, key, det, q, u, v, why in Q[zid]["items"]:
         if g != cur:
             cur = g
             sub = sum(qq * uu for gg, _, _, qq, uu, *_ in Q[zid]["items"] if gg == g)
-            rows.append(f'<tr class="grp"><th colspan="4" scope="rowgroup">{E(g)}</th><td class="num">{k(sub)}</td><td colspan="2"></td></tr>')
+            rows.append(f'<tr class="grp"><th colspan="4" scope="rowgroup">{E(g)}</th><td class="num">{fm(g)(sub)}</td><td colspan="2"></td></tr>')
         nm = name_of(key) if key else det
         dd = det if key else ""
-        rows.append(f'<tr><td class="nm">{E(nm)}</td><td>{E(dd)}</td><td class="q"><b>{q}</b></td><td class="num">{k(u)}</td>'
-                    f'<td class="num">{k(q * u)}</td><td>{tag(v)}</td><td>{E(why)}</td></tr>')
-    foot = (f'<tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">{k(Q[zid]["ga"])}</td><td colspan="2"></td></tr>'
-            f'<tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">{k(Q[zid]["total"])}</td><td colspan="2">{E(Q[zid]["no"])}</td></tr>')
+        rows.append(f'<tr><td class="nm">{E(nm)}</td><td>{E(dd)}</td><td class="q"><b>{q}</b></td><td class="num">{fm(g)(u)}</td>'
+                    f'<td class="num">{fm(g)(q * u)}</td><td>{tag(v)}</td><td>{E(why)}</td></tr>')
+    foot = (f'<tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">{km(Q[zid]["ga"])}</td><td colspan="2"></td></tr>'
+            f'<tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">{km(Q[zid]["total"])}</td><td colspan="2">{E(Q[zid]["no"])}</td></tr>')
     return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th>'
             '<th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead>'
             f'<tbody>{"".join(rows)}</tbody><tfoot>{foot}</tfoot></table></div>')
@@ -328,8 +344,8 @@ def pz_table():
     for key, q, why in PZ:
         u = OPT[key][2] * RATE if key in OPT else NEW[key][1]
         tot += u * q
-        rows.append(f'<tr><td class="nm">{E(name_of(key))}</td><td class="q"><b>{q}</b></td><td class="num">{k(u)}</td><td class="num">{k(u * q)}</td><td>{E(why)}</td></tr>')
-    rows.append(f'<tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">{k(tot)}</td><td>10/15 최종 견적 단가(정가×57.2%) 적용</td></tr>')
+        rows.append(f'<tr><td class="nm">{E(name_of(key))}</td><td class="q"><b>{q}</b></td><td class="num">{km(u)}</td><td class="num">{km(u * q)}</td><td>{E(why)}</td></tr>')
+    rows.append(f'<tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">{km(tot)}</td><td>10/15 최종 견적 단가(정가×57.2%) 적용</td></tr>')
     return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>쓰는 이유</th></tr></thead>'
             f'<tbody>{"".join(rows)}</tbody></table></div>')
 
@@ -345,8 +361,20 @@ ISSUES = [
 ]
 
 
+# 공개본: 견적 총액·DMWorks 단가가 들어간 문장 대체 (쟁점 → 현재 상황)
+ISSUES_PUBLIC = {
+    "구매계획서 대비": "10/14 수정 구매계획서 존별 합계(외산 SW 1년 구독 포함)와 최종 견적 합계를 대조 — 적응가공은 X-cloud 1.497억을 빼면 거의 같음(금액은 공개본에서 비공개)",
+    "정밀검사 AIMS·TESCar": "대형 스캐너는 빠졌는데 AIMS Simulator·Controller와 TESCar가 남음(단가는 공개본에서 비공개)",
+}
+REFS_PUBLIC = {
+    "Q0": "이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 — 유연제조(1015-1)·적응가공(1015-2)·AI정밀검사(1015-3)",
+    "P1": "OCS 시뮬레이션 셀 구매계획서 R2(부원장 검토)·10/14 수정본(스토리지 서버 포함) — 존별 합계, AMC 18%×4년",
+}
+
+
 def issues_table():
-    body = "".join(f'<tr><td class="u">{E(a)}</td><th scope="row">{E(b)}</th><td>{E(c)}</td><td>{E(d)}</td><td>{E(e)}</td></tr>' for a, b, c, d, e in ISSUES)
+    rows = [(a, b, ISSUES_PUBLIC.get(b, c) if PUBLIC else c, d, e) for a, b, c, d, e in ISSUES]
+    body = "".join(f'<tr><td class="u">{E(a)}</td><th scope="row">{E(b)}</th><td>{E(c)}</td><td>{E(d)}</td><td>{E(e)}</td></tr>' for a, b, c, d, e in rows)
     return ('<div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>구분</th><th>쟁점</th><th>현재 상황</th><th>영향</th><th>다음 조치</th></tr></thead>'
             f'<tbody>{body}</tbody></table></div>')
 
@@ -367,7 +395,8 @@ REFS = [
 
 
 def refs_table():
-    body = "".join(f'<tr><td class="sym">[{a}]</td><td class="u">{E(b)}</td><td>{E(c)}</td><td class="u">{E(d)}</td><td class="note">{E(e)}</td></tr>' for a, b, c, d, e in REFS)
+    rows = [(a, b, REFS_PUBLIC.get(a, c) if PUBLIC else c, d, e) for a, b, c, d, e in REFS]
+    body = "".join(f'<tr><td class="sym">[{a}]</td><td class="u">{E(b)}</td><td>{E(c)}</td><td class="u">{E(d)}</td><td class="note">{E(e)}</td></tr>' for a, b, c, d, e in rows)
     return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>표기</th><th>구분</th><th>문서·내용</th><th>일자</th><th>위치</th></tr></thead>'
             f'<tbody>{body}</tbody></table></div>')
 
@@ -376,11 +405,11 @@ def page():
     zsecs = "".join(f'''
 <section id="{z["slug"]}">
   <p class="eyebrow">{E(z["id"])} · {E(z["purpose"])} · {E(Q[z["id"]]["no"])}</p>
-  <h2>{E(z["name"])} · 견적 {k(Q[z["id"]]["total"])}천원</h2>
+  <h2>{E(z["name"])} · 견적 {won(Q[z["id"]]["total"])}</h2>
   <h3>해야 할 일과 필요한 기능</h3>
   {task_table(z)}
   <h3>10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
-  <p class="note-box">10/8 견적 대비: {E(CHANGES[z["id"]])}. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
+  <p class="note-box">10/8 견적 대비: {E(pick(CHANGES[z["id"]], CHANGES[z["id"]].split(". ", 1)[1]))}. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
   {quote_table(z["id"])}
 </section>''' for z in ZONES)
     return f'''<title>DMWorks 존별 옵션 구성</title>
@@ -397,8 +426,8 @@ def page():
 <main class="wrap">
 <section id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
-  <h2>10/15 최종 견적 3개 존 · 합계 {k(QTOTAL)}천원</h2>
-  {key_table()}
+  <h2>10/15 최종 견적 3개 존 · 합계 {won(QTOTAL)}</h2>
+  {f'<p class="note-box">{E(PUBLIC_NOTE)}</p>' if PUBLIC else ""}{key_table()}
   <h3>존별 견적 합계</h3>
   {summary_table()}
 </section>
