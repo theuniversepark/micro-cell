@@ -152,19 +152,27 @@ td.dz,th.dz{text-align:center;white-space:nowrap} table.bom td a{white-space:now
 <body>
 <nav class="webbar"><a href="index.html">목차</a><a href="ocs_precision.html">로컬 OCS Zone 구성 - (예시) 정밀조립존</a><a href="dmworks_zones.html" class=on>DMWorks 존별 옵션</a><a href="ocs_sim_fms.html">유연제조 OCS Cell</a><a href="ocs_sim_adaptive.html">적응가공 OCS Cell</a><a href="ocs_sim_qms.html">AI정밀검사 OCS Cell</a><span class="dl"><a href="dmworks_zones.pdf" download>PDF 저장</a><a href="dmworks_zones.docx" download>Word 저장</a></span></nav>
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · 이지로보틱스 10/15 최종 견적서(1015-1~3) 기준 · 10/12 비용 조정 반영 · 2026.10.19 갱신 · 검토본</p>
+  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · <span id="ql-eb">이지로보틱스 10/15 최종 견적서(1015-1~3) 기준</span> · 10/12 비용 조정 반영 · 2026.10.19 갱신 · 검토본</p>
   <h1>DMWorks 존별 옵션 구성</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
   <a href="#sum">요약</a><a href="#why">구매 필요성</a><a href="#opt">단가·제품</a><a href="#z14">A-1-4</a><a href="#z25">A-2-5</a><a href="#z45">A-4-5</a><a href="#z3">A-3</a><a href="#issues">확인 필요</a><a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
+<div class="qlive" id="qlive">
+  <div class="ql-row"><b>견적서 파일</b><span id="ql-cur">기준 견적: <b>10/15 최종 견적 3건(1015-1~3)</b> — 페이지 작성 기준</span>
+    <label class="ql-pick">견적서 파일 선택<input type="file" id="ql-file" accept=".xlsx,.xls,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"></label>
+    <button type="button" id="ql-reset" hidden>기준 견적으로 되돌리기</button></div>
+  <p class="ql-help">이지로보틱스 견적서 엑셀(존별 시트, 항목1~6)을 고르거나 이 상자에 끌어다 놓으면 브라우저 안에서 읽어 존별 견적 표·요약·단가표·정밀조립 산정을 다시 그리고, 기준 견적과 달라진 품목을 '확인'으로 표시함. 고른 견적은 이 브라우저에 기억되어 OCS 시뮬레이션 Cell 3종(<a href="ocs_sim_fms.html">유연제조</a> · <a href="ocs_sim_adaptive.html">적응가공</a> · <a href="ocs_sim_qms.html">AI정밀검사</a>)에도 자동 반영됨(각 페이지에서 직접 골라도 됨). 파일은 어디에도 전송되지 않음. 구매 필요성·쟁점 등 서술형 내용과 PDF·Word 저장본은 기준 견적 기준.</p>
+  <p class="ql-msg" id="ql-msg" role="status" aria-live="polite"></p>
+  <ul class="ql-diff" id="ql-diff"></ul>
+</div>
 <section id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
-  <h2>10/15 최종 견적 3개 존 · 합계 6,793,000천원</h2>
-  <div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>내용</th><th>근거</th></tr></thead><tbody><tr><th scope="row">견적 개요</th><td>이지로보틱스 10/15 최종 견적 3건(1015-1~3). 유연제조 1,991,000 · 적응가공 2,192,000 · AI정밀검사 2,610,000 = 합계 6,793,000천원. 10/14 수정 구매계획서(스토리지 서버 포함) 기준 재견적으로, 10/12 비용 조정 결정이 반영됨. 과제기간 4개월, Network-Lock 라이선스</td><td class="note">10/15 최종 견적서</td></tr><tr><th scope="row">견적 구조</th><td>① OCS SW(DMWorks + AMC) ② OCS HW(스캐너·연산 서버·운영 PC·모니터링) ③ 로컬 HW(데이터 서버·스토리지·네트워크·서버실) ④ 로컬 OCS·보안(TSDB·IAM/PKI) ⑤ 기술지원 ⑥ 일반관리비·이윤 = (①+②+⑤)의 10%. ③·④는 10/8 견적에 없던 항목</td><td class="note">10/15 최종 견적서</td></tr><tr><th scope="row">단가 수준</th><td>정가표 옵션은 모두 정가(Node-Lock) × 57.2% = 10/8 견적 단가(× 52%) × 1.1. 표지 &#x27;VAT 포함&#x27;이면 할인율은 그대로 48%, 참고사항 &#x27;부가세 별도&#x27;면 42.8%로 낮아짐. 10/6에 들은 60% 할인은 미반영</td><td class="note">정가표 대조</td></tr><tr><th scope="row">10/12 결정 반영</th><td>유연제조·적응가공 ACS 삭제(정밀검사만 유지), 정밀검사 대형 스캐너 삭제, 연산 서버 GPU 8→4장 + 방화벽(385,000), AMC 18% × 4년 계상, 유연제조 CAD IMPORT 4→3종·EXPORT 3→1종</td><td class="note">10/12 결정 · 10/15 견적</td></tr><tr><th scope="row">금액이 큰 항목</th><td>로컬 HW 3존 2,101,000 · 연산 서버 3대 1,155,000 · AMC 4년 956,394 · 스캐너 2대 380,600천원 — 네 가지가 전체의 약 68%</td><td class="note">견적 항목 합산</td></tr><tr><th scope="row">확인 항목</th><td>AMC &#x27;5년&#x27; 표기와 ×4 계산 불일치, 표지 VAT 포함 vs 참고사항 부가세 별도. 로컬 HW 상세 사양(견적서 &#x27;별도 협의&#x27;). 정밀검사 AIMS(측정 HW 없음)·TESCar·ACS OLP 메이커. 나머지 SW·HW는 적합</td><td class="note">존별 검토</td></tr><tr><th scope="row">정밀조립</th><td>견적 대상이 아님. 같은 단가로 Base·MULTIPLE PROCESS·PLC·Plug-in User·USD Converter 1좌석을 잡으면 약 156,781천원</td><td class="note">견적 단가 적용</td></tr></tbody></table></div>
+  <h2 id="ql-sumh2">10/15 최종 견적 3개 존 · 합계 6,793,000천원</h2>
+  <div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>내용</th><th>근거</th></tr></thead><tbody><tr><th scope="row">견적 개요</th><td id="ql-k-ov">이지로보틱스 10/15 최종 견적 3건(1015-1~3). 유연제조 1,991,000 · 적응가공 2,192,000 · AI정밀검사 2,610,000 = 합계 6,793,000천원. 10/14 수정 구매계획서(스토리지 서버 포함) 기준 재견적으로, 10/12 비용 조정 결정이 반영됨. 과제기간 4개월, Network-Lock 라이선스</td><td class="note">10/15 최종 견적서</td></tr><tr><th scope="row">견적 구조</th><td>① OCS SW(DMWorks + AMC) ② OCS HW(스캐너·연산 서버·운영 PC·모니터링) ③ 로컬 HW(데이터 서버·스토리지·네트워크·서버실) ④ 로컬 OCS·보안(TSDB·IAM/PKI) ⑤ 기술지원 ⑥ 일반관리비·이윤 = (①+②+⑤)의 10%. ③·④는 10/8 견적에 없던 항목</td><td class="note">10/15 최종 견적서</td></tr><tr><th scope="row">단가 수준</th><td>정가표 옵션은 모두 정가(Node-Lock) × 57.2% = 10/8 견적 단가(× 52%) × 1.1. 표지 &#x27;VAT 포함&#x27;이면 할인율은 그대로 48%, 참고사항 &#x27;부가세 별도&#x27;면 42.8%로 낮아짐. 10/6에 들은 60% 할인은 미반영</td><td class="note">정가표 대조</td></tr><tr><th scope="row">10/12 결정 반영</th><td>유연제조·적응가공 ACS 삭제(정밀검사만 유지), 정밀검사 대형 스캐너 삭제, 연산 서버 GPU 8→4장 + 방화벽(385,000), AMC 18% × 4년 계상, 유연제조 CAD IMPORT 4→3종·EXPORT 3→1종</td><td class="note">10/12 결정 · 10/15 견적</td></tr><tr><th scope="row">금액이 큰 항목</th><td id="ql-k-big">로컬 HW 3존 2,101,000 · 연산 서버 3대 1,155,000 · AMC 4년 956,394 · 스캐너 2대 380,600천원 — 네 가지가 전체의 약 68%</td><td class="note">견적 항목 합산</td></tr><tr><th scope="row">확인 항목</th><td>AMC &#x27;5년&#x27; 표기와 ×4 계산 불일치, 표지 VAT 포함 vs 참고사항 부가세 별도. 로컬 HW 상세 사양(견적서 &#x27;별도 협의&#x27;). 정밀검사 AIMS(측정 HW 없음)·TESCar·ACS OLP 메이커. 나머지 SW·HW는 적합</td><td class="note">존별 검토</td></tr><tr><th scope="row">정밀조립</th><td>견적 대상이 아님. 같은 단가로 Base·MULTIPLE PROCESS·PLC·Plug-in User·USD Converter 1좌석을 잡으면 약 156,781천원</td><td class="note">견적 단가 적용</td></tr></tbody></table></div>
   <h3>존별 견적 합계</h3>
-  <div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">OCS SW(AMC 포함)</th><th class="r">OCS HW</th><th class="r">로컬 HW·OCS·보안</th><th class="r">기술지원</th><th class="r">일반관리비·이윤</th><th class="r">견적 합계</th></tr></thead><tbody><tr><td><a href="#z14">A-1-4</a></td><td class="nm">유연제조 OCS 시뮬레이션 Cell</td><td class="note">견26CAMTIC-DMWorks-1015-1</td><td class="num">574,396</td><td class="num">631,950</td><td class="num">616,000</td><td class="num">44,550</td><td class="num">125,089</td><td class="num"><b>1,991,000</b></td></tr><tr><td><a href="#z25">A-2-5</a></td><td class="nm">적응가공 OCS 시뮬레이션 Cell</td><td class="note">견26CAMTIC-DMWorks-1015-2</td><td class="num">546,652</td><td class="num">669,350</td><td class="num">770,000</td><td class="num">77,000</td><td class="num">129,299</td><td class="num"><b>2,192,000</b></td></tr><tr><td><a href="#z45">A-4-5</a></td><td class="nm">AI정밀검사 OCS 시뮬레이션 Cell</td><td class="note">견26CAMTIC-DMWorks-1015-3</td><td class="num">1,163,671</td><td class="num">460,350</td><td class="num">715,000</td><td class="num">99,000</td><td class="num">172,301</td><td class="num"><b>2,610,000</b></td></tr><tr><td><a href="#z3">A-3</a></td><td class="nm">정밀조립존</td><td class="note">견적 없음 · 견적 단가로 산정</td><td class="num">156,781</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">156,781</td></tr><tr class="tot strong"><th colspan="3">견적 합계 (3개 존)</th><td class="num">2,284,719</td><td class="num">1,761,650</td><td class="num">2,101,000</td><td class="num">220,550</td><td class="num">426,689</td><td class="num">6,793,000</td></tr></tbody></table></div><p class="note-box">단위 천원. 견적서 표지는 'VAT 포함', 참고사항은 '부가세 별도'로 엇갈림. 일반관리비·이윤은 (OCS SW + OCS HW + 기술지원)의 10%로 로컬 HW·로컬 OCS·보안에는 붙지 않음. 견적 합계는 업체 단위절삭(백만 원 미만 버림) 후 금액.</p>
+  <div id="ql-sumtbl"><div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">OCS SW(AMC 포함)</th><th class="r">OCS HW</th><th class="r">로컬 HW·OCS·보안</th><th class="r">기술지원</th><th class="r">일반관리비·이윤</th><th class="r">견적 합계</th></tr></thead><tbody><tr><td><a href="#z14">A-1-4</a></td><td class="nm">유연제조 OCS 시뮬레이션 Cell</td><td class="note">견26CAMTIC-DMWorks-1015-1</td><td class="num">574,396</td><td class="num">631,950</td><td class="num">616,000</td><td class="num">44,550</td><td class="num">125,089</td><td class="num"><b>1,991,000</b></td></tr><tr><td><a href="#z25">A-2-5</a></td><td class="nm">적응가공 OCS 시뮬레이션 Cell</td><td class="note">견26CAMTIC-DMWorks-1015-2</td><td class="num">546,652</td><td class="num">669,350</td><td class="num">770,000</td><td class="num">77,000</td><td class="num">129,299</td><td class="num"><b>2,192,000</b></td></tr><tr><td><a href="#z45">A-4-5</a></td><td class="nm">AI정밀검사 OCS 시뮬레이션 Cell</td><td class="note">견26CAMTIC-DMWorks-1015-3</td><td class="num">1,163,671</td><td class="num">460,350</td><td class="num">715,000</td><td class="num">99,000</td><td class="num">172,301</td><td class="num"><b>2,610,000</b></td></tr><tr><td><a href="#z3">A-3</a></td><td class="nm">정밀조립존</td><td class="note">견적 없음 · 견적 단가로 산정</td><td class="num">156,781</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">156,781</td></tr><tr class="tot strong"><th colspan="3">견적 합계 (3개 존)</th><td class="num">2,284,719</td><td class="num">1,761,650</td><td class="num">2,101,000</td><td class="num">220,550</td><td class="num">426,689</td><td class="num">6,793,000</td></tr></tbody></table></div><p class="note-box">단위 천원. 견적서 표지는 'VAT 포함', 참고사항은 '부가세 별도'로 엇갈림. 일반관리비·이윤은 (OCS SW + OCS HW + 기술지원)의 10%로 로컬 HW·로컬 OCS·보안에는 붙지 않음. 견적 합계는 업체 단위절삭(백만 원 미만 버림) 후 금액.</p></div>
 </section>
 <section id="why">
   <p class="eyebrow">1. 구매 필요성</p>
@@ -175,41 +183,41 @@ td.dz,th.dz{text-align:center;white-space:nowrap} table.bom td a{white-space:now
   <p class="eyebrow">2. 견적 단가·제품</p>
   <h2>옵션별 정가 대비 견적 단가, 신규 제품 기능</h2>
   <p class="note-box">정가표 옵션은 모두 정가 × 57.2%(10/8 견적 52% × 1.1). 아래 9종은 정가표에 없는 제품으로 견적가만 있음. 오른쪽 열은 존별 10/15 최종 견적 수량. 검토 표시: <b>적합</b> 존 목적에 맞음 · <b>확인</b> 계상 조건 확인 후 결정.</p>
-  <div class="tbl-wrap"><table class="bom wide"><thead><tr><th>옵션·제품</th><th class="r">정가</th><th class="r">견적 단가</th><th style="text-align:center">비율</th><th>기능</th><th>확인·제약</th><th class='dz'>A-1-4</th><th class='dz'>A-2-5</th><th class='dz'>A-4-5</th></tr></thead><tbody><tr><td class="nm">DMWorks Base<br><span class="chg">DMW-001</span></td><td class="num">142,200</td><td class="num"><b>81,338</b></td><td class="q">57.2%</td><td>Device Modeler(기구학·CAD 생성·좌표계) + Factory Simulator(설비 배치·로봇 라이브러리·모션/Task·충돌검사·케이블·단일 공정)</td><td class="note">단일 공정만(라인·물류는 MULTIPLE PROCESS). 물리엔진 없음 → 학습은 Omniverse</td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">CAD IMPORT (포맷당)<br><span class="chg">DMW-002</span></td><td class="num">9,000</td><td class="num"><b>5,148</b></td><td class="q">57.2%</td><td>외부 CAD 변환·경량화. 포맷당 1옵션</td><td class="note">Base에 1종 포함(정가표). 견적은 4종 별도 계상</td><td class="dz">3</td><td class="dz">4</td><td class="dz">4</td></tr><tr><td class="nm">CAD EXPORT (포맷당)<br><span class="chg">DMW-003</span></td><td class="num">9,000</td><td class="num"><b>5,148</b></td><td class="q">57.2%</td><td>DMWorks 데이터를 외부 포맷으로</td><td class="note">업체 고지: 원하는 결과가 안 나올 수 있음</td><td class="dz">1</td><td class="dz">4</td><td class="dz">3</td></tr><tr><td class="nm">DM OLP (컨트롤러당)<br><span class="chg">DMW-004</span></td><td class="num">24,000</td><td class="num"><b>13,728</b></td><td class="q">57.2%</td><td>로봇 컨트롤러별 오프라인 프로그래밍(스폿·핸들링 24,000)</td><td class="note">협동로봇·휴머노이드 컨트롤러 없음(요청 시 지원)</td><td class="dz">2</td><td class="dz">2</td><td class="dz">2</td></tr><tr><td class="nm">DM RRS (컨트롤러당)<br><span class="chg">DMW-009</span></td><td class="num">20,000</td><td class="num"><b>11,440</b></td><td class="q">57.2%</td><td>로봇사 RCS 연동 정밀 경로·사이클타임</td><td class="note">정가표상 현대 Hi5·FANUC RJ3만. RCS 모듈 미포함</td><td class="dz">1</td><td class="dz">–</td><td class="dz">1</td></tr><tr><td class="nm">DM POINT CLOUD<br><span class="chg">DMW-005</span></td><td class="num">38,000</td><td class="num"><b>21,736</b></td><td class="q">57.2%</td><td>3D 스캔 데이터로 가상 작업장 구축</td><td class="note">공장 공간 스캔 개념</td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">DM MULTIPLE PROCESS<br><span class="chg">DMW-007</span></td><td class="num">46,000</td><td class="num"><b>26,312</b></td><td class="q">57.2%</td><td>다공정 라인·물류(컨베이어·셔틀·버퍼)·UPH·가동률</td><td class="note">AMR 실운영 속도 파라미터 필요</td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)<br><span class="chg">DMW-010</span></td><td class="num">44,200</td><td class="num"><b>25,282</b></td><td class="q">57.2%</td><td>PLC 프로그램–가상 설비 연동 가상 시운전(OPC UA, I/O 매핑, 시퀀스 검증)</td><td class="note">Read + 핸드셰이크만. 이기종 PLC 동시 시뮬레이션 2종까지 경험</td><td class="dz">2</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">DM PLUG-IN For Developer<br><span class="chg">DMW-011</span></td><td class="num">42,000</td><td class="num"><b>24,024</b></td><td class="q">57.2%</td><td>API로 전용 기능·UI 개발(AI·PLC·MES 연계)</td><td class="note">개발한 Plug-in 실행에는 For User 필요</td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">DM PLUG-IN For User<br><span class="chg">DMW-012</span></td><td class="num">14,000</td><td class="num"><b>8,008</b></td><td class="q">57.2%</td><td>개발된 Plug-in 실행 환경</td><td class="note"></td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">DM-Monitoring<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>35,200</b></td><td class="q">–</td><td>설비 실시간 연동으로 DT 동작 일치, CELL/ZONE 운영 정보(생산량·진행률·CT) 분할 화면, 권한 관리</td><td class="note">OCS Cell 관제(OWS·존 오케스트레이터 UI)와 기능이 겹침 → 역할 구분 필요</td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">Omniverse USD Converter<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>15,840</b></td><td class="q">–</td><td>Workcell을 Tree 구조 유지한 USD로 변환·Nucleus 업로드, 물리 설정 정보 반영. 기구 정의 변환은 &#x27;협의 후 개발 예정&#x27;</td><td class="note">9/30 &#x27;지오메트리만&#x27; 문제를 푸는 항목. 기구 정의는 아직 개발 전</td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">Omniverse Live Edit<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>11,440</b></td><td class="q">–</td><td>DMWorks–Omniverse Live Session으로 위치·동작 실시간 동기화</td><td class="note">9/30 업체 스스로 &#x27;DT 운영용 비추천(지연)&#x27;</td><td class="dz">1</td><td class="dz">1</td><td class="dz">1</td></tr><tr><td class="nm">ACS BASE<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>28,600</b></td><td class="q">–</td><td>검사 결과(결함 위치 3D 좌표)로 로봇 리워크 프로그램·레시피 자동 생성 기본 환경</td><td class="note">리워크 공정이 있는 존에만 의미. AI 알고리즘 연동 가능</td><td class="dz">–</td><td class="dz">–</td><td class="dz">1</td></tr><tr><td class="nm">ACS OLP (컨트롤러당)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>18,920</b></td><td class="q">–</td><td>리워크 경로를 로봇 컨트롤러 형식 OLP로 생성</td><td class="note">OLP와 같은 컨트롤러 2종 계상</td><td class="dz">–</td><td class="dz">–</td><td class="dz">2</td></tr><tr><td class="nm">AIMS Simulator (컨트롤러당)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>52,800</b></td><td class="q">–</td><td>가상 측정 작업장·캘리브레이션·측정 시뮬레이션·로봇 OLP</td><td class="note">레이저트래커·스캐너 로봇 자동 측정(CMM 수준)</td><td class="dz">–</td><td class="dz">–</td><td class="dz">2</td></tr><tr><td class="nm">AIMS Controller (컨트롤러당)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>39,600</b></td><td class="q">–</td><td>측정 시스템 통합 제어·데이터 수집·실시간 결과 모니터링</td><td class="note"></td><td class="dz">–</td><td class="dz">–</td><td class="dz">2</td></tr><tr><td class="nm">PIA (Predictive Inspect &amp; Analysis)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>35,200</b></td><td class="q">–</td><td>3D 스캔 데이터 경량화·컬러맵·섹션·차트 시각화로 품질 예측</td><td class="note">측정 결과 분석 SW(9/30 소개)</td><td class="dz">–</td><td class="dz">–</td><td class="dz">1</td></tr><tr><td class="nm">TESCar<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>66,000</b></td><td class="q">–</td><td>스캔 데이터로 저항 점용접 품질 자동 판정·최적 용접조건 제시</td><td class="note">차체 스폿용접 특화 → 유연제조(용접) 쪽 기능에 가까움</td><td class="dz">–</td><td class="dz">–</td><td class="dz">1</td></tr></tbody></table></div>
+  <div class="tbl-wrap"><table class="bom wide"><thead><tr><th>옵션·제품</th><th class="r">정가</th><th class="r">견적 단가</th><th style="text-align:center">비율</th><th>기능</th><th>확인·제약</th><th class='dz'>A-1-4</th><th class='dz'>A-2-5</th><th class='dz'>A-4-5</th></tr></thead><tbody><tr><td class="nm">DMWorks Base<br><span class="chg">DMW-001</span></td><td class="num">142,200</td><td class="num" data-qlu="BASE"><b>81,338</b></td><td class="q" data-qlr="BASE">57.2%</td><td>Device Modeler(기구학·CAD 생성·좌표계) + Factory Simulator(설비 배치·로봇 라이브러리·모션/Task·충돌검사·케이블·단일 공정)</td><td class="note">단일 공정만(라인·물류는 MULTIPLE PROCESS). 물리엔진 없음 → 학습은 Omniverse</td><td class="dz" data-qlq="BASE|A-1-4">1</td><td class="dz" data-qlq="BASE|A-2-5">1</td><td class="dz" data-qlq="BASE|A-4-5">1</td></tr><tr><td class="nm">CAD IMPORT (포맷당)<br><span class="chg">DMW-002</span></td><td class="num">9,000</td><td class="num" data-qlu="CADI"><b>5,148</b></td><td class="q" data-qlr="CADI">57.2%</td><td>외부 CAD 변환·경량화. 포맷당 1옵션</td><td class="note">Base에 1종 포함(정가표). 견적은 4종 별도 계상</td><td class="dz" data-qlq="CADI|A-1-4">3</td><td class="dz" data-qlq="CADI|A-2-5">4</td><td class="dz" data-qlq="CADI|A-4-5">4</td></tr><tr><td class="nm">CAD EXPORT (포맷당)<br><span class="chg">DMW-003</span></td><td class="num">9,000</td><td class="num" data-qlu="CADE"><b>5,148</b></td><td class="q" data-qlr="CADE">57.2%</td><td>DMWorks 데이터를 외부 포맷으로</td><td class="note">업체 고지: 원하는 결과가 안 나올 수 있음</td><td class="dz" data-qlq="CADE|A-1-4">1</td><td class="dz" data-qlq="CADE|A-2-5">4</td><td class="dz" data-qlq="CADE|A-4-5">3</td></tr><tr><td class="nm">DM OLP (컨트롤러당)<br><span class="chg">DMW-004</span></td><td class="num">24,000</td><td class="num" data-qlu="OLP"><b>13,728</b></td><td class="q" data-qlr="OLP">57.2%</td><td>로봇 컨트롤러별 오프라인 프로그래밍(스폿·핸들링 24,000)</td><td class="note">협동로봇·휴머노이드 컨트롤러 없음(요청 시 지원)</td><td class="dz" data-qlq="OLP|A-1-4">2</td><td class="dz" data-qlq="OLP|A-2-5">2</td><td class="dz" data-qlq="OLP|A-4-5">2</td></tr><tr><td class="nm">DM RRS (컨트롤러당)<br><span class="chg">DMW-009</span></td><td class="num">20,000</td><td class="num" data-qlu="RRS"><b>11,440</b></td><td class="q" data-qlr="RRS">57.2%</td><td>로봇사 RCS 연동 정밀 경로·사이클타임</td><td class="note">정가표상 현대 Hi5·FANUC RJ3만. RCS 모듈 미포함</td><td class="dz" data-qlq="RRS|A-1-4">1</td><td class="dz" data-qlq="RRS|A-2-5">–</td><td class="dz" data-qlq="RRS|A-4-5">1</td></tr><tr><td class="nm">DM POINT CLOUD<br><span class="chg">DMW-005</span></td><td class="num">38,000</td><td class="num" data-qlu="PC"><b>21,736</b></td><td class="q" data-qlr="PC">57.2%</td><td>3D 스캔 데이터로 가상 작업장 구축</td><td class="note">공장 공간 스캔 개념</td><td class="dz" data-qlq="PC|A-1-4">1</td><td class="dz" data-qlq="PC|A-2-5">1</td><td class="dz" data-qlq="PC|A-4-5">1</td></tr><tr><td class="nm">DM MULTIPLE PROCESS<br><span class="chg">DMW-007</span></td><td class="num">46,000</td><td class="num" data-qlu="MP"><b>26,312</b></td><td class="q" data-qlr="MP">57.2%</td><td>다공정 라인·물류(컨베이어·셔틀·버퍼)·UPH·가동률</td><td class="note">AMR 실운영 속도 파라미터 필요</td><td class="dz" data-qlq="MP|A-1-4">1</td><td class="dz" data-qlq="MP|A-2-5">1</td><td class="dz" data-qlq="MP|A-4-5">1</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)<br><span class="chg">DMW-010</span></td><td class="num">44,200</td><td class="num" data-qlu="PLC"><b>25,282</b></td><td class="q" data-qlr="PLC">57.2%</td><td>PLC 프로그램–가상 설비 연동 가상 시운전(OPC UA, I/O 매핑, 시퀀스 검증)</td><td class="note">Read + 핸드셰이크만. 이기종 PLC 동시 시뮬레이션 2종까지 경험</td><td class="dz" data-qlq="PLC|A-1-4">2</td><td class="dz" data-qlq="PLC|A-2-5">1</td><td class="dz" data-qlq="PLC|A-4-5">1</td></tr><tr><td class="nm">DM PLUG-IN For Developer<br><span class="chg">DMW-011</span></td><td class="num">42,000</td><td class="num" data-qlu="PID"><b>24,024</b></td><td class="q" data-qlr="PID">57.2%</td><td>API로 전용 기능·UI 개발(AI·PLC·MES 연계)</td><td class="note">개발한 Plug-in 실행에는 For User 필요</td><td class="dz" data-qlq="PID|A-1-4">1</td><td class="dz" data-qlq="PID|A-2-5">1</td><td class="dz" data-qlq="PID|A-4-5">1</td></tr><tr><td class="nm">DM PLUG-IN For User<br><span class="chg">DMW-012</span></td><td class="num">14,000</td><td class="num" data-qlu="PIU"><b>8,008</b></td><td class="q" data-qlr="PIU">57.2%</td><td>개발된 Plug-in 실행 환경</td><td class="note"></td><td class="dz" data-qlq="PIU|A-1-4">1</td><td class="dz" data-qlq="PIU|A-2-5">1</td><td class="dz" data-qlq="PIU|A-4-5">1</td></tr><tr><td class="nm">DM-Monitoring<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="MON"><b>35,200</b></td><td class="q">–</td><td>설비 실시간 연동으로 DT 동작 일치, CELL/ZONE 운영 정보(생산량·진행률·CT) 분할 화면, 권한 관리</td><td class="note">OCS Cell 관제(OWS·존 오케스트레이터 UI)와 기능이 겹침 → 역할 구분 필요</td><td class="dz" data-qlq="MON|A-1-4">1</td><td class="dz" data-qlq="MON|A-2-5">1</td><td class="dz" data-qlq="MON|A-4-5">1</td></tr><tr><td class="nm">Omniverse USD Converter<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="USD"><b>15,840</b></td><td class="q">–</td><td>Workcell을 Tree 구조 유지한 USD로 변환·Nucleus 업로드, 물리 설정 정보 반영. 기구 정의 변환은 &#x27;협의 후 개발 예정&#x27;</td><td class="note">9/30 &#x27;지오메트리만&#x27; 문제를 푸는 항목. 기구 정의는 아직 개발 전</td><td class="dz" data-qlq="USD|A-1-4">1</td><td class="dz" data-qlq="USD|A-2-5">1</td><td class="dz" data-qlq="USD|A-4-5">1</td></tr><tr><td class="nm">Omniverse Live Edit<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="LE"><b>11,440</b></td><td class="q">–</td><td>DMWorks–Omniverse Live Session으로 위치·동작 실시간 동기화</td><td class="note">9/30 업체 스스로 &#x27;DT 운영용 비추천(지연)&#x27;</td><td class="dz" data-qlq="LE|A-1-4">1</td><td class="dz" data-qlq="LE|A-2-5">1</td><td class="dz" data-qlq="LE|A-4-5">1</td></tr><tr><td class="nm">ACS BASE<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="ACSB"><b>28,600</b></td><td class="q">–</td><td>검사 결과(결함 위치 3D 좌표)로 로봇 리워크 프로그램·레시피 자동 생성 기본 환경</td><td class="note">리워크 공정이 있는 존에만 의미. AI 알고리즘 연동 가능</td><td class="dz" data-qlq="ACSB|A-1-4">–</td><td class="dz" data-qlq="ACSB|A-2-5">–</td><td class="dz" data-qlq="ACSB|A-4-5">1</td></tr><tr><td class="nm">ACS OLP (컨트롤러당)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="ACSO"><b>18,920</b></td><td class="q">–</td><td>리워크 경로를 로봇 컨트롤러 형식 OLP로 생성</td><td class="note">OLP와 같은 컨트롤러 2종 계상</td><td class="dz" data-qlq="ACSO|A-1-4">–</td><td class="dz" data-qlq="ACSO|A-2-5">–</td><td class="dz" data-qlq="ACSO|A-4-5">2</td></tr><tr><td class="nm">AIMS Simulator (컨트롤러당)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="AIMSS"><b>52,800</b></td><td class="q">–</td><td>가상 측정 작업장·캘리브레이션·측정 시뮬레이션·로봇 OLP</td><td class="note">레이저트래커·스캐너 로봇 자동 측정(CMM 수준)</td><td class="dz" data-qlq="AIMSS|A-1-4">–</td><td class="dz" data-qlq="AIMSS|A-2-5">–</td><td class="dz" data-qlq="AIMSS|A-4-5">2</td></tr><tr><td class="nm">AIMS Controller (컨트롤러당)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="AIMSC"><b>39,600</b></td><td class="q">–</td><td>측정 시스템 통합 제어·데이터 수집·실시간 결과 모니터링</td><td class="note"></td><td class="dz" data-qlq="AIMSC|A-1-4">–</td><td class="dz" data-qlq="AIMSC|A-2-5">–</td><td class="dz" data-qlq="AIMSC|A-4-5">2</td></tr><tr><td class="nm">PIA (Predictive Inspect &amp; Analysis)<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="PIA"><b>35,200</b></td><td class="q">–</td><td>3D 스캔 데이터 경량화·컬러맵·섹션·차트 시각화로 품질 예측</td><td class="note">측정 결과 분석 SW(9/30 소개)</td><td class="dz" data-qlq="PIA|A-1-4">–</td><td class="dz" data-qlq="PIA|A-2-5">–</td><td class="dz" data-qlq="PIA|A-4-5">1</td></tr><tr><td class="nm">TESCar<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="TES"><b>66,000</b></td><td class="q">–</td><td>스캔 데이터로 저항 점용접 품질 자동 판정·최적 용접조건 제시</td><td class="note">차체 스폿용접 특화 → 유연제조(용접) 쪽 기능에 가까움</td><td class="dz" data-qlq="TES|A-1-4">–</td><td class="dz" data-qlq="TES|A-2-5">–</td><td class="dz" data-qlq="TES|A-4-5">1</td></tr></tbody></table></div>
 </section>
 
 <section id="z14">
-  <p class="eyebrow">A-1-4 · 공정 최적화 + 가상 시운전 · 견26CAMTIC-DMWorks-1015-1</p>
-  <h2>유연제조 OCS 시뮬레이션 Cell · 견적 1,991,000천원</h2>
+  <p class="eyebrow" id="ql-zeb-z14">A-1-4 · 공정 최적화 + 가상 시운전 · 견26CAMTIC-DMWorks-1015-1</p>
+  <h2 id="ql-zh2-z14">유연제조 OCS 시뮬레이션 Cell · 견적 1,991,000천원</h2>
   <h3>해야 할 일과 필요한 기능</h3>
   <div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>필요한 기능·옵션</th></tr></thead><tbody><tr><td>삼진산업 도어·차체 혼류 공정 DT 모델링, 설비 배치·로봇 경로 검증</td><td class='nm'>Base · CAD IMPORT · POINT CLOUD</td></tr><tr><td>다공정 라인·AMR 물류·스케줄 최적화</td><td class='nm'>MULTIPLE PROCESS</td></tr><tr><td>2차년도 실물 셀 투입 전 PLC 가상 시운전</td><td class='nm'>PLC SIMULATION (1사)</td></tr><tr><td>용접·핸들링 로봇 OLP·사이클타임</td><td class='nm'>OLP · RRS (로봇 확정 후)</td></tr><tr><td>운영 상태 DT 모니터링</td><td class='nm'>DM-Monitoring</td></tr><tr><td>Isaac Sim 학습 DT로 Workcell 전달</td><td class='nm'>Omniverse USD Converter</td></tr><tr><td>AAS 출력·OCS 연동 플러그인 개발(3존 공통 거점)</td><td class='nm'>PLUG-IN Developer</td></tr></tbody></table></div>
-  <h3>10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
-  <p class="note-box">10/8 견적 대비: 16.38억 → 19.91억. CAD IMPORT 4→3종·EXPORT 3→1종, ACS(Base·OLP·Customizing) 삭제, 기술지원 감액(75,000 → 44,550), 로컬 HW 528,000·로컬 OCS·보안 88,000 추가. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
-  <div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="rowgroup">SW</th><td class="num">333,951</td><td colspan="2"></td></tr><tr><td class="nm">DMWorks Base</td><td></td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td><span class="tag ok">적합</span></td><td>필수. 모니터링은 DM-Monitoring이 맡아 Base는 1카피</td></tr><tr><td class="nm">DM-Monitoring</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>DT 모니터링 화면(운영 관제는 OCS Cell)</td></tr><tr><td class="nm">CAD IMPORT (포맷당)</td><td>STL·CATIA·AUTOCAD</td><td class="q"><b>3</b></td><td class="num">5,148</td><td class="num">15,444</td><td><span class="tag ok">적합</span></td><td>10/15 최종에서 4→3종(PRO/E 삭제)</td></tr><tr><td class="nm">CAD EXPORT (포맷당)</td><td>JT</td><td class="q"><b>1</b></td><td class="num">5,148</td><td class="num">5,148</td><td><span class="tag ok">적합</span></td><td>10/15 최종에서 3→1종(STL·VRML·OBJ → JT)</td></tr><tr><td class="nm">DM OLP (컨트롤러당)</td><td>HYUNDAI·KAWASAKI</td><td class="q"><b>2</b></td><td class="num">13,728</td><td class="num">27,456</td><td><span class="tag ok">적합</span></td><td>로봇 오프라인 프로그래밍(컨트롤러 2종)</td></tr><tr><td class="nm">DM RRS (컨트롤러당)</td><td>HYUNDAI</td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>현대 Hi5 컨트롤러 사이클타임 정밀 산출</td></tr><tr><td class="nm">DM POINT CLOUD</td><td></td><td class="q"><b>1</b></td><td class="num">21,736</td><td class="num">21,736</td><td><span class="tag ok">적합</span></td><td>공장 스캐너 데이터 반영</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td></td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td><span class="tag ok">적합</span></td><td>혼류 라인·AMR 물류</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td>LS·MITSUBISHI</td><td class="q"><b>2</b></td><td class="num">25,282</td><td class="num">50,565</td><td><span class="tag ok">적합</span></td><td>PLC 가상 시운전 2종(DMWorks 동시 시뮬레이션 2기종 경험 범위)</td></tr><tr><td class="nm">DM PLUG-IN For Developer</td><td></td><td class="q"><b>1</b></td><td class="num">24,024</td><td class="num">24,024</td><td><span class="tag ok">적합</span></td><td>존 전용 Plug-in 개발</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td></td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">Omniverse USD Converter</td><td></td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td><span class="tag ok">적합</span></td><td>Isaac Sim 학습 DT 연계 핵심</td></tr><tr><td class="nm">Omniverse Live Edit</td><td></td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>Omniverse 리뷰 세션 실시간 동기화</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">유지보수</th><td class="num">240,445</td><td colspan="2"></td></tr><tr><td class="nm">AMC 유지보수</td><td>연 18% × 4년</td><td class="q"><b>4</b></td><td class="num">60,111</td><td class="num">240,445</td><td><span class="tag chk">확인</span></td><td>견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 &#x27;5년 AMC 포함&#x27;이라 표기와 계산이 다름</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">OCS HW</th><td class="num">631,950</td><td colspan="2"></td></tr><tr><td class="nm">광대역 공장 스캐너 RTC700 (HW·운영 SW 포함)</td><td></td><td class="q"><b>1</b></td><td class="num">171,600</td><td class="num">171,600</td><td><span class="tag ok">적합</span></td><td>대형 공간 스캔으로 공장·셀 가상 작업장 구축</td></tr><tr><td class="nm">DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)</td><td></td><td class="q"><b>1</b></td><td class="num">385,000</td><td class="num">385,000</td><td><span class="tag ok">적합</span></td><td>10/12 결정 GPU 8→4장 반영, 방화벽 포함</td></tr><tr><td class="nm">디지털트윈·시뮬레이션 운영 PC</td><td></td><td class="q"><b>1</b></td><td class="num">13,200</td><td class="num">13,200</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">시뮬레이션 운영 노트북</td><td></td><td class="q"><b>1</b></td><td class="num">7,150</td><td class="num">7,150</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업</td><td></td><td class="q"><b>1</b></td><td class="num">55,000</td><td class="num">55,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 HW</th><td class="num">528,000</td><td colspan="2"></td></tr><tr><td class="nm">데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)</td><td></td><td class="q"><b>1</b></td><td class="num">528,000</td><td class="num">528,000</td><td><span class="tag chk">확인</span></td><td>견적서 &#x27;상세 사양 별도 협의&#x27;. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 OCS·보안</th><td class="num">88,000</td><td colspan="2"></td></tr><tr><td class="nm">로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)</td><td></td><td class="q"><b>1</b></td><td class="num">49,500</td><td class="num">49,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 운영 데이터 저장</td></tr><tr><td class="nm">보안 스택(IAM/PKI) — Keycloak + HIWARE</td><td></td><td class="q"><b>1</b></td><td class="num">38,500</td><td class="num">38,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 접근·인증 관리</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">기술지원</th><td class="num">44,550</td><td colspan="2"></td></tr><tr><td class="nm">CELL 구성 설비별 DT 연동 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">11,000</td><td class="num">11,000</td><td><span class="tag ok">적합</span></td><td>다른 두 존(22,000)의 절반으로 감액</td></tr><tr><td class="nm">DB 연동 시각화 UI Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">28,050</td><td class="num">28,050</td><td><span class="tag ok">적합</span></td><td>다른 두 존(44,000)보다 감액. DB 데이터를 DT 화면에 시각화</td></tr><tr><td class="nm">DM PLUG-IN 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">5,500</td><td class="num">5,500</td><td><span class="tag ok">적합</span></td><td>AAS 출력·OpenUSD 물성 전달 범위 명시. 다른 두 존(11,000)의 절반</td></tr></tbody><tfoot><tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">125,089</td><td colspan="2"></td></tr><tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">1,991,000</td><td colspan="2">견26CAMTIC-DMWorks-1015-1</td></tr></tfoot></table></div>
+  <h3 id="ql-zh3-z14">10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
+  <p class="note-box" id="ql-zchg-z14">10/8 견적 대비: 16.38억 → 19.91억. CAD IMPORT 4→3종·EXPORT 3→1종, ACS(Base·OLP·Customizing) 삭제, 기술지원 감액(75,000 → 44,550), 로컬 HW 528,000·로컬 OCS·보안 88,000 추가. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
+  <div id="ql-qt-z14"><div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="rowgroup">SW</th><td class="num">333,951</td><td colspan="2"></td></tr><tr><td class="nm">DMWorks Base</td><td></td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td><span class="tag ok">적합</span></td><td>필수. 모니터링은 DM-Monitoring이 맡아 Base는 1카피</td></tr><tr><td class="nm">DM-Monitoring</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>DT 모니터링 화면(운영 관제는 OCS Cell)</td></tr><tr><td class="nm">CAD IMPORT (포맷당)</td><td>STL·CATIA·AUTOCAD</td><td class="q"><b>3</b></td><td class="num">5,148</td><td class="num">15,444</td><td><span class="tag ok">적합</span></td><td>10/15 최종에서 4→3종(PRO/E 삭제)</td></tr><tr><td class="nm">CAD EXPORT (포맷당)</td><td>JT</td><td class="q"><b>1</b></td><td class="num">5,148</td><td class="num">5,148</td><td><span class="tag ok">적합</span></td><td>10/15 최종에서 3→1종(STL·VRML·OBJ → JT)</td></tr><tr><td class="nm">DM OLP (컨트롤러당)</td><td>HYUNDAI·KAWASAKI</td><td class="q"><b>2</b></td><td class="num">13,728</td><td class="num">27,456</td><td><span class="tag ok">적합</span></td><td>로봇 오프라인 프로그래밍(컨트롤러 2종)</td></tr><tr><td class="nm">DM RRS (컨트롤러당)</td><td>HYUNDAI</td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>현대 Hi5 컨트롤러 사이클타임 정밀 산출</td></tr><tr><td class="nm">DM POINT CLOUD</td><td></td><td class="q"><b>1</b></td><td class="num">21,736</td><td class="num">21,736</td><td><span class="tag ok">적합</span></td><td>공장 스캐너 데이터 반영</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td></td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td><span class="tag ok">적합</span></td><td>혼류 라인·AMR 물류</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td>LS·MITSUBISHI</td><td class="q"><b>2</b></td><td class="num">25,282</td><td class="num">50,565</td><td><span class="tag ok">적합</span></td><td>PLC 가상 시운전 2종(DMWorks 동시 시뮬레이션 2기종 경험 범위)</td></tr><tr><td class="nm">DM PLUG-IN For Developer</td><td></td><td class="q"><b>1</b></td><td class="num">24,024</td><td class="num">24,024</td><td><span class="tag ok">적합</span></td><td>존 전용 Plug-in 개발</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td></td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">Omniverse USD Converter</td><td></td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td><span class="tag ok">적합</span></td><td>Isaac Sim 학습 DT 연계 핵심</td></tr><tr><td class="nm">Omniverse Live Edit</td><td></td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>Omniverse 리뷰 세션 실시간 동기화</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">유지보수</th><td class="num">240,445</td><td colspan="2"></td></tr><tr><td class="nm">AMC 유지보수</td><td>연 18% × 4년</td><td class="q"><b>4</b></td><td class="num">60,111</td><td class="num">240,445</td><td><span class="tag chk">확인</span></td><td>견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 &#x27;5년 AMC 포함&#x27;이라 표기와 계산이 다름</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">OCS HW</th><td class="num">631,950</td><td colspan="2"></td></tr><tr><td class="nm">광대역 공장 스캐너 RTC700 (HW·운영 SW 포함)</td><td></td><td class="q"><b>1</b></td><td class="num">171,600</td><td class="num">171,600</td><td><span class="tag ok">적합</span></td><td>대형 공간 스캔으로 공장·셀 가상 작업장 구축</td></tr><tr><td class="nm">DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)</td><td></td><td class="q"><b>1</b></td><td class="num">385,000</td><td class="num">385,000</td><td><span class="tag ok">적합</span></td><td>10/12 결정 GPU 8→4장 반영, 방화벽 포함</td></tr><tr><td class="nm">디지털트윈·시뮬레이션 운영 PC</td><td></td><td class="q"><b>1</b></td><td class="num">13,200</td><td class="num">13,200</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">시뮬레이션 운영 노트북</td><td></td><td class="q"><b>1</b></td><td class="num">7,150</td><td class="num">7,150</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업</td><td></td><td class="q"><b>1</b></td><td class="num">55,000</td><td class="num">55,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 HW</th><td class="num">528,000</td><td colspan="2"></td></tr><tr><td class="nm">데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)</td><td></td><td class="q"><b>1</b></td><td class="num">528,000</td><td class="num">528,000</td><td><span class="tag chk">확인</span></td><td>견적서 &#x27;상세 사양 별도 협의&#x27;. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 OCS·보안</th><td class="num">88,000</td><td colspan="2"></td></tr><tr><td class="nm">로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)</td><td></td><td class="q"><b>1</b></td><td class="num">49,500</td><td class="num">49,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 운영 데이터 저장</td></tr><tr><td class="nm">보안 스택(IAM/PKI) — Keycloak + HIWARE</td><td></td><td class="q"><b>1</b></td><td class="num">38,500</td><td class="num">38,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 접근·인증 관리</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">기술지원</th><td class="num">44,550</td><td colspan="2"></td></tr><tr><td class="nm">CELL 구성 설비별 DT 연동 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">11,000</td><td class="num">11,000</td><td><span class="tag ok">적합</span></td><td>다른 두 존(22,000)의 절반으로 감액</td></tr><tr><td class="nm">DB 연동 시각화 UI Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">28,050</td><td class="num">28,050</td><td><span class="tag ok">적합</span></td><td>다른 두 존(44,000)보다 감액. DB 데이터를 DT 화면에 시각화</td></tr><tr><td class="nm">DM PLUG-IN 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">5,500</td><td class="num">5,500</td><td><span class="tag ok">적합</span></td><td>AAS 출력·OpenUSD 물성 전달 범위 명시. 다른 두 존(11,000)의 절반</td></tr></tbody><tfoot><tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">125,089</td><td colspan="2"></td></tr><tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">1,991,000</td><td colspan="2">견26CAMTIC-DMWorks-1015-1</td></tr></tfoot></table></div></div>
 </section>
 <section id="z25">
-  <p class="eyebrow">A-2-5 · 데이터 + 강화학습 · 견26CAMTIC-DMWorks-1015-2</p>
-  <h2>적응가공 OCS 시뮬레이션 Cell · 견적 2,192,000천원</h2>
+  <p class="eyebrow" id="ql-zeb-z25">A-2-5 · 데이터 + 강화학습 · 견26CAMTIC-DMWorks-1015-2</p>
+  <h2 id="ql-zh2-z25">적응가공 OCS 시뮬레이션 Cell · 견적 2,192,000천원</h2>
   <h3>해야 할 일과 필요한 기능</h3>
   <div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>필요한 기능·옵션</th></tr></thead><tbody><tr><td>가공기·로봇·팔레트·AMR 경로·간섭 검증</td><td class='nm'>Base · CAD IMPORT</td></tr><tr><td>공정 배정·팔레트·AMR 물류 최적화</td><td class='nm'>MULTIPLE PROCESS</td></tr><tr><td>머신텐딩 셀 제어로직·가공기 인터록 검증</td><td class='nm'>PLC SIMULATION</td></tr><tr><td>로딩·언로딩 로봇 OLP</td><td class='nm'>OLP (로봇 확정 후)</td></tr><tr><td>강화학습 환경(Isaac Lab)으로 셀 전달·결과 환류</td><td class='nm'>USD Converter · PLUG-IN User</td></tr><tr><td>※ CNC 가공 경로·NC 검증은 별도 SW(DMWorks에 CAM 없음)</td><td class='nm'>—</td></tr></tbody></table></div>
-  <h3>10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
-  <p class="note-box">10/8 견적 대비: 16.20억 → 21.92억. ACS(Base·OLP·Customizing) 삭제, DB 연동 UI 45,000 → 44,000(×1.1 전), 로컬 HW 682,000·로컬 OCS·보안 88,000 추가. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
-  <div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="rowgroup">SW</th><td class="num">317,821</td><td colspan="2"></td></tr><tr><td class="nm">DMWorks Base</td><td></td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td><span class="tag ok">적합</span></td><td>필수</td></tr><tr><td class="nm">DM-Monitoring</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>DT 모니터링 화면(운영 관제는 OCS Cell)</td></tr><tr><td class="nm">CAD IMPORT (포맷당)</td><td>NX·JT·SOLID EDGE·SOLIDWORKS</td><td class="q"><b>4</b></td><td class="num">5,148</td><td class="num">20,592</td><td><span class="tag ok">적합</span></td><td>가공기·지그 원본 포맷 반입</td></tr><tr><td class="nm">CAD EXPORT (포맷당)</td><td>AAS·JT·IGES·FBX</td><td class="q"><b>4</b></td><td class="num">5,148</td><td class="num">20,592</td><td><span class="tag ok">적합</span></td><td>AAS·중립 포맷 내보내기</td></tr><tr><td class="nm">DM OLP (컨트롤러당)</td><td>YASKAWA·KUKA</td><td class="q"><b>2</b></td><td class="num">13,728</td><td class="num">27,456</td><td><span class="tag ok">적합</span></td><td>머신텐딩 로봇 오프라인 프로그래밍</td></tr><tr><td class="nm">DM POINT CLOUD</td><td></td><td class="q"><b>1</b></td><td class="num">21,736</td><td class="num">21,736</td><td><span class="tag ok">적합</span></td><td>제품 스캐너 점군을 가상 작업장에 반영</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td></td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td><span class="tag ok">적합</span></td><td>팔레트·AMR 물류</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td>SIEMENS</td><td class="q"><b>1</b></td><td class="num">25,282</td><td class="num">25,282</td><td><span class="tag ok">적합</span></td><td>PLC 메이커 확정 시 일치 여부 확인</td></tr><tr><td class="nm">DM PLUG-IN For Developer</td><td></td><td class="q"><b>1</b></td><td class="num">24,024</td><td class="num">24,024</td><td><span class="tag ok">적합</span></td><td>존 전용 Plug-in 개발</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td></td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">Omniverse USD Converter</td><td></td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td><span class="tag ok">적합</span></td><td>강화학습 환경(Isaac Lab) 연계</td></tr><tr><td class="nm">Omniverse Live Edit</td><td></td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>Omniverse 리뷰 세션 실시간 동기화</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">유지보수</th><td class="num">228,831</td><td colspan="2"></td></tr><tr><td class="nm">AMC 유지보수</td><td>연 18% × 4년</td><td class="q"><b>4</b></td><td class="num">57,208</td><td class="num">228,831</td><td><span class="tag chk">확인</span></td><td>견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 &#x27;5년 AMC 포함&#x27;이라 표기와 계산이 다름</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">OCS HW</th><td class="num">669,350</td><td colspan="2"></td></tr><tr><td class="nm">소형 제품 스캐너(자동) HyperScan (HW·운영 SW 포함)</td><td></td><td class="q"><b>1</b></td><td class="num">209,000</td><td class="num">209,000</td><td><span class="tag ok">적합</span></td><td>가공 소재·제품 자동 스캔, 점군을 가상 작업장에 반영</td></tr><tr><td class="nm">DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)</td><td></td><td class="q"><b>1</b></td><td class="num">385,000</td><td class="num">385,000</td><td><span class="tag ok">적합</span></td><td>10/12 결정 GPU 8→4장 반영, 방화벽 포함</td></tr><tr><td class="nm">디지털트윈·시뮬레이션 운영 PC</td><td></td><td class="q"><b>1</b></td><td class="num">13,200</td><td class="num">13,200</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">시뮬레이션 운영 노트북</td><td></td><td class="q"><b>1</b></td><td class="num">7,150</td><td class="num">7,150</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업</td><td></td><td class="q"><b>1</b></td><td class="num">55,000</td><td class="num">55,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 HW</th><td class="num">682,000</td><td colspan="2"></td></tr><tr><td class="nm">데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)</td><td></td><td class="q"><b>1</b></td><td class="num">682,000</td><td class="num">682,000</td><td><span class="tag chk">확인</span></td><td>견적서 &#x27;상세 사양 별도 협의&#x27;. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 OCS·보안</th><td class="num">88,000</td><td colspan="2"></td></tr><tr><td class="nm">로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)</td><td></td><td class="q"><b>1</b></td><td class="num">49,500</td><td class="num">49,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 운영 데이터 저장</td></tr><tr><td class="nm">보안 스택(IAM/PKI) — Keycloak + HIWARE</td><td></td><td class="q"><b>1</b></td><td class="num">38,500</td><td class="num">38,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 접근·인증 관리</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">기술지원</th><td class="num">77,000</td><td colspan="2"></td></tr><tr><td class="nm">CELL 구성 설비별 DT 연동 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">22,000</td><td class="num">22,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DB 연동 시각화 UI Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">44,000</td><td class="num">44,000</td><td><span class="tag ok">적합</span></td><td>DB 데이터를 DT 화면에 시각화</td></tr><tr><td class="nm">DM PLUG-IN 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">11,000</td><td class="num">11,000</td><td><span class="tag ok">적합</span></td><td></td></tr></tbody><tfoot><tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">129,299</td><td colspan="2"></td></tr><tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">2,192,000</td><td colspan="2">견26CAMTIC-DMWorks-1015-2</td></tr></tfoot></table></div>
+  <h3 id="ql-zh3-z25">10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
+  <p class="note-box" id="ql-zchg-z25">10/8 견적 대비: 16.20억 → 21.92억. ACS(Base·OLP·Customizing) 삭제, DB 연동 UI 45,000 → 44,000(×1.1 전), 로컬 HW 682,000·로컬 OCS·보안 88,000 추가. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
+  <div id="ql-qt-z25"><div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="rowgroup">SW</th><td class="num">317,821</td><td colspan="2"></td></tr><tr><td class="nm">DMWorks Base</td><td></td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td><span class="tag ok">적합</span></td><td>필수</td></tr><tr><td class="nm">DM-Monitoring</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>DT 모니터링 화면(운영 관제는 OCS Cell)</td></tr><tr><td class="nm">CAD IMPORT (포맷당)</td><td>NX·JT·SOLID EDGE·SOLIDWORKS</td><td class="q"><b>4</b></td><td class="num">5,148</td><td class="num">20,592</td><td><span class="tag ok">적합</span></td><td>가공기·지그 원본 포맷 반입</td></tr><tr><td class="nm">CAD EXPORT (포맷당)</td><td>AAS·JT·IGES·FBX</td><td class="q"><b>4</b></td><td class="num">5,148</td><td class="num">20,592</td><td><span class="tag ok">적합</span></td><td>AAS·중립 포맷 내보내기</td></tr><tr><td class="nm">DM OLP (컨트롤러당)</td><td>YASKAWA·KUKA</td><td class="q"><b>2</b></td><td class="num">13,728</td><td class="num">27,456</td><td><span class="tag ok">적합</span></td><td>머신텐딩 로봇 오프라인 프로그래밍</td></tr><tr><td class="nm">DM POINT CLOUD</td><td></td><td class="q"><b>1</b></td><td class="num">21,736</td><td class="num">21,736</td><td><span class="tag ok">적합</span></td><td>제품 스캐너 점군을 가상 작업장에 반영</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td></td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td><span class="tag ok">적합</span></td><td>팔레트·AMR 물류</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td>SIEMENS</td><td class="q"><b>1</b></td><td class="num">25,282</td><td class="num">25,282</td><td><span class="tag ok">적합</span></td><td>PLC 메이커 확정 시 일치 여부 확인</td></tr><tr><td class="nm">DM PLUG-IN For Developer</td><td></td><td class="q"><b>1</b></td><td class="num">24,024</td><td class="num">24,024</td><td><span class="tag ok">적합</span></td><td>존 전용 Plug-in 개발</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td></td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">Omniverse USD Converter</td><td></td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td><span class="tag ok">적합</span></td><td>강화학습 환경(Isaac Lab) 연계</td></tr><tr><td class="nm">Omniverse Live Edit</td><td></td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>Omniverse 리뷰 세션 실시간 동기화</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">유지보수</th><td class="num">228,831</td><td colspan="2"></td></tr><tr><td class="nm">AMC 유지보수</td><td>연 18% × 4년</td><td class="q"><b>4</b></td><td class="num">57,208</td><td class="num">228,831</td><td><span class="tag chk">확인</span></td><td>견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 &#x27;5년 AMC 포함&#x27;이라 표기와 계산이 다름</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">OCS HW</th><td class="num">669,350</td><td colspan="2"></td></tr><tr><td class="nm">소형 제품 스캐너(자동) HyperScan (HW·운영 SW 포함)</td><td></td><td class="q"><b>1</b></td><td class="num">209,000</td><td class="num">209,000</td><td><span class="tag ok">적합</span></td><td>가공 소재·제품 자동 스캔, 점군을 가상 작업장에 반영</td></tr><tr><td class="nm">DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)</td><td></td><td class="q"><b>1</b></td><td class="num">385,000</td><td class="num">385,000</td><td><span class="tag ok">적합</span></td><td>10/12 결정 GPU 8→4장 반영, 방화벽 포함</td></tr><tr><td class="nm">디지털트윈·시뮬레이션 운영 PC</td><td></td><td class="q"><b>1</b></td><td class="num">13,200</td><td class="num">13,200</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">시뮬레이션 운영 노트북</td><td></td><td class="q"><b>1</b></td><td class="num">7,150</td><td class="num">7,150</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업</td><td></td><td class="q"><b>1</b></td><td class="num">55,000</td><td class="num">55,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 HW</th><td class="num">682,000</td><td colspan="2"></td></tr><tr><td class="nm">데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)</td><td></td><td class="q"><b>1</b></td><td class="num">682,000</td><td class="num">682,000</td><td><span class="tag chk">확인</span></td><td>견적서 &#x27;상세 사양 별도 협의&#x27;. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 OCS·보안</th><td class="num">88,000</td><td colspan="2"></td></tr><tr><td class="nm">로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)</td><td></td><td class="q"><b>1</b></td><td class="num">49,500</td><td class="num">49,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 운영 데이터 저장</td></tr><tr><td class="nm">보안 스택(IAM/PKI) — Keycloak + HIWARE</td><td></td><td class="q"><b>1</b></td><td class="num">38,500</td><td class="num">38,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 접근·인증 관리</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">기술지원</th><td class="num">77,000</td><td colspan="2"></td></tr><tr><td class="nm">CELL 구성 설비별 DT 연동 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">22,000</td><td class="num">22,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DB 연동 시각화 UI Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">44,000</td><td class="num">44,000</td><td><span class="tag ok">적합</span></td><td>DB 데이터를 DT 화면에 시각화</td></tr><tr><td class="nm">DM PLUG-IN 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">11,000</td><td class="num">11,000</td><td><span class="tag ok">적합</span></td><td></td></tr></tbody><tfoot><tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">129,299</td><td colspan="2"></td></tr><tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">2,192,000</td><td colspan="2">견26CAMTIC-DMWorks-1015-2</td></tr></tfoot></table></div></div>
 </section>
 <section id="z45">
-  <p class="eyebrow">A-4-5 · DT(역설계) + 품질 운영 · 견26CAMTIC-DMWorks-1015-3</p>
-  <h2>AI정밀검사 OCS 시뮬레이션 Cell · 견적 2,610,000천원</h2>
+  <p class="eyebrow" id="ql-zeb-z45">A-4-5 · DT(역설계) + 품질 운영 · 견26CAMTIC-DMWorks-1015-3</p>
+  <h2 id="ql-zh2-z45">AI정밀검사 OCS 시뮬레이션 Cell · 견적 2,610,000천원</h2>
   <h3>해야 할 일과 필요한 기능</h3>
   <div class="tbl-wrap"><table class="bom"><thead><tr><th>이 존에서 해야 할 일</th><th>필요한 기능·옵션</th></tr></thead><tbody><tr><td>3D 스캔으로 검사 셀·현장을 가상 작업장으로</td><td class='nm'>POINT CLOUD</td></tr><tr><td>로봇 자동 측정 경로·측정 시뮬레이션</td><td class='nm'>AIMS Simulator · Controller</td></tr><tr><td>스캔 결과 분석·품질 예측 시각화</td><td class='nm'>PIA</td></tr><tr><td>판정→재검사→리워크 폐루프(리워크 로봇 프로그램 자동 생성)</td><td class='nm'>ACS BASE · ACS OLP</td></tr><tr><td>검사·로봇·AMR 공정 시뮬레이션</td><td class='nm'>Base · MULTIPLE PROCESS</td></tr><tr><td>합성 결함 데이터(Omniverse) 연계</td><td class='nm'>USD Converter</td></tr></tbody></table></div>
-  <h3>10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
-  <p class="note-box">10/8 견적 대비: 25.31억 → 26.10억. 대형 제품 스캐너 AT960SR+AS1(560,000) 삭제, ACS·AIMS·PIA·TESCar 유지, 로컬 HW 627,000·로컬 OCS·보안 88,000 추가. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
-  <div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="rowgroup">SW</th><td class="num">676,553</td><td colspan="2"></td></tr><tr><td class="nm">DMWorks Base</td><td></td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td><span class="tag ok">적합</span></td><td>필수</td></tr><tr><td class="nm">DM-Monitoring</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>DT 모니터링 화면(품질 관제는 QMS·OCS)</td></tr><tr><td class="nm">CAD IMPORT (포맷당)</td><td>STEP·OBJ·AAS·PARASOLID</td><td class="q"><b>4</b></td><td class="num">5,148</td><td class="num">20,592</td><td><span class="tag ok">적합</span></td><td>검사 대상 CAD 포맷 반입</td></tr><tr><td class="nm">CAD EXPORT (포맷당)</td><td>AAS·STP·PARASOLID</td><td class="q"><b>3</b></td><td class="num">5,148</td><td class="num">15,444</td><td><span class="tag ok">적합</span></td><td>역설계 결과 내보내기</td></tr><tr><td class="nm">DM OLP (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">13,728</td><td class="num">27,456</td><td><span class="tag ok">적합</span></td><td>검사·리워크 로봇 오프라인 프로그래밍</td></tr><tr><td class="nm">DM RRS (컨트롤러당)</td><td>FANUC</td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>FANUC 컨트롤러 사이클타임 정밀 산출</td></tr><tr><td class="nm">DM POINT CLOUD</td><td></td><td class="q"><b>1</b></td><td class="num">21,736</td><td class="num">21,736</td><td><span class="tag ok">적합</span></td><td>스캔 기반 가상 작업장</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td></td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td><span class="tag ok">적합</span></td><td>검사 라인·AMR 물류</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td>ROCKWELL</td><td class="q"><b>1</b></td><td class="num">25,282</td><td class="num">25,282</td><td><span class="tag ok">적합</span></td><td>검사 라인 PLC 가상 시운전</td></tr><tr><td class="nm">DM PLUG-IN For Developer</td><td></td><td class="q"><b>1</b></td><td class="num">24,024</td><td class="num">24,024</td><td><span class="tag ok">적합</span></td><td>검사 전용 Plug-in 개발</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td></td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">Omniverse USD Converter</td><td></td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td><span class="tag ok">적합</span></td><td>합성 결함 데이터(Omniverse) 연계</td></tr><tr><td class="nm">Omniverse Live Edit</td><td></td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>Omniverse 리뷰 세션 실시간 동기화</td></tr><tr><td class="nm">ACS BASE</td><td></td><td class="q"><b>1</b></td><td class="num">28,600</td><td class="num">28,600</td><td><span class="tag ok">적합</span></td><td>판정→재검사→리워크 폐루프와 직접 맞음(10/12 결정: ACS는 정밀검사존만)</td></tr><tr><td class="nm">ACS OLP (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">18,920</td><td class="num">37,840</td><td><span class="tag chk">확인</span></td><td>구매계획(안)은 FANUC·KUKA — 리워크 로봇 메이커로 한쪽에 맞춤</td></tr><tr><td class="nm">PIA (Predictive Inspect &amp; Analysis)</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>스캔 결과 분석·시각화</td></tr><tr><td class="nm">TESCar</td><td></td><td class="q"><b>1</b></td><td class="num">66,000</td><td class="num">66,000</td><td><span class="tag chk">확인</span></td><td>차체 스폿용접 특화. 감액이 필요하면 1순위 — 유지하려면 대상 부품의 용접부 검사 근거 필요</td></tr><tr><td class="nm">AIMS Simulator (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">52,800</td><td class="num">105,600</td><td><span class="tag chk">확인</span></td><td>레이저트래커 측정용 — 10/15 최종에서 스캐너는 빠졌는데 AIMS는 남음. 측정 HW 없이 쓸 근거 명시 필요</td></tr><tr><td class="nm">AIMS Controller (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">39,600</td><td class="num">79,200</td><td><span class="tag chk">확인</span></td><td>측정 시스템 제어용 — 제어할 스캐너가 빠져 AIMS Simulator와 같이 판단</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">유지보수</th><td class="num">487,118</td><td colspan="2"></td></tr><tr><td class="nm">AMC 유지보수</td><td>연 18% × 4년</td><td class="q"><b>4</b></td><td class="num">121,780</td><td class="num">487,118</td><td><span class="tag chk">확인</span></td><td>견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 &#x27;5년 AMC 포함&#x27;이라 표기와 계산이 다름. AIMS·TESCar 조정 시 함께 감소</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">OCS HW</th><td class="num">460,350</td><td colspan="2"></td></tr><tr><td class="nm">DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)</td><td></td><td class="q"><b>1</b></td><td class="num">385,000</td><td class="num">385,000</td><td><span class="tag ok">적합</span></td><td>10/12 결정 GPU 8→4장 반영, 방화벽 포함</td></tr><tr><td class="nm">디지털트윈·시뮬레이션 운영 PC</td><td></td><td class="q"><b>1</b></td><td class="num">13,200</td><td class="num">13,200</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">시뮬레이션 운영 노트북</td><td></td><td class="q"><b>1</b></td><td class="num">7,150</td><td class="num">7,150</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업</td><td></td><td class="q"><b>1</b></td><td class="num">55,000</td><td class="num">55,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 HW</th><td class="num">627,000</td><td colspan="2"></td></tr><tr><td class="nm">데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)</td><td></td><td class="q"><b>1</b></td><td class="num">627,000</td><td class="num">627,000</td><td><span class="tag chk">확인</span></td><td>견적서 &#x27;상세 사양 별도 협의&#x27;. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 OCS·보안</th><td class="num">88,000</td><td colspan="2"></td></tr><tr><td class="nm">로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)</td><td></td><td class="q"><b>1</b></td><td class="num">49,500</td><td class="num">49,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 운영 데이터 저장</td></tr><tr><td class="nm">보안 스택(IAM/PKI) — Keycloak + HIWARE</td><td></td><td class="q"><b>1</b></td><td class="num">38,500</td><td class="num">38,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 접근·인증 관리</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">기술지원</th><td class="num">99,000</td><td colspan="2"></td></tr><tr><td class="nm">CELL 구성 설비별 DT 연동 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">22,000</td><td class="num">22,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DB 연동 시각화 UI Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">44,000</td><td class="num">44,000</td><td><span class="tag ok">적합</span></td><td>DB 데이터를 DT 화면에 시각화</td></tr><tr><td class="nm">DM PLUG-IN 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">11,000</td><td class="num">11,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">ACS 시스템 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">22,000</td><td class="num">22,000</td><td><span class="tag ok">적합</span></td><td>ACS 리워크 연동</td></tr></tbody><tfoot><tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">172,301</td><td colspan="2"></td></tr><tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">2,610,000</td><td colspan="2">견26CAMTIC-DMWorks-1015-3</td></tr></tfoot></table></div>
+  <h3 id="ql-zh3-z45">10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
+  <p class="note-box" id="ql-zchg-z45">10/8 견적 대비: 25.31억 → 26.10억. 대형 제품 스캐너 AT960SR+AS1(560,000) 삭제, ACS·AIMS·PIA·TESCar 유지, 로컬 HW 627,000·로컬 OCS·보안 88,000 추가. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
+  <div id="ql-qt-z45"><div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="rowgroup">SW</th><td class="num">676,553</td><td colspan="2"></td></tr><tr><td class="nm">DMWorks Base</td><td></td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td><span class="tag ok">적합</span></td><td>필수</td></tr><tr><td class="nm">DM-Monitoring</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>DT 모니터링 화면(품질 관제는 QMS·OCS)</td></tr><tr><td class="nm">CAD IMPORT (포맷당)</td><td>STEP·OBJ·AAS·PARASOLID</td><td class="q"><b>4</b></td><td class="num">5,148</td><td class="num">20,592</td><td><span class="tag ok">적합</span></td><td>검사 대상 CAD 포맷 반입</td></tr><tr><td class="nm">CAD EXPORT (포맷당)</td><td>AAS·STP·PARASOLID</td><td class="q"><b>3</b></td><td class="num">5,148</td><td class="num">15,444</td><td><span class="tag ok">적합</span></td><td>역설계 결과 내보내기</td></tr><tr><td class="nm">DM OLP (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">13,728</td><td class="num">27,456</td><td><span class="tag ok">적합</span></td><td>검사·리워크 로봇 오프라인 프로그래밍</td></tr><tr><td class="nm">DM RRS (컨트롤러당)</td><td>FANUC</td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>FANUC 컨트롤러 사이클타임 정밀 산출</td></tr><tr><td class="nm">DM POINT CLOUD</td><td></td><td class="q"><b>1</b></td><td class="num">21,736</td><td class="num">21,736</td><td><span class="tag ok">적합</span></td><td>스캔 기반 가상 작업장</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td></td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td><span class="tag ok">적합</span></td><td>검사 라인·AMR 물류</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td>ROCKWELL</td><td class="q"><b>1</b></td><td class="num">25,282</td><td class="num">25,282</td><td><span class="tag ok">적합</span></td><td>검사 라인 PLC 가상 시운전</td></tr><tr><td class="nm">DM PLUG-IN For Developer</td><td></td><td class="q"><b>1</b></td><td class="num">24,024</td><td class="num">24,024</td><td><span class="tag ok">적합</span></td><td>검사 전용 Plug-in 개발</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td></td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">Omniverse USD Converter</td><td></td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td><span class="tag ok">적합</span></td><td>합성 결함 데이터(Omniverse) 연계</td></tr><tr><td class="nm">Omniverse Live Edit</td><td></td><td class="q"><b>1</b></td><td class="num">11,440</td><td class="num">11,440</td><td><span class="tag ok">적합</span></td><td>Omniverse 리뷰 세션 실시간 동기화</td></tr><tr><td class="nm">ACS BASE</td><td></td><td class="q"><b>1</b></td><td class="num">28,600</td><td class="num">28,600</td><td><span class="tag ok">적합</span></td><td>판정→재검사→리워크 폐루프와 직접 맞음(10/12 결정: ACS는 정밀검사존만)</td></tr><tr><td class="nm">ACS OLP (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">18,920</td><td class="num">37,840</td><td><span class="tag chk">확인</span></td><td>구매계획(안)은 FANUC·KUKA — 리워크 로봇 메이커로 한쪽에 맞춤</td></tr><tr><td class="nm">PIA (Predictive Inspect &amp; Analysis)</td><td></td><td class="q"><b>1</b></td><td class="num">35,200</td><td class="num">35,200</td><td><span class="tag ok">적합</span></td><td>스캔 결과 분석·시각화</td></tr><tr><td class="nm">TESCar</td><td></td><td class="q"><b>1</b></td><td class="num">66,000</td><td class="num">66,000</td><td><span class="tag chk">확인</span></td><td>차체 스폿용접 특화. 감액이 필요하면 1순위 — 유지하려면 대상 부품의 용접부 검사 근거 필요</td></tr><tr><td class="nm">AIMS Simulator (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">52,800</td><td class="num">105,600</td><td><span class="tag chk">확인</span></td><td>레이저트래커 측정용 — 10/15 최종에서 스캐너는 빠졌는데 AIMS는 남음. 측정 HW 없이 쓸 근거 명시 필요</td></tr><tr><td class="nm">AIMS Controller (컨트롤러당)</td><td>FANUC·ABB</td><td class="q"><b>2</b></td><td class="num">39,600</td><td class="num">79,200</td><td><span class="tag chk">확인</span></td><td>측정 시스템 제어용 — 제어할 스캐너가 빠져 AIMS Simulator와 같이 판단</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">유지보수</th><td class="num">487,118</td><td colspan="2"></td></tr><tr><td class="nm">AMC 유지보수</td><td>연 18% × 4년</td><td class="q"><b>4</b></td><td class="num">121,780</td><td class="num">487,118</td><td><span class="tag chk">확인</span></td><td>견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 &#x27;5년 AMC 포함&#x27;이라 표기와 계산이 다름. AIMS·TESCar 조정 시 함께 감소</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">OCS HW</th><td class="num">460,350</td><td colspan="2"></td></tr><tr><td class="nm">DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)</td><td></td><td class="q"><b>1</b></td><td class="num">385,000</td><td class="num">385,000</td><td><span class="tag ok">적합</span></td><td>10/12 결정 GPU 8→4장 반영, 방화벽 포함</td></tr><tr><td class="nm">디지털트윈·시뮬레이션 운영 PC</td><td></td><td class="q"><b>1</b></td><td class="num">13,200</td><td class="num">13,200</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">시뮬레이션 운영 노트북</td><td></td><td class="q"><b>1</b></td><td class="num">7,150</td><td class="num">7,150</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업</td><td></td><td class="q"><b>1</b></td><td class="num">55,000</td><td class="num">55,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 HW</th><td class="num">627,000</td><td colspan="2"></td></tr><tr><td class="nm">데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)</td><td></td><td class="q"><b>1</b></td><td class="num">627,000</td><td class="num">627,000</td><td><span class="tag chk">확인</span></td><td>견적서 &#x27;상세 사양 별도 협의&#x27;. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">로컬 OCS·보안</th><td class="num">88,000</td><td colspan="2"></td></tr><tr><td class="nm">로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)</td><td></td><td class="q"><b>1</b></td><td class="num">49,500</td><td class="num">49,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 운영 데이터 저장</td></tr><tr><td class="nm">보안 스택(IAM/PKI) — Keycloak + HIWARE</td><td></td><td class="q"><b>1</b></td><td class="num">38,500</td><td class="num">38,500</td><td><span class="tag ok">적합</span></td><td>로컬 OCS 접근·인증 관리</td></tr><tr class="grp"><th colspan="4" scope="rowgroup">기술지원</th><td class="num">99,000</td><td colspan="2"></td></tr><tr><td class="nm">CELL 구성 설비별 DT 연동 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">22,000</td><td class="num">22,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">DB 연동 시각화 UI Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">44,000</td><td class="num">44,000</td><td><span class="tag ok">적합</span></td><td>DB 데이터를 DT 화면에 시각화</td></tr><tr><td class="nm">DM PLUG-IN 기능 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">11,000</td><td class="num">11,000</td><td><span class="tag ok">적합</span></td><td></td></tr><tr><td class="nm">ACS 시스템 Customizing</td><td></td><td class="q"><b>1</b></td><td class="num">22,000</td><td class="num">22,000</td><td><span class="tag ok">적합</span></td><td>ACS 리워크 연동</td></tr></tbody><tfoot><tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">172,301</td><td colspan="2"></td></tr><tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">2,610,000</td><td colspan="2">견26CAMTIC-DMWorks-1015-3</td></tr></tfoot></table></div></div>
 </section>
 <section id="z3">
   <p class="eyebrow">A-3 · 셀 배치·물류·상태머신 검증 · 견적 없음</p>
   <h2>정밀조립존 (OCS 셀 없음 · DT 워크스테이션 1대)</h2>
   <p class="note-box">10/15 최종 견적 대상에 없음. 같은 견적 단가로 1좌석을 산정함. 협동로봇(국산)은 OLP 목록에 없어 제외.</p>
-  <div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>쓰는 이유</th></tr></thead><tbody><tr><td class="nm">DMWorks Base</td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td>DT 워크스테이션 1대용</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td>셀 간 AMR 물류·배치</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td class="q"><b>1</b></td><td class="num">25,282</td><td class="num">25,282</td><td>셀 상태머신·PLC 시퀀스 검증</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td>A-1-4에서 개발한 AAS 출력 플러그인 실행</td></tr><tr><td class="nm">Omniverse USD Converter</td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td>Isaac Sim 학습 DT(VLA)로 셀 전달</td></tr><tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">156,781</td><td>10/15 최종 견적 단가(정가×57.2%) 적용</td></tr></tbody></table></div>
+  <div id="ql-pz"><div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>쓰는 이유</th></tr></thead><tbody><tr><td class="nm">DMWorks Base</td><td class="q"><b>1</b></td><td class="num">81,338</td><td class="num">81,338</td><td>DT 워크스테이션 1대용</td></tr><tr><td class="nm">DM MULTIPLE PROCESS</td><td class="q"><b>1</b></td><td class="num">26,312</td><td class="num">26,312</td><td>셀 간 AMR 물류·배치</td></tr><tr><td class="nm">DM PLC SIMULATION (PLC당)</td><td class="q"><b>1</b></td><td class="num">25,282</td><td class="num">25,282</td><td>셀 상태머신·PLC 시퀀스 검증</td></tr><tr><td class="nm">DM PLUG-IN For User</td><td class="q"><b>1</b></td><td class="num">8,008</td><td class="num">8,008</td><td>A-1-4에서 개발한 AAS 출력 플러그인 실행</td></tr><tr><td class="nm">Omniverse USD Converter</td><td class="q"><b>1</b></td><td class="num">15,840</td><td class="num">15,840</td><td>Isaac Sim 학습 DT(VLA)로 셀 전달</td></tr><tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">156,781</td><td>10/15 최종 견적 단가(정가×57.2%) 적용</td></tr></tbody></table></div></div>
 </section>
 <section id="issues">
   <p class="eyebrow">확인 필요 사항</p>
@@ -222,6 +230,593 @@ td.dz,th.dz{text-align:center;white-space:nowrap} table.bom td a{white-space:now
   <div class="tbl-wrap"><table class="bom"><thead><tr><th>표기</th><th>구분</th><th>문서·내용</th><th>일자</th><th>위치</th></tr></thead><tbody><tr><td class="sym">[Q0]</td><td class="u">최종 견적</td><td>이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 — 유연제조(1015-1, 19.91억)·적응가공(1015-2, 21.92억)·AI정밀검사(1015-3, 26.10억)</td><td class="u">2026-10-15</td><td class="note">피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류 / [A-1-4]·[A-2-5]·[A-4-5]</td></tr><tr><td class="sym">[Q1]</td><td class="u">견적</td><td>캠틱종합기술원 3D가상 환경 구축 및 DMWorks 구매 견적서 — 유연제조(1008-1)·적응가공(1008-2)·AI정밀검사(1008-3)</td><td class="u">2026-10-08</td><td class="note">OneDrive Workspace / Customers / 이지로보틱스 / 2026-10-08</td></tr><tr><td class="sym">[Q2]</td><td class="u">제안서</td><td>캠틱종합기술원 시뮬레이션 환경 구축 제안서 — 제품 설명(DM-Monitoring·USD Converter·Live Edit·ACS·AIMS·PIA·TESCar), DT 구축 절차, 교육 3단계</td><td class="u">2026-10-08</td><td class="note">같은 폴더</td></tr><tr><td class="sym">[E1]</td><td class="u">이메일</td><td>송기정 부원장 전달 &#x27;기술 실증 테스트베드 시스템 도입 수정 제안서 및 견적서&#x27; — 10/7 미팅 후 재접수, DMWorks 옵션 추가·공급 가능 SW 포함·HW 반영</td><td class="u">2026-10-08</td><td class="note">OneDrive Workspace / Email</td></tr><tr><td class="sym">[S1]</td><td class="u">정가표</td><td>DMWorks 3.0 Solution List Price — 옵션별 정가, 유지보수 18%</td><td class="u">2026-01</td><td class="note">OneDrive Workspace / Customers / 이지로보틱스</td></tr><tr><td class="sym">[M1]</td><td class="u">회의록</td><td>이지로보틱스 DMWorks 방문 Q&amp;A — USD·PLC·AAS·OLP 제약, 라이선스·교육</td><td class="u">2026-09-30</td><td class="note">OneDrive Workspace / MoM / 2026-09-30</td></tr><tr><td class="sym">[W2]</td><td class="u">llm-wiki 결정</td><td>OCS 시뮬레이션 셀 비용 조정 — 외산 SW 1년 구독·ACS 검사존만·Field 엣지 최대 삭제·검사존 스캐너 제외·AMC 반영·GPU 4장</td><td class="u">2026-10-12</td><td class="note">llm-wiki decisions</td></tr><tr><td class="sym">[P1]</td><td class="u">구매계획서</td><td>OCS 시뮬레이션 셀 구매계획서 R2(부원장 검토)·10/14 수정본(스토리지 서버 포함) — 존별 21.20·23.41·26.10억, AMC 18%×4년</td><td class="u">2026-10-14</td><td class="note">llm-wiki sources</td></tr><tr><td class="sym">[Q3]</td><td class="u">비교견적</td><td>엠아이테크 적응가공 비교견적(24.00억) 외 존별 비교견적</td><td class="u">2026-10-15</td><td class="note">같은 폴더</td></tr><tr><td class="sym">[E2]</td><td class="u">이메일</td><td>허태한 상무 셀별 재견적 송부 → 이형수 본부장 3본부 전달 — 유연제조 CAD IMPORT/EXPORT 삭제, 서버 수량 조절·방화벽 추가, 데이터 서버 금액 조정으로 총액 유지</td><td class="u">2026-10-15</td><td class="note">OneDrive Workspace / Email</td></tr><tr><td class="sym">[W1]</td><td class="u">llm-wiki 결정</td><td>OCS 시뮬레이션 셀 존별 목적·구성 문서화 후 견적 확정 — 60% 할인 제안, 스캐너 공동활용, GPU 서버 4.05억</td><td class="u">2026-10-06</td><td class="note">llm-wiki decisions</td></tr></tbody></table></div>
 </section>
 </main>
+<style>
+.qlive{margin:14px 0 6px;padding:12px 16px;border:1px solid var(--rule);border-left:4px solid var(--teal);border-radius:8px;background:var(--paper);font-size:13.5px;line-height:1.55}
+.qlive.on{border-left-color:var(--amber)} .qlive.drag{outline:2px dashed var(--teal);outline-offset:2px}
+.ql-row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.ql-row>b:first-child{color:var(--navy2);font-size:14px}
+.ql-pick,.ql-row button{font:600 13px var(--font);border-radius:4px;padding:6px 14px;cursor:pointer}
+.ql-pick{color:#fff;background:var(--teal);border:0} .ql-pick:focus-within{outline:2px solid var(--amber);outline-offset:2px}
+.ql-pick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.ql-row button{color:var(--teal);background:var(--paper);border:1px solid var(--rule)} .ql-row button:hover{border-color:var(--teal)}
+.qlive p{max-width:none} .ql-help{margin:6px 0 0;color:var(--muted);font-size:12.5px} .ql-msg{margin:6px 0 0;color:var(--amber);font-weight:700;font-size:13px} .ql-msg:empty{display:none}
+.ql-diff{margin:6px 0 0;padding-left:18px;font-size:12.5px} .ql-diff ul{margin:2px 0 4px;padding-left:16px} .ql-diff:empty{display:none}
+.ql-diff li b{font:600 11px var(--mono);margin-right:4px} .ql-chg b{color:#9A4A00} .ql-new b{color:var(--teal)} .ql-del b,.ql-warn b{color:#A12020}
+.note-box .ql-diff{margin-top:4px}
+@media print{.qlive{display:none!important}}
+</style><script type="application/json" id="qlbase">{"zones":[{"id":"A-1-4","slug":"z14","name":"유연제조 OCS 시뮬레이션 Cell","short":"유연제조","purpose":"공정 최적화 + 가상 시운전","no":"견26CAMTIC-DMWorks-1015-1","date":"2026.10.15","total":1991000,"ga":125088.606,"rows":[{"g":1,"cat":"DMWorks","label":"DMWorks Base","q":1,"u":81338.4,"dm":{"grp":"SW","nm":"DMWorks Base","dd":"","v":"ok","why":"필수. 모니터링은 DM-Monitoring이 맡아 Base는 1카피"}},{"g":1,"cat":"DMWorks","label":"DM-Monitoring","q":1,"u":35200,"dm":{"grp":"SW","nm":"DM-Monitoring","dd":"","v":"ok","why":"DT 모니터링 화면(운영 관제는 OCS Cell)"}},{"g":1,"cat":"DMWorks","label":"CAD IMPORT - STL, CATIA, AUTOCAD","q":3,"u":5148,"dm":{"grp":"SW","nm":"CAD IMPORT (포맷당)","dd":"STL·CATIA·AUTOCAD","v":"ok","why":"10/15 최종에서 4→3종(PRO/E 삭제)"}},{"g":1,"cat":"DMWorks","label":"CAD EXPORT - JT","q":1,"u":5148,"dm":{"grp":"SW","nm":"CAD EXPORT (포맷당)","dd":"JT","v":"ok","why":"10/15 최종에서 3→1종(STL·VRML·OBJ → JT)"}},{"g":1,"cat":"DMWorks","label":"DM OLP - HYUNDAI, KAWASAKI","q":2,"u":13728,"dm":{"grp":"SW","nm":"DM OLP (컨트롤러당)","dd":"HYUNDAI·KAWASAKI","v":"ok","why":"로봇 오프라인 프로그래밍(컨트롤러 2종)"}},{"g":1,"cat":"DMWorks","label":"DM RRS - HYUNDAI","q":1,"u":11440,"dm":{"grp":"SW","nm":"DM RRS (컨트롤러당)","dd":"HYUNDAI","v":"ok","why":"현대 Hi5 컨트롤러 사이클타임 정밀 산출"}},{"g":1,"cat":"DMWorks","label":"DM POINT CLOUD","q":1,"u":21736,"dm":{"grp":"SW","nm":"DM POINT CLOUD","dd":"","v":"ok","why":"공장 스캐너 데이터 반영"}},{"g":1,"cat":"DMWorks","label":"DM MULTIPLE PROCESS","q":1,"u":26312,"dm":{"grp":"SW","nm":"DM MULTIPLE PROCESS","dd":"","v":"ok","why":"혼류 라인·AMR 물류"}},{"g":1,"cat":"DMWorks","label":"DM PLC SIMULATION - LS, MITSUBISHI","q":2,"u":25282.4,"dm":{"grp":"SW","nm":"DM PLC SIMULATION (PLC당)","dd":"LS·MITSUBISHI","v":"ok","why":"PLC 가상 시운전 2종(DMWorks 동시 시뮬레이션 2기종 경험 범위)"}},{"g":1,"cat":"DMWorks","label":"DM PLUG-IN For Developer","q":1,"u":24024,"dm":{"grp":"SW","nm":"DM PLUG-IN For Developer","dd":"","v":"ok","why":"존 전용 Plug-in 개발"}},{"g":1,"cat":"DMWorks","label":"DM PLUG-IN For User","q":1,"u":8008,"dm":{"grp":"SW","nm":"DM PLUG-IN For User","dd":"","v":"ok","why":""}},{"g":1,"cat":"DMWorks","label":"Omniverse USD Converter","q":1,"u":15840,"dm":{"grp":"SW","nm":"Omniverse USD Converter","dd":"","v":"ok","why":"Isaac Sim 학습 DT 연계 핵심"}},{"g":1,"cat":"DMWorks","label":"Omniverse Live Edit","q":1,"u":11440,"dm":{"grp":"SW","nm":"Omniverse Live Edit","dd":"","v":"ok","why":"Omniverse 리뷰 세션 실시간 동기화"}},{"g":1,"cat":"유지보수","label":"AMC(Annual Maintenance Charge)","q":4,"u":60111.216,"dm":{"grp":"유지보수","nm":"AMC 유지보수","dd":"연 18% × 4년","v":"chk","why":"견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 '5년 AMC 포함'이라 표기와 계산이 다름"}},{"g":2,"cat":"공장 스캐너","label":"광대역 스캐너 - RTC700 (HW 및 운영 SW포함)","q":1,"u":171600,"dm":{"grp":"OCS HW","nm":"광대역 공장 스캐너 RTC700 (HW·운영 SW 포함)","dd":"","v":"ok","why":"대형 공간 스캔으로 공장·셀 가상 작업장 구축"}},{"g":2,"cat":"디지털 트윈·AI 연산 서버","label":"서버 - ESC8000A-E13P · EPYC 9755×2 · RTX PRO 6000 ×4 · 방화벽 NGF 1300","q":1,"u":385000,"dm":{"grp":"OCS HW","nm":"DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)","dd":"","v":"ok","why":"10/12 결정 GPU 8→4장 반영, 방화벽 포함"}},{"g":2,"cat":"시뮬레이션 연산 시스템","label":"디지털 트윈 및 시뮬레이션 운영 PC","q":1,"u":13200,"dm":{"grp":"OCS HW","nm":"디지털트윈·시뮬레이션 운영 PC","dd":"","v":"ok","why":""}},{"g":2,"cat":"시뮬레이션 연산 시스템","label":"시뮬레이션 운영 노트북","q":1,"u":7150,"dm":{"grp":"OCS HW","nm":"시뮬레이션 운영 노트북","dd":"","v":"ok","why":""}},{"g":2,"cat":"디지털 트윈 모니터링 시스템","label":"모니터링 구성품 구매, 설치 시스템 연동 셋업","q":1,"u":55000,"dm":{"grp":"OCS HW","nm":"DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업","dd":"","v":"ok","why":""}},{"g":3,"cat":"데이터 서버","label":"데이터 처리 서버 - HP3 ProLiant DL380 GEN12 x 5 등 · NAS(Dell PowerStore 1200T) · 백업 스토리지 · Edge Gateway · 영상 수집 노드 · 네트워크 · 서버실","q":1,"u":528000,"dm":{"grp":"로컬 HW","nm":"데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)","dd":"","v":"chk","why":"견적서 '상세 사양 별도 협의'. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인"}},{"g":4,"cat":"로컬 제어 부스 하드웨어","label":"Operational TSDB - Machbase Cluster Edition (계층)","q":1,"u":49500,"dm":{"grp":"로컬 OCS·보안","nm":"로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)","dd":"","v":"ok","why":"로컬 OCS 운영 데이터 저장"}},{"g":4,"cat":"보안","label":"보안 스택(IAM/PKI) - Keyloak+HIWARE","q":1,"u":38500,"dm":{"grp":"로컬 OCS·보안","nm":"보안 스택(IAM/PKI) — Keycloak + HIWARE","dd":"","v":"ok","why":"로컬 OCS 접근·인증 관리"}},{"g":5,"cat":"기술 지원","label":"CELL 구성 설비별 디지털 트윈 연동 기능 Customizing","q":1,"u":11000,"dm":{"grp":"기술지원","nm":"CELL 구성 설비별 DT 연동 기능 Customizing","dd":"","v":"ok","why":"다른 두 존(22,000)의 절반으로 감액"}},{"g":5,"cat":"기술 지원","label":"DB 연동 시각화 UI Customizing","q":1,"u":28050,"dm":{"grp":"기술지원","nm":"DB 연동 시각화 UI Customizing","dd":"","v":"ok","why":"다른 두 존(44,000)보다 감액. DB 데이터를 DT 화면에 시각화"}},{"g":5,"cat":"기술 지원","label":"DM PLUG-IN 기능 Customizing","q":1,"u":5500,"dm":{"grp":"기술지원","nm":"DM PLUG-IN 기능 Customizing","dd":"","v":"ok","why":"AAS 출력·OpenUSD 물성 전달 범위 명시. 다른 두 존(11,000)의 절반"}}]},{"id":"A-2-5","slug":"z25","name":"적응가공 OCS 시뮬레이션 Cell","short":"적응가공","purpose":"데이터 + 강화학습","no":"견26CAMTIC-DMWorks-1015-2","date":"2026.10.15","total":2192000,"ga":129299.178,"rows":[{"g":1,"cat":"DMWorks","label":"DMWorks Base","q":1,"u":81338.4,"dm":{"grp":"SW","nm":"DMWorks Base","dd":"","v":"ok","why":"필수"}},{"g":1,"cat":"DMWorks","label":"DM-Monitoring","q":1,"u":35200,"dm":{"grp":"SW","nm":"DM-Monitoring","dd":"","v":"ok","why":"DT 모니터링 화면(운영 관제는 OCS Cell)"}},{"g":1,"cat":"DMWorks","label":"CAD IMPORT - NX, JT, SOLID EDGE, SOLIDWORKS","q":4,"u":5148,"dm":{"grp":"SW","nm":"CAD IMPORT (포맷당)","dd":"NX·JT·SOLID EDGE·SOLIDWORKS","v":"ok","why":"가공기·지그 원본 포맷 반입"}},{"g":1,"cat":"DMWorks","label":"CAD EXPORT - AAS, JT, IGES, FBX","q":4,"u":5148,"dm":{"grp":"SW","nm":"CAD EXPORT (포맷당)","dd":"AAS·JT·IGES·FBX","v":"ok","why":"AAS·중립 포맷 내보내기"}},{"g":1,"cat":"DMWorks","label":"DM OLP - YASKAWA, KUKA","q":2,"u":13728,"dm":{"grp":"SW","nm":"DM OLP (컨트롤러당)","dd":"YASKAWA·KUKA","v":"ok","why":"머신텐딩 로봇 오프라인 프로그래밍"}},{"g":1,"cat":"DMWorks","label":"DM POINT CLOUD","q":1,"u":21736,"dm":{"grp":"SW","nm":"DM POINT CLOUD","dd":"","v":"ok","why":"제품 스캐너 점군을 가상 작업장에 반영"}},{"g":1,"cat":"DMWorks","label":"DM MULTIPLE PROCESS","q":1,"u":26312,"dm":{"grp":"SW","nm":"DM MULTIPLE PROCESS","dd":"","v":"ok","why":"팔레트·AMR 물류"}},{"g":1,"cat":"DMWorks","label":"DM PLC SIMULATION - SIMENS","q":1,"u":25282.4,"dm":{"grp":"SW","nm":"DM PLC SIMULATION (PLC당)","dd":"SIEMENS","v":"ok","why":"PLC 메이커 확정 시 일치 여부 확인"}},{"g":1,"cat":"DMWorks","label":"DM PLUG-IN For Developer","q":1,"u":24024,"dm":{"grp":"SW","nm":"DM PLUG-IN For Developer","dd":"","v":"ok","why":"존 전용 Plug-in 개발"}},{"g":1,"cat":"DMWorks","label":"DM PLUG-IN For User","q":1,"u":8008,"dm":{"grp":"SW","nm":"DM PLUG-IN For User","dd":"","v":"ok","why":""}},{"g":1,"cat":"DMWorks","label":"Omniverse USD Converter","q":1,"u":15840,"dm":{"grp":"SW","nm":"Omniverse USD Converter","dd":"","v":"ok","why":"강화학습 환경(Isaac Lab) 연계"}},{"g":1,"cat":"DMWorks","label":"Omniverse Live Edit","q":1,"u":11440,"dm":{"grp":"SW","nm":"Omniverse Live Edit","dd":"","v":"ok","why":"Omniverse 리뷰 세션 실시간 동기화"}},{"g":1,"cat":"유지보수","label":"AMC(Annual Maintenance Charge)","q":4,"u":57207.744,"dm":{"grp":"유지보수","nm":"AMC 유지보수","dd":"연 18% × 4년","v":"chk","why":"견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 '5년 AMC 포함'이라 표기와 계산이 다름"}},{"g":2,"cat":"제품 스캐너","label":"소형 제품 스캐너(자동) - HyperScan (HW 및 운영 SW포함)","q":1,"u":209000,"dm":{"grp":"OCS HW","nm":"소형 제품 스캐너(자동) HyperScan (HW·운영 SW 포함)","dd":"","v":"ok","why":"가공 소재·제품 자동 스캔, 점군을 가상 작업장에 반영"}},{"g":2,"cat":"디지털 트윈·AI 연산 서버","label":"서버 - ESC8000A-E13P · EPYC 9755×2 · RTX PRO 6000 ×4 · 방화벽 NGF 1300","q":1,"u":385000,"dm":{"grp":"OCS HW","nm":"DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)","dd":"","v":"ok","why":"10/12 결정 GPU 8→4장 반영, 방화벽 포함"}},{"g":2,"cat":"시뮬레이션 연산 시스템","label":"디지털 트윈 및 시뮬레이션 운영 PC","q":1,"u":13200,"dm":{"grp":"OCS HW","nm":"디지털트윈·시뮬레이션 운영 PC","dd":"","v":"ok","why":""}},{"g":2,"cat":"시뮬레이션 연산 시스템","label":"시뮬레이션 운영 노트북","q":1,"u":7150,"dm":{"grp":"OCS HW","nm":"시뮬레이션 운영 노트북","dd":"","v":"ok","why":""}},{"g":2,"cat":"디지털 트윈 모니터링 시스템","label":"모니터링 구성품 구매, 설치 시스템 연동 셋업","q":1,"u":55000,"dm":{"grp":"OCS HW","nm":"DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업","dd":"","v":"ok","why":""}},{"g":3,"cat":"데이터 서버","label":"데이터 처리 서버 - HP3 ProLiant DL380 GEN12 x 5 등 · NAS(Dell PowerStore 1200T) · 백업 스토리지 · Edge Gateway · 영상 수집 노드 · 네트워크 · 서버실","q":1,"u":682000,"dm":{"grp":"로컬 HW","nm":"데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)","dd":"","v":"chk","why":"견적서 '상세 사양 별도 협의'. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인"}},{"g":4,"cat":"로컬 제어 부스 하드웨어","label":"Operational TSDB - Machbase Cluster Edition (계층)","q":1,"u":49500,"dm":{"grp":"로컬 OCS·보안","nm":"로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)","dd":"","v":"ok","why":"로컬 OCS 운영 데이터 저장"}},{"g":4,"cat":"보안","label":"보안 스택(IAM/PKI) - Keyloak+HIWARE","q":1,"u":38500,"dm":{"grp":"로컬 OCS·보안","nm":"보안 스택(IAM/PKI) — Keycloak + HIWARE","dd":"","v":"ok","why":"로컬 OCS 접근·인증 관리"}},{"g":5,"cat":"기술 지원","label":"CELL 구성 설비별 디지털 트윈 연동 기능 Customizing","q":1,"u":22000,"dm":{"grp":"기술지원","nm":"CELL 구성 설비별 DT 연동 기능 Customizing","dd":"","v":"ok","why":""}},{"g":5,"cat":"기술 지원","label":"DB 연동 시각화 UI Customizing","q":1,"u":44000,"dm":{"grp":"기술지원","nm":"DB 연동 시각화 UI Customizing","dd":"","v":"ok","why":"DB 데이터를 DT 화면에 시각화"}},{"g":5,"cat":"기술 지원","label":"DM PLUG-IN 기능 Customizing","q":1,"u":11000,"dm":{"grp":"기술지원","nm":"DM PLUG-IN 기능 Customizing","dd":"","v":"ok","why":""}}]},{"id":"A-4-5","slug":"z45","name":"AI정밀검사 OCS 시뮬레이션 Cell","short":"AI정밀검사","purpose":"DT(역설계) + 품질 운영","no":"견26CAMTIC-DMWorks-1015-3","date":"2026.10.15","total":2610000,"ga":172301.082,"rows":[{"g":1,"cat":"DMWorks","label":"DMWorks Base","q":1,"u":81338.4,"dm":{"grp":"SW","nm":"DMWorks Base","dd":"","v":"ok","why":"필수"}},{"g":1,"cat":"DMWorks","label":"DM-Monitoring","q":1,"u":35200,"dm":{"grp":"SW","nm":"DM-Monitoring","dd":"","v":"ok","why":"DT 모니터링 화면(품질 관제는 QMS·OCS)"}},{"g":1,"cat":"DMWorks","label":"CAD IMPORT - STEP, OBJ, AAS, PARASOLID","q":4,"u":5148,"dm":{"grp":"SW","nm":"CAD IMPORT (포맷당)","dd":"STEP·OBJ·AAS·PARASOLID","v":"ok","why":"검사 대상 CAD 포맷 반입"}},{"g":1,"cat":"DMWorks","label":"CAD EXPORT - AAS, STP, PARASOLID","q":3,"u":5148,"dm":{"grp":"SW","nm":"CAD EXPORT (포맷당)","dd":"AAS·STP·PARASOLID","v":"ok","why":"역설계 결과 내보내기"}},{"g":1,"cat":"DMWorks","label":"DM OLP - FANUC, ABB","q":2,"u":13728,"dm":{"grp":"SW","nm":"DM OLP (컨트롤러당)","dd":"FANUC·ABB","v":"ok","why":"검사·리워크 로봇 오프라인 프로그래밍"}},{"g":1,"cat":"DMWorks","label":"DM RRS - FANUC","q":1,"u":11440,"dm":{"grp":"SW","nm":"DM RRS (컨트롤러당)","dd":"FANUC","v":"ok","why":"FANUC 컨트롤러 사이클타임 정밀 산출"}},{"g":1,"cat":"DMWorks","label":"DM POINT CLOUD","q":1,"u":21736,"dm":{"grp":"SW","nm":"DM POINT CLOUD","dd":"","v":"ok","why":"스캔 기반 가상 작업장"}},{"g":1,"cat":"DMWorks","label":"DM MULTIPLE PROCESS","q":1,"u":26312,"dm":{"grp":"SW","nm":"DM MULTIPLE PROCESS","dd":"","v":"ok","why":"검사 라인·AMR 물류"}},{"g":1,"cat":"DMWorks","label":"DM PLC SIMULATION - ROCKWELL","q":1,"u":25282.4,"dm":{"grp":"SW","nm":"DM PLC SIMULATION (PLC당)","dd":"ROCKWELL","v":"ok","why":"검사 라인 PLC 가상 시운전"}},{"g":1,"cat":"DMWorks","label":"DM PLUG-IN For Developer","q":1,"u":24024,"dm":{"grp":"SW","nm":"DM PLUG-IN For Developer","dd":"","v":"ok","why":"검사 전용 Plug-in 개발"}},{"g":1,"cat":"DMWorks","label":"DM PLUG-IN For User","q":1,"u":8008,"dm":{"grp":"SW","nm":"DM PLUG-IN For User","dd":"","v":"ok","why":""}},{"g":1,"cat":"DMWorks","label":"Omniverse USD Converter","q":1,"u":15840,"dm":{"grp":"SW","nm":"Omniverse USD Converter","dd":"","v":"ok","why":"합성 결함 데이터(Omniverse) 연계"}},{"g":1,"cat":"DMWorks","label":"Omniverse Live Edit","q":1,"u":11440,"dm":{"grp":"SW","nm":"Omniverse Live Edit","dd":"","v":"ok","why":"Omniverse 리뷰 세션 실시간 동기화"}},{"g":1,"cat":"ACS","label":"ACS BASE","q":1,"u":28600,"dm":{"grp":"SW","nm":"ACS BASE","dd":"","v":"ok","why":"판정→재검사→리워크 폐루프와 직접 맞음(10/12 결정: ACS는 정밀검사존만)"}},{"g":1,"cat":"ACS","label":"ACS OLP - FANUC, ABB","q":2,"u":18920,"dm":{"grp":"SW","nm":"ACS OLP (컨트롤러당)","dd":"FANUC·ABB","v":"chk","why":"구매계획(안)은 FANUC·KUKA — 리워크 로봇 메이커로 한쪽에 맞춤"}},{"g":1,"cat":"PIA","label":"PIA","q":1,"u":35200,"dm":{"grp":"SW","nm":"PIA (Predictive Inspect & Analysis)","dd":"","v":"ok","why":"스캔 결과 분석·시각화"}},{"g":1,"cat":"TESCar","label":"TESCar","q":1,"u":66000,"dm":{"grp":"SW","nm":"TESCar","dd":"","v":"chk","why":"차체 스폿용접 특화. 감액이 필요하면 1순위 — 유지하려면 대상 부품의 용접부 검사 근거 필요"}},{"g":1,"cat":"AIMS","label":"AIMS - SIMULATOR (FANUC, ABB)","q":2,"u":52800,"dm":{"grp":"SW","nm":"AIMS Simulator (컨트롤러당)","dd":"FANUC·ABB","v":"chk","why":"레이저트래커 측정용 — 10/15 최종에서 스캐너는 빠졌는데 AIMS는 남음. 측정 HW 없이 쓸 근거 명시 필요"}},{"g":1,"cat":"AIMS","label":"AIMS - CONTROLLER (FANUC, ABB)","q":2,"u":39600,"dm":{"grp":"SW","nm":"AIMS Controller (컨트롤러당)","dd":"FANUC·ABB","v":"chk","why":"측정 시스템 제어용 — 제어할 스캐너가 빠져 AIMS Simulator와 같이 판단"}},{"g":1,"cat":"유지보수","label":"AMC(Annual Maintenance Charge)","q":4,"u":121779.504,"dm":{"grp":"유지보수","nm":"AMC 유지보수","dd":"연 18% × 4년","v":"chk","why":"견적 SW 합계의 18% × 4년(10/12 결정). 견적서 참고사항은 '5년 AMC 포함'이라 표기와 계산이 다름. AIMS·TESCar 조정 시 함께 감소"}},{"g":2,"cat":"디지털 트윈·AI 연산 서버","label":"서버 - ESC8000A-E13P · EPYC 9755×2 · RTX PRO 6000 ×4 · 방화벽 NGF 1300","q":1,"u":385000,"dm":{"grp":"OCS HW","nm":"DT·AI 연산 서버 (ASUS ESC8000A-E13P · EPYC 9755×2 · 768GB · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300)","dd":"","v":"ok","why":"10/12 결정 GPU 8→4장 반영, 방화벽 포함"}},{"g":2,"cat":"시뮬레이션 연산 시스템","label":"디지털 트윈 및 시뮬레이션 운영 PC","q":1,"u":13200,"dm":{"grp":"OCS HW","nm":"디지털트윈·시뮬레이션 운영 PC","dd":"","v":"ok","why":""}},{"g":2,"cat":"시뮬레이션 연산 시스템","label":"시뮬레이션 운영 노트북","q":1,"u":7150,"dm":{"grp":"OCS HW","nm":"시뮬레이션 운영 노트북","dd":"","v":"ok","why":""}},{"g":2,"cat":"디지털 트윈 모니터링 시스템","label":"모니터링 구성품 구매, 설치 시스템 연동 셋업","q":1,"u":55000,"dm":{"grp":"OCS HW","nm":"DT 모니터링 시스템 — 구성품 구매·설치·시스템 연동 셋업","dd":"","v":"ok","why":""}},{"g":3,"cat":"데이터 서버","label":"데이터 처리 서버 - HP3 ProLiant DL380 GEN12 x 5 등 · NAS(Dell PowerStore 1200T) · 백업 스토리지 · Edge Gateway · 영상 수집 노드 · 네트워크 · 서버실","q":1,"u":627000,"dm":{"grp":"로컬 HW","nm":"데이터 처리 서버(HPE DL380 Gen12 ×5)·NAS(Dell PowerStore 1200T)·백업 스토리지·Edge Gateway·영상 수집 노드·네트워크(코어·TSN·방화벽·PTP·AP·배선)·서버실(랙·UPS·KVM)","dd":"","v":"chk","why":"견적서 '상세 사양 별도 협의'. 존마다 금액이 달라(5.28·6.82·6.27억) 총액 맞춤용 조정분으로 보임(추정) — 품목별 사양·수량 확인"}},{"g":4,"cat":"로컬 제어 부스 하드웨어","label":"Operational TSDB - Machbase Cluster Edition (계층)","q":1,"u":49500,"dm":{"grp":"로컬 OCS·보안","nm":"로컬 제어 부스 HW — Operational TSDB (Machbase Cluster Edition, 계층)","dd":"","v":"ok","why":"로컬 OCS 운영 데이터 저장"}},{"g":4,"cat":"보안","label":"보안 스택(IAM/PKI) - Keyloak+HIWARE","q":1,"u":38500,"dm":{"grp":"로컬 OCS·보안","nm":"보안 스택(IAM/PKI) — Keycloak + HIWARE","dd":"","v":"ok","why":"로컬 OCS 접근·인증 관리"}},{"g":5,"cat":"기술 지원","label":"CELL 구성 설비별 디지털 트윈 연동 기능 Customizing","q":1,"u":22000,"dm":{"grp":"기술지원","nm":"CELL 구성 설비별 DT 연동 기능 Customizing","dd":"","v":"ok","why":""}},{"g":5,"cat":"기술 지원","label":"DB 연동 시각화 UI Customizing","q":1,"u":44000,"dm":{"grp":"기술지원","nm":"DB 연동 시각화 UI Customizing","dd":"","v":"ok","why":"DB 데이터를 DT 화면에 시각화"}},{"g":5,"cat":"기술 지원","label":"DM PLUG-IN 기능 Customizing","q":1,"u":11000,"dm":{"grp":"기술지원","nm":"DM PLUG-IN 기능 Customizing","dd":"","v":"ok","why":""}},{"g":5,"cat":"기술 지원","label":"ACS 시스템 Customizing","q":1,"u":22000,"dm":{"grp":"기술지원","nm":"ACS 시스템 Customizing","dd":"","v":"ok","why":"ACS 리워크 연동"}}]}],"names":{"BASE":"DMWorks Base","CADI":"CAD IMPORT (포맷당)","CADE":"CAD EXPORT (포맷당)","OLP":"DM OLP (컨트롤러당)","RRS":"DM RRS (컨트롤러당)","PC":"DM POINT CLOUD","MP":"DM MULTIPLE PROCESS","PLC":"DM PLC SIMULATION (PLC당)","PID":"DM PLUG-IN For Developer","PIU":"DM PLUG-IN For User","MON":"DM-Monitoring","USD":"Omniverse USD Converter","LE":"Omniverse Live Edit","ACSB":"ACS BASE","ACSO":"ACS OLP (컨트롤러당)","AIMSS":"AIMS Simulator (컨트롤러당)","AIMSC":"AIMS Controller (컨트롤러당)","PIA":"PIA (Predictive Inspect & Analysis)","TES":"TESCar","AMC":"AMC 유지보수"},"list":{"BASE":142200,"CADI":9000,"CADE":9000,"OLP":24000,"RRS":20000,"PC":38000,"MP":46000,"PLC":44200,"PID":42000,"PIU":14000},"pz":[{"key":"BASE","q":1,"why":"DT 워크스테이션 1대용","nm":"DMWorks Base","u":81338.4},{"key":"MP","q":1,"why":"셀 간 AMR 물류·배치","nm":"DM MULTIPLE PROCESS","u":26311.999999999996},{"key":"PLC","q":1,"why":"셀 상태머신·PLC 시퀀스 검증","nm":"DM PLC SIMULATION (PLC당)","u":25282.399999999998},{"key":"PIU","q":1,"why":"A-1-4에서 개발한 AAS 출력 플러그인 실행","nm":"DM PLUG-IN For User","u":8007.999999999999},{"key":"USD","q":1,"why":"Isaac Sim 학습 DT(VLA)로 셀 전달","nm":"Omniverse USD Converter","u":15840}],"page":"dmw","public":false,"sheetjs":"https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"}</script><script>/* 견적서 파일 선택 — DMWorks 존별 옵션 구성 페이지에서 고른 견적서 엑셀(.xlsx)을 브라우저 안에서 읽어(SheetJS) 견적 표·요약을 다시 그림.
+   읽은 견적은 localStorage(ocsQuote.v1)에 남겨 OCS 시뮬레이션 Cell 3종 페이지도 같은 견적서 기준으로 다시 그림. 파일은 어디에도 전송하지 않음.
+   기준 견적(빌드 시 데이터)은 #qlbase JSON. 업로드 품목은 기준 견적 품목과 키(옵션·장비 종류)로 대조해 같으면 기준 표기·검토 의견을 그대로 쓰고,
+   수량·단가·구성이 바뀌거나 새로 생긴 품목은 '확인'으로 표시함. 서술형 설명·공간 배치도·PDF·Word 저장본은 기준 견적 그대로. */
+(function (root) {
+  'use strict';
+  var KEY = 'ocsQuote.v1';
+  var GN = ['', '항목1. OCS SW', '항목2. OCS HW', '항목3. 로컬 HW', '항목4. 로컬 OCS·보안', '항목5. 기술지원'];
+  var DMG = {1: 'SW', 2: 'OCS HW', 3: '로컬 HW', 4: '로컬 OCS·보안', 5: '기술지원'};
+  var DETAIL = {CADI: 1, CADE: 1, OLP: 1, RRS: 1, PLC: 1, ACSO: 1, AIMSS: 1, AIMSC: 1};
+  var ROBOT = {OLP: 1, RRS: 1, ACSO: 1, AIMSS: 1, AIMSC: 1};
+  var ANCH = ['SCN', 'GPU', 'OPC', 'NB', 'MON', 'DPS', 'NAS', 'BAK', 'EGW', 'VNODE', 'NET', 'RACK'];
+  var ZRE = [['A-1-4', /유연\s*제조/], ['A-2-5', /적응\s*가공/], ['A-4-5', /정밀\s*검사/]];
+  var B = null, PUB = false;
+
+  // ------------------------------------------------------------------ 공통
+  function E(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;'); }
+  function k(n) { return Number(n).toLocaleString('en-US', {maximumFractionDigits: 0}); }
+  function km(n) { return PUB ? '비공개' : k(n); }
+  function won(n) { return PUB ? '비공개' : k(n) + '천원'; }
+  function sum(a, f) { return a.reduce(function (s, x) { return s + (f(x) || 0); }, 0); }
+  function pad(n) { return ('0' + n).slice(-2); }
+  function str(v) {
+    if (v == null) return '';
+    if (v instanceof Date) return v.getFullYear() + '.' + pad(v.getMonth() + 1) + '.' + pad(v.getDate());
+    return String(v).trim();
+  }
+  function sq(v) { return str(v).replace(/\s+/g, ''); }
+  function num(v) {
+    if (typeof v === 'number') return isFinite(v) ? v : null;
+    var s = str(v).replace(/[,\s₩원]/g, '');
+    return s !== '' && isFinite(s) ? Number(s) : null;
+  }
+  function norm(s) { return str(s).toUpperCase().replace(/[^0-9A-Z가-힣]/g, ''); }
+  function oneLine(s) { return str(s).split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean).join(' · '); }
+  function toks(label) {
+    var s = str(label), m = s.match(/\(([^)]*)\)\s*$/) || s.match(/-\s*([^-]+)$/);
+    return m ? m[1].split(/[,·]/).map(function (t) { return t.trim().toUpperCase(); }).filter(Boolean) : [];
+  }
+
+  // ------------------------------------------------------------------ 엑셀 → 견적 (단위 천원)
+  function zoneOf(texts) {
+    for (var i = 0; i < texts.length; i++) for (var j = 0; j < ZRE.length; j++) if (ZRE[j][1].test(texts[i] || '')) return ZRE[j][0];
+    return null;
+  }
+  function fmtDate(v) {
+    var s = str(v), m = s.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+    return m ? m[1] + '.' + pad(m[2]) + '.' + pad(m[3]) : s;
+  }
+  function find(r, re, not) {
+    for (var i = 0; i < r.length; i++) if (i !== not && re.test(sq(r[i]))) return i;
+    return -1;
+  }
+
+  /* 견적서 시트 1장(2차원 배열) → {id, no, date, title, total, ga, items:[{g, cat, label, q, u}], warn}
+     '항목N. …' 절 머리 → 표 머리(수량·단가·견적가) → 품목 행 → '항목N. 합계', 항목6 일반관리비, 마지막 '합계' 행 순서를 따름 */
+  function parseSheet(name, rows) {
+    var z = {sheet: name, items: [], warn: [], ga: null, total: null}, sec = 0, cat = '', col = null, sub = {}, head = null;
+    rows.forEach(function (r) {
+      r = r || [];
+      var a = str(r[0]), as = sq(r[0]), m, v1 = '';
+      for (var i = 1; i < r.length && !v1; i++) v1 = str(r[i]);
+      if (as === '과제명' || as === '건명') z.title = v1;
+      else if (as === '견적번호') z.no = v1;
+      else if (as === '견적일자') z.date = fmtDate(r.slice(1).filter(function (x) { return x != null && x !== ''; })[0]);
+      else if (/^견적금액/.test(as) && (m = v1.match(/₩\s*([\d,]+)/))) head = num(m[1]) / 1000;
+      if (find(r, /^수량$/) >= 0) {
+        var q = find(r, /^수량$/), u = find(r, /^단가$|기준금액/), am = find(r, /견적가/);
+        if (am < 0) am = find(r, /금액/, u);
+        var d = find(r, /상세/);
+        col = {q: q, u: u, a: am, d: d < 0 ? 1 : d};
+        return;
+      }
+      if ((m = as.match(/^항목(\d)\./))) {
+        if (/합계/.test(as)) { if (col && num(r[col.a]) != null) sub[m[1]] = num(r[col.a]) / 1000; sec = 0; }
+        else { sec = +m[1]; cat = ''; }
+        return;
+      }
+      if (as === '합계' && col && num(r[col.a]) != null) { z.total = num(r[col.a]) / 1000; return; }
+      if (!col || as === '항목') return;
+      if (sec >= 1 && sec <= 5 && num(r[col.q]) != null && num(r[col.u]) != null) {
+        cat = a || cat;
+        var label = str(r[col.d]);
+        if (!label) label = r.slice(1, col.q).map(str).filter(Boolean).join(' ');
+        z.items.push({g: sec, cat: cat, label: label || cat, q: num(r[col.q]), u: num(r[col.u]) / 1000});
+      } else if (sec === 6 && /일반관리비/.test(a) && num(r[col.a]) != null) z.ga = num(r[col.a]) / 1000;
+    });
+    if (!z.items.length) return null;
+    z.id = zoneOf([z.title, name, z.no]);
+    Object.keys(sub).forEach(function (n) {
+      var s = n === '6' ? z.ga : sum(z.items, function (x) { return x.g === +n ? x.q * x.u : 0; });
+      if (Math.abs(s - sub[n]) > 1) z.warn.push(name + ': 항목' + n + ' 품목 합 ' + k(s) + '천원 ≠ 견적서 소계 ' + k(sub[n]) + '천원');
+    });
+    var pre = sum(z.items, function (x) { return x.q * x.u; });
+    if (z.ga == null) {
+      z.ga = sum(z.items, function (x) { return x.g === 1 || x.g === 2 || x.g === 5 ? x.q * x.u : 0; }) * 0.1;
+      z.warn.push(name + ': 일반관리비 행이 없어 (항목1+2+5)의 10%로 계산');
+    }
+    if (z.total == null) z.total = head;
+    if (z.total == null) { z.total = Math.floor((pre + z.ga) / 1000) * 1000; z.warn.push(name + ': 합계 행이 없어 백만 원 미만 절삭으로 계산'); }
+    var gap = pre + z.ga - z.total;
+    if (gap < -1 || gap >= 1000) z.warn.push(name + ': 항목 합계 ' + k(pre + z.ga) + '천원과 견적 합계 ' + k(z.total) + '천원 차이가 단위절삭(백만 원 미만)보다 큼');
+    return z;
+  }
+
+  function parseBook(sheets, fileName) {
+    var out = {name: fileName, at: new Date().toISOString(), zones: {}, warn: []};
+    sheets.forEach(function (s) {
+      var z = parseSheet(s.name, s.rows);
+      if (!z) return;
+      out.warn = out.warn.concat(z.warn);
+      delete z.warn;
+      if (!z.id) out.warn.push(s.name + ': 어느 존 견적인지 알 수 없어 제외(과제명·시트명에 유연제조·적응가공·정밀검사가 있어야 함)');
+      else if (out.zones[z.id]) out.warn.push(s.name + ': ' + z.id + ' 견적이 이미 있어 제외');
+      else out.zones[z.id] = z;
+    });
+    return out;
+  }
+
+  // ------------------------------------------------------------------ 품목 키·기준 견적 대조
+  var SWK = [[/AMC|유지보수/i, 'AMC'], [/ACS\s*OLP/i, 'ACSO'], [/ACS/i, 'ACSB'], [/AIMS.*SIM/i, 'AIMSS'], [/AIMS.*CONT/i, 'AIMSC'], [/TESCAR/i, 'TES'],
+    [/^PIA\b|PREDICTIVE/i, 'PIA'], [/CAD\s*IMPORT/i, 'CADI'], [/CAD\s*EXPORT/i, 'CADE'], [/RRS/i, 'RRS'], [/OLP/i, 'OLP'], [/POINT\s*CLOUD/i, 'PC'],
+    [/MULTIPLE\s*PROCESS/i, 'MP'], [/PLC/i, 'PLC'], [/PLUG-?IN.*USER/i, 'PIU'], [/PLUG-?IN/i, 'PID'], [/USD/i, 'USD'], [/LIVE\s*EDIT/i, 'LE'],
+    [/MONITORING/i, 'MON'], [/BASE/i, 'BASE']];
+  function keyOf(g, cat, label) {
+    var c = str(cat), l = str(label), t = c + ' ' + l, i;
+    if (g === 1) {
+      if (/유지보수/.test(c)) return 'AMC';
+      for (i = 0; i < SWK.length; i++) if (SWK[i][0].test(l)) return SWK[i][1];
+      return 'S1:' + norm(l);
+    }
+    if (g === 2) {
+      if (/스캐너|SCAN/i.test(t)) return 'SCN';
+      if (/연산\s*서버|GPU/i.test(t)) return 'GPU';
+      if (/노트북/.test(l)) return 'NB';
+      if (/운영\s*PC/i.test(l)) return 'OPC';
+      if (/모니터링/.test(t)) return 'MON';
+      return 'H2:' + norm(l);
+    }
+    if (g === 3) return /데이터\s*(처리\s*)?서버/.test(t) ? 'LHW' : 'L3:' + norm(l);
+    if (g === 4) return /TSDB/i.test(l) ? 'TSDB' : (/보안|IAM|PKI/i.test(t) ? 'SEC' : 'L4:' + norm(l));
+    if (/ACS/i.test(l)) return 'TS4';
+    if (/PLUG-?IN/i.test(l)) return 'TS3';
+    if (/시각화|UI/i.test(l)) return 'TS2';
+    if (/설비|연동/.test(l)) return 'TS1';
+    return 'T5:' + norm(l);
+  }
+
+  /* 기준 견적 행(base: {g, cat, label, q, u, …표기}) ↔ 업로드 품목 대조.
+     st: same(수량·단가·구성 같음) · chg(바뀜, diff에 내역) · new(기준에 없음). removed: 업로드에 없는 기준 품목 */
+  function merge(base, up) {
+    var bk = base.map(function (r) { return {r: r, key: keyOf(r.g, r.cat, r.label), used: false}; });
+    if (!up) return {live: false, rows: bk.map(function (b) { return {g: b.r.g, cat: b.r.cat, label: b.r.label, key: b.key, q: b.r.q, u: b.r.u, base: b.r, st: 'same', diff: []}; }), removed: []};
+    var rows = up.items.map(function (it) {
+      var key = keyOf(it.g, it.cat, it.label), b = null, diff = [];
+      for (var i = 0; i < bk.length && !b; i++) if (!bk[i].used && bk[i].key === key && bk[i].r.g === it.g) { b = bk[i]; b.used = true; }
+      if (b) {
+        var r = b.r;
+        if (Math.abs(r.q - it.q) > 1e-9) diff.push('수량 ' + r.q + '→' + it.q);
+        if (Math.abs(r.u - it.u) > 0.0005) diff.push(PUB && it.g === 1 ? '단가 변경' : '단가 ' + k(r.u) + '→' + k(it.u));
+        if (DETAIL[key] && toks(r.label).join('·') !== toks(it.label).join('·')) diff.push('구성 ' + toks(r.label).join('·') + '→' + toks(it.label).join('·'));
+        if (key === 'SCN' && norm(r.label) !== norm(it.label)) diff.push('모델 변경');
+      }
+      return {g: it.g, cat: it.cat, label: it.label, key: key, q: it.q, u: it.u, base: b ? b.r : null, st: b ? (diff.length ? 'chg' : 'same') : 'new', diff: diff};
+    });
+    return {live: true, rows: rows, removed: bk.filter(function (b) { return !b.used; }).map(function (b) { return b.r; })};
+  }
+
+  function amcText(rows, amc) {
+    var sw = sum(rows, function (x) { return x.g === 1 && x.key !== 'AMC' ? x.q * x.u : 0; });
+    return '연 ' + (sw ? Math.round(amc.u / sw * 1000) / 10 : 0) + '% × ' + amc.q + '년';
+  }
+  function itemName(m) {
+    if (m.base && m.base.dm) return m.base.dm.nm;
+    if (m.g === 1 && B.names && B.names[m.key]) return B.names[m.key];
+    if (m.base && m.base.o) return m.base.o.nm;
+    return oneLine(m.label);
+  }
+  function diffList(mz) {
+    var out = [];
+    mz.rows.forEach(function (m) {
+      if (m.st === 'chg') out.push({t: 'chg', s: itemName(m) + ' — ' + m.diff.join(', ')});
+      if (m.st === 'new') out.push({t: 'new', s: itemName(m) + ' — 추가 (수량 ' + m.q + (PUB && m.g === 1 ? '' : ', 금액 ' + k(m.q * m.u) + '천원') + ')'});
+    });
+    mz.removed.forEach(function (r) { out.push({t: 'del', s: itemName({base: r, g: r.g, label: r.label, key: keyOf(r.g, r.cat, r.label)}) + ' — 삭제'}); });
+    return out;
+  }
+  function diffHtml(d) {
+    var T = {chg: '변경', new: '추가', del: '삭제'};
+    return d.map(function (x) { return '<li class="ql-' + x.t + '"><b>' + T[x.t] + '</b> ' + E(x.s) + '</li>'; }).join('');
+  }
+
+  // ------------------------------------------------------------------ 저장 (브라우저 안에서만)
+  function load() {
+    try { var s = root.localStorage.getItem(KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; }
+  }
+  function save(q) {
+    try { if (q) root.localStorage.setItem(KEY, JSON.stringify(q)); else root.localStorage.removeItem(KEY); return true; } catch (e) { return false; }
+  }
+
+  // ------------------------------------------------------------------ DMWorks 존별 옵션 구성 페이지
+  var TAG = {ok: ['적합', 'ok'], chk: ['확인', 'chk'], adj: ['조정', 'adj']};
+  function tag(v) { return '<span class="tag ' + TAG[v][1] + '">' + TAG[v][0] + '</span>'; }
+  function fm(grp) { return grp === 'SW' || grp === '유지보수' ? km : k; }
+
+  function dmTemplates() {
+    var t = {};
+    B.zones.forEach(function (z) { z.rows.forEach(function (r) { var key = keyOf(r.g, r.cat, r.label); if (!t[key]) t[key] = r.dm; }); });
+    return t;
+  }
+  function dmRows(mz, tm) {
+    return mz.rows.map(function (m) {
+      if (m.st === 'same') return {grp: m.base.dm.grp, nm: m.base.dm.nm, dd: m.base.dm.dd, q: m.q, u: m.u, v: m.base.dm.v, why: m.base.dm.why, key: m.key, g: m.g};
+      var t = m.base ? m.base.dm : tm[m.key], grp = m.g === 1 ? (m.key === 'AMC' ? '유지보수' : 'SW') : DMG[m.g], nm, dd;
+      if (m.g === 1 && B.names[m.key]) { nm = B.names[m.key]; dd = DETAIL[m.key] ? toks(m.label).join('·') : (m.key === 'AMC' ? amcText(mz.rows, m) : ''); }
+      else if (t) { nm = t.nm; dd = t.dd; }
+      else { nm = oneLine(m.label); dd = ''; }
+      var why = m.st === 'new' ? '기준 견적에 없던 품목 — 존 목적에 맞는지 검토 필요'
+        : '기준 견적 대비 ' + m.diff.join(', ') + (t && t.why ? ' · 기존 의견: ' + t.why : '');
+      return {grp: grp, nm: nm, dd: dd, q: m.q, u: m.u, v: 'chk', why: why, key: m.key, g: m.g};
+    });
+  }
+  function quoteTable(rs, z) {
+    var h = [], cur = null;
+    rs.forEach(function (r) {
+      if (r.grp !== cur) {
+        cur = r.grp;
+        h.push('<tr class="grp"><th colspan="4" scope="rowgroup">' + E(cur) + '</th><td class="num">' + fm(cur)(sum(rs, function (x) { return x.grp === cur ? x.q * x.u : 0; })) + '</td><td colspan="2"></td></tr>');
+      }
+      h.push('<tr><td class="nm">' + E(r.nm) + '</td><td>' + E(r.dd) + '</td><td class="q"><b>' + r.q + '</b></td><td class="num">' + fm(r.grp)(r.u) + '</td>'
+        + '<td class="num">' + fm(r.grp)(r.q * r.u) + '</td><td>' + tag(r.v) + '</td><td>' + E(r.why) + '</td></tr>');
+    });
+    var foot = '<tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">' + km(z.ga) + '</td><td colspan="2"></td></tr>'
+      + '<tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">' + km(z.total) + '</td><td colspan="2">' + E(z.no) + '</td></tr>';
+    return '<div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th>'
+      + '<th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead>'
+      + '<tbody>' + h.join('') + '</tbody><tfoot>' + foot + '</tfoot></table></div>';
+  }
+  function parts(rs, z) {
+    var g = function (n) { return sum(rs, function (x) { return n.indexOf(x.g) >= 0 ? x.q * x.u : 0; }); };
+    return [g([1]), g([2]), g([3, 4]), g([5]), z.ga];
+  }
+  function summaryTable(Z, pzt) {
+    var F = [km, k, k, k, km], t = [0, 0, 0, 0, 0, 0], rows = [];
+    Z.forEach(function (x) {
+      var v = parts(x.rs, x.meta).concat([x.meta.total]);
+      v.forEach(function (n, i) { t[i] += n; });
+      rows.push('<tr><td><a href="#' + x.z.slug + '">' + E(x.z.id) + '</a></td><td class="nm">' + E(x.z.name) + '</td><td class="note">' + E(x.meta.no) + '</td>'
+        + F.map(function (f, i) { return '<td class="num">' + f(v[i]) + '</td>'; }).join('') + '<td class="num"><b>' + km(v[5]) + '</b></td></tr>');
+    });
+    rows.push('<tr><td><a href="#z3">A-3</a></td><td class="nm">정밀조립존</td><td class="note">견적 없음 · 견적 단가로 산정</td>'
+      + '<td class="num">' + km(pzt) + '</td>' + new Array(5).join('<td class="num">–</td>') + '<td class="num">' + km(pzt) + '</td></tr>');
+    rows.push('<tr class="tot strong"><th colspan="3">견적 합계 (3개 존)</th>' + F.concat([km]).map(function (f, i) { return '<td class="num">' + f(t[i]) + '</td>'; }).join('') + '</tr>');
+    return '<div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">OCS SW(AMC 포함)</th><th class="r">OCS HW</th>'
+      + '<th class="r">로컬 HW·OCS·보안</th><th class="r">기술지원</th><th class="r">일반관리비·이윤</th><th class="r">견적 합계</th></tr></thead>'
+      + '<tbody>' + rows.join('') + '</tbody></table></div><p class="note-box">단위 천원. 견적서 표지는 \'VAT 포함\', 참고사항은 \'부가세 별도\'로 엇갈림. 일반관리비·이윤은 (OCS SW + OCS HW + 기술지원)의 10%로 로컬 HW·로컬 OCS·보안에는 붙지 않음. 견적 합계는 업체 단위절삭(백만 원 미만 버림) 후 금액.</p>';
+  }
+  function unitOf(Z, key) {
+    for (var i = 0; i < Z.length; i++) for (var j = 0; j < Z[i].rs.length; j++) if (Z[i].rs[j].key === key) return Z[i].rs[j].u;
+    return null;
+  }
+  function pzRows(Z) {
+    return B.pz.map(function (p) { var u = unitOf(Z, p.key); return {nm: p.nm, q: p.q, why: p.why, u: u == null ? p.u : u, base: u == null}; });
+  }
+  function pzTable(rs, live) {
+    var tot = sum(rs, function (r) { return r.u * r.q; }), nb = rs.filter(function (r) { return r.base; }).length;
+    return '<div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>쓰는 이유</th></tr></thead><tbody>'
+      + rs.map(function (r) { return '<tr><td class="nm">' + E(r.nm) + '</td><td class="q"><b>' + r.q + '</b></td><td class="num">' + km(r.u) + '</td><td class="num">' + km(r.u * r.q) + '</td><td>' + E(r.why) + '</td></tr>'; }).join('')
+      + '<tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">' + km(tot) + '</td><td>'
+      + (live ? '업로드 견적 단가 적용' + (nb ? ' (견적에 없는 ' + nb + '종은 기준 견적 단가)' : '') : '10/15 최종 견적 단가(정가×57.2%) 적용') + '</td></tr></tbody></table></div>';
+  }
+
+  function renderDmw(q, mzs) {
+    var tm = dmTemplates(), Z = B.zones.map(function (z, i) {
+      var up = q && q.zones[z.id];
+      return {z: z, up: up, mz: mzs[i], meta: up || z, rs: dmRows(mzs[i], tm)};
+    });
+    Z.forEach(function (x) {
+      var s = x.z.slug;
+      setH('ql-qt-' + s, quoteTable(x.rs, x.meta));
+      setT('ql-zeb-' + s, x.z.id + ' · ' + x.z.purpose + ' · ' + x.meta.no);
+      setT('ql-zh2-' + s, x.z.name + ' · 견적 ' + won(x.meta.total));
+      setH('ql-zh3-' + s, (x.up ? '업로드 견적' : '기준 견적(10/15)') + ' 구성과 검토 <span class="chg">(단위 천원 · ' + E(x.meta.no) + (x.meta.date ? ' · ' + E(x.meta.date) : '') + ')</span>');
+      var d = diffList(x.mz);
+      setH('ql-zchg-' + s, x.up ? '<b>기준 견적(10/15 최종, ' + E(x.z.no) + ') 대비</b> ' + (d.length ? '변경 ' + d.filter(function (y) { return y.t === 'chg'; }).length + '건 · 추가 ' + d.filter(function (y) { return y.t === 'new'; }).length
+        + '건 · 삭제 ' + d.filter(function (y) { return y.t === 'del'; }).length + '건' + (PUB ? '' : ' · 합계 ' + k(x.z.total) + ' → ' + k(x.meta.total) + '천원') + '<ul class="ql-diff">' + diffHtml(d) + '</ul>' : '— 품목·수량·단가가 같음')
+        : '업로드한 견적서에 이 존 시트가 없어 기준 견적(10/15 최종)을 그대로 표시함.');
+    });
+    var pz = pzRows(Z), pzt = sum(pz, function (r) { return r.u * r.q; }), T = sum(Z, function (x) { return x.meta.total; });
+    setH('ql-sumtbl', summaryTable(Z, pzt));
+    setH('ql-pz', pzTable(pz, true));
+    setT('ql-sumh2', '업로드 견적 3개 존 · 합계 ' + won(T));
+    setT('ql-eb', '업로드 견적서 「' + q.name + '」 기준(기준 견적 10/15 최종과 대조)');
+    var B0 = sum(B.zones, function (z) { return z.total; });
+    setT('ql-k-ov', '업로드 견적서 「' + q.name + '」 기준 — ' + Z.map(function (x) { return x.z.short + ' ' + (PUB ? '' : k(x.meta.total) + ' ') + '(' + x.meta.no + (x.up ? '' : ', 기준 유지') + ')'; }).join(' · ')
+      + (PUB ? '. 견적 합계는 공개본에서 비공개.' : ' = 합계 ' + k(T) + '천원 (기준 10/15 최종 ' + k(B0) + '천원 대비 ' + (T >= B0 ? '+' : '') + k(T - B0) + '천원).'));
+    var all = [].concat.apply([], Z.map(function (x) { return x.rs; })), amt = function (f) { return sum(all, function (r) { return f(r) ? r.q * r.u : 0; }); };
+    var loc = amt(function (r) { return r.g === 3 || r.g === 4; }), srv = amt(function (r) { return r.key === 'GPU'; }), amc = amt(function (r) { return r.key === 'AMC'; }), scn = amt(function (r) { return r.key === 'SCN'; });
+    var nsrv = sum(all, function (r) { return r.key === 'GPU' ? r.q : 0; }), nscn = sum(all, function (r) { return r.key === 'SCN' ? r.q : 0; });
+    var yrs = all.filter(function (r) { return r.key === 'AMC'; }).map(function (r) { return r.q; })[0];
+    setT('ql-k-big', PUB ? '로컬 HW 3존 ' + k(loc) + ' · 연산 서버 ' + nsrv + '대 ' + k(srv) + ' · 스캐너 ' + nscn + '대 ' + k(scn) + '천원 · AMC ' + (yrs || 0) + '년(DMWorks SW 기준이라 비공개)'
+      : '로컬 HW 3존 ' + k(loc) + ' · 연산 서버 ' + nsrv + '대 ' + k(srv) + ' · AMC ' + (yrs || 0) + '년 ' + k(amc) + ' · 스캐너 ' + nscn + '대 ' + k(scn) + '천원 — 네 가지가 전체의 약 ' + Math.round((loc + srv + amc + scn) / T * 100) + '%');
+    // 단가·제품 표: 견적 단가·비율·존별 수량
+    Array.prototype.forEach.call(document.querySelectorAll('[data-qlu]'), function (td) {
+      var key = td.getAttribute('data-qlu'), u = unitOf(Z, key);
+      if (u != null) td.innerHTML = '<b>' + km(u) + '</b>';
+      var r = document.querySelector('[data-qlr="' + key + '"]');
+      if (r && u != null && B.list[key]) r.textContent = (Math.round(u / B.list[key] * 1000) / 10).toFixed(1) + '%';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-qlq]'), function (td) {
+      var p = td.getAttribute('data-qlq').split('|'), x = Z.filter(function (y) { return y.z.id === p[1]; })[0];
+      td.textContent = sum(x.rs, function (r) { return r.key === p[0] ? r.q : 0; }) || '–';
+    });
+    return Z;
+  }
+
+  // ------------------------------------------------------------------ OCS 시뮬레이션 Cell 페이지
+  var CHKX = {chg: ['변경 확인', 'chk'], new: ['신규 품목', 'adj']};
+  var CHKX_NOTE = {chg: '기준 견적 대비 수량·단가·구성 변경 — 사양·근거 재확인', new: '기준 견적에 없던 품목 — 일반 명칭·세부 사양 정리 필요'};
+  function chkTag(c) { var t = B.chk[c] || CHKX[c]; return '<span class="tag ' + t[1] + '">' + t[0] + '</span>'; }
+  function gk(g) { return g.indexOf('항목1') === 0 ? km : k; }
+
+  function ocsTemplate(key, label) {
+    for (var i = 0; i < B.tmpl.length; i++) {
+      var t = B.tmpl[i];
+      if (keyOf(t.g, t.cat, t.label) === key && (key !== 'SCN' || norm(t.label) === norm(label))) return t;
+    }
+    return null;
+  }
+  function ocsPres(m, mz) {
+    if (m.st === 'same') return {sym: m.base.o.sym, nm: m.base.o.nm, sp: m.base.o.sp, unit: m.base.o.unit, node: m.base.o.node, chk: m.base.o.chk, lab: m.base.o.lab, cat: m.base.cat};
+    var t = m.base || ocsTemplate(m.key, m.label), to = t && t.o, gen = m.g === 1 && B.gen[m.key], p;
+    if (gen) {
+      var det = '', n = toks(m.label).length || m.q, sp = gen[1];
+      if (m.key === 'CADI' || m.key === 'CADE') det = toks(m.label).join('·') + ' ' + n + '종';
+      else if (ROBOT[m.key]) det = 'Cell 로봇 제어기 ' + n + '종';
+      else if (m.key === 'PLC') det = 'Cell PLC ' + n + '종';
+      if (m.key === 'AMC') sp = sp.replace(/연 [\d.]+% × \d+년/, amcText(mz.rows, m));
+      p = {sym: m.key, nm: gen[0], sp: det ? det + ' — ' + sp : sp, node: gen[2], unit: m.key === 'AMC' ? '년' : (m.q === 1 ? '카피' : '모듈'),
+        chk: ROBOT[m.key] || m.key === 'PLC' ? 'maker' : (m.key === 'AMC' ? 'amc' : 'ok')};
+    } else if (to) p = {sym: to.sym, nm: to.nm, sp: to.sp, node: to.node, unit: to.unit, chk: to.chk};
+    else {
+      var scn = m.key === 'SCN';
+      p = {sym: scn ? 'SCN' : (m.g === 1 ? 'SW' : 'HW'), nm: scn ? '3D 스캐너 (HW·운영 SW 포함)' : oneLine(m.label).split(' · ')[0],
+        sp: scn ? '측정 범위·정확도·스캔 속도는 견적서에 없음 — 규격서 기재 필요' : '견적서 기재 품목 — 일반 명칭·세부 사양 정리 필요',
+        node: scn ? 'SCN' : null, unit: m.g === 1 ? (m.q === 1 ? '카피' : '모듈') : (m.g === 2 ? '대' : '식'), chk: 'ok'};
+    }
+    var bc = m.base ? m.base.o.chk : p.chk;
+    p.chk = m.st === 'chg' ? (bc !== 'ok' ? bc : 'chg') : (p.chk !== 'ok' ? p.chk : 'new');
+    p.lab = oneLine(m.label);
+    p.cat = m.base ? m.base.cat : oneLine(m.cat.replace(/,\s*\n/g, '·'));
+    return p;
+  }
+  function ocsRows(mz) {
+    var out = [], cnt = {}, subs = false;
+    mz.rows.forEach(function (m) {
+      var n = cnt[m.g] = (cnt[m.g] || 0) + 1, no = m.g + '-' + n, p = ocsPres(m, mz);
+      out.push({g: GN[m.g], no: no, sym: p.sym, nm: p.nm, sp: p.sp, q: m.q, unit: p.unit, u: m.u, amt: m.q * m.u, lab: p.lab, node: p.node, chk: p.chk, sub: 0, cat: p.cat, key: m.key});
+      if (m.key === 'LHW' && !subs) {
+        subs = true;
+        B.sub.forEach(function (s) { out.push({g: GN[3], no: no + '-' + s.sfx, sym: s.sym, nm: s.nm, sp: s.sp, q: s.q, unit: s.unit, u: null, amt: null, lab: s.lab, node: s.node, chk: s.chk, sub: s.sub, cat: p.cat}); });
+      }
+    });
+    return out;
+  }
+  function itemTable(rows, z) {
+    var gsum = {}, swBy = {}, csum = {}, ccnt = {}, push = function (o, key, v) { (o[key] = o[key] || []).push(v); };
+    rows.forEach(function (r) { if (r.amt != null) gsum[r.g] = (gsum[r.g] || 0) + r.amt; });
+    rows.forEach(function (r) { if (r.g.indexOf('항목1') === 0 && r.node) push(swBy, r.node, r.no); });
+    rows.forEach(function (r) { if (r.g.indexOf('항목4') === 0) push(swBy, 'DPS', r.no); });
+    rows.forEach(function (r) { var c = r.g + '|' + r.cat; csum[c] = (csum[c] || 0) + (r.amt || 0); ccnt[c] = (ccnt[c] || 0) + (r.sub ? 0 : 1); });
+    var body = [], cur = null, ccur = null, seen = {}, cn = 0;
+    rows.forEach(function (r) {
+      if (r.g !== cur) { cur = r.g; body.push('<tr class="grp"><th colspan="6" scope="rowgroup">' + E(r.g) + '</th><td class="num">' + gk(r.g)(gsum[r.g] || 0) + '</td><td colspan="2"></td></tr>'); }
+      var c = r.g + '|' + r.cat;
+      if (c !== ccur) {
+        ccur = c; cn++;
+        body.push('<tr class="cat" data-cat="c' + cn + '" tabindex="0" role="button" aria-expanded="false" title="눌러서 접기·펼치기">'
+          + '<td class="sym"><span class="tw" aria-hidden="true">▸</span>견적서 항목</td><th colspan="5" scope="rowgroup">' + E(r.cat) + ' <span>· ' + ccnt[c] + '품목</span></th>'
+          + '<td class="num">' + gk(r.g)(csum[c]) + '</td><td colspan="2"></td></tr>');
+      }
+      var anchor = ANCH.indexOf(r.sym) >= 0 ? r.sym : null, rid = '';
+      if (anchor && !seen[anchor]) { rid = ' id="it-' + anchor + '"'; seen[anchor] = 1; }
+      var nmh = E(r.nm);
+      if (anchor && swBy[anchor]) {
+        var lst = swBy[anchor];
+        nmh += '<span class="where">탑재: ' + E(lst.length <= 3 ? lst.join(', ') : 'SW ' + lst.length + '종 (' + lst[0] + '~' + lst[lst.length - 1] + ')')
+          + ' <a href="#r-' + lst[0] + '" class="tolink" data-flash="' + lst.map(function (x) { return 'r-' + x; }).join(',') + '">↓</a></span>';
+      }
+      if (anchor) nmh += ' <a href="#topo-' + anchor + '" class="tolink">도면 ↑</a>';
+      else if (r.node) nmh += '<span class="where">설치: ' + E(B.nodes[r.node] || r.node) + ' <a href="#topo-' + r.node + '" class="tolink">↑</a></span>';
+      var cls = r.sub === 2 ? ' class="subrow sub2 cx"' : (r.sub ? ' class="subrow cx"' : ' class="cx"');
+      if (rid) body.push('<tr id="r-' + r.no + '" hidden></tr>');
+      body.push('<tr' + (rid || ' id="r-' + r.no + '"') + cls + ' data-in="c' + cn + '"><td class="sym">' + E(r.no) + '</td><td class="nm">' + nmh + '</td><td class="spec">' + E(r.sp) + '</td>'
+        + '<td class="q"><b>' + E(String(r.q)) + '</b></td><td class="u">' + E(r.unit) + '</td>'
+        + '<td class="num">' + (r.u != null ? gk(r.g)(r.u) : '–') + '</td><td class="num">' + (r.amt != null ? gk(r.g)(r.amt) : '미구분') + '</td>'
+        + '<td>' + chkTag(r.chk) + '<span class="where">' + E(B.chkNote[r.chk] || CHKX_NOTE[r.chk] || '') + '</span></td><td class="note">' + E(r.lab) + '</td></tr>');
+    });
+    var amt = rows.filter(function (r) { return r.amt != null; }), pre = sum(amt, function (r) { return r.amt; });
+    var base = sum(amt, function (r) { return /^항목[125]/.test(r.g) ? r.amt : 0; });
+    var foot = '<tr class="tot"><th colspan="6">항목6. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목5)' + (PUB ? '' : ' ' + k(base)) + '의 10%, 견적서 기재값</th><td class="num">' + km(z.ga) + '</td><td colspan="2"></td></tr>'
+      + '<tr class="tot"><th colspan="6">합계 (단위절삭 전)</th><td class="num">' + km(pre + z.ga) + '</td><td colspan="2"></td></tr>'
+      + '<tr class="tot strong"><th colspan="6">견적 합계 (단위절삭 후)</th><td class="num">' + km(z.total) + '</td><td colspan="2">' + E(z.no) + '</td></tr>';
+    return '<div class="tbl-wrap"><table class="bom wide2"><thead><tr><th>번호</th><th>구성품 (일반 명칭)</th><th>세부 사양</th><th style="text-align:center">수량</th><th>단위</th>'
+      + '<th class="r">단가</th><th class="r">금액</th><th>지침 점검</th><th>견적서 기재 품목 <span class="chg">(내부 대조용 · 제출 문서에는 쓰지 않음)</span></th></tr></thead>'
+      + '<tbody>' + body.join('') + '</tbody><tfoot>' + foot + '</tfoot></table></div>';
+  }
+  function opcBlock(rows) {
+    var names = rows.filter(function (r) { return r.g.indexOf('항목1') === 0 && r.node === 'OPC'; }).map(function (r) { return r.nm.split(' (')[0]; });
+    var lines = [], cur = '';
+    names.forEach(function (n) { var nx = (cur ? cur + ' · ' : '') + n; if (nx.length > 34) { lines.push(cur); cur = n; } else cur = nx; });
+    lines.push(cur);
+    return '<rect x="776" y="346" width="310" height="132" rx="4" class="dv3"/><text x="931" y="368" class="dvt" font-size="12">운영 PC 탑재 SW ' + names.length + '종 (항목1)</text>'
+      + lines.slice(0, 8).map(function (l, i) { return '<text x="931" y="' + (386 + i * 12.5) + '" class="dvs" font-size="9.5">' + E(l) + '</text>'; }).join('');
+  }
+
+  function renderOcs(q, mz) {
+    var z = B.zones[0], up = q && q.zones[z.id], meta = up || z, rows = ocsRows(mz);
+    setH('ql-items', itemTable(rows, meta));
+    var gs = {}, gl = [];
+    rows.forEach(function (r) { if (r.amt != null) { if (!(r.g in gs)) { gs[r.g] = 0; gl.push(r.g); } gs[r.g] += r.amt; } });
+    setH('ql-kpis', gl.map(function (g) { return '<div><b>' + gk(g)(gs[g] / 1000) + '</b><span>' + E(g.split('. ')[1]) + ' (백만원)</span></div>'; }).join(''));
+    setT('ql-h2', '견적 ' + won(meta.total) + ' · 견적서 6개 항목을 서버실·운영실·Cell 캐비닛에 배치');
+    setT('ql-eb', up ? '업로드 견적(' + meta.no + ') 기준' : '10/15 최종 견적(' + z.no + ') 기준');
+    setT('ql-s-quote', meta.no + ' (' + (meta.date || '') + ') · 합계 ' + won(meta.total) + ' · 비교견적 ' + k(z.cmp) + '천원(발표자료 별첨 3' + (up ? ' · 기준 견적 때 확보' : '') + ')');
+    setT('ql-s-comp', gl.map(function (g) { return g.split('. ')[1] + ' ' + gk(g)(gs[g]); }).join(' · ') + ' · 일반관리비·이윤 ' + won(meta.ga));
+    var amc = rows.filter(function (r) { return r.key === 'AMC'; })[0];
+    setT('ql-s-lic', '네트워크 라이선스(Network-Lock), 모듈별 1카피(포맷·제어기·PLC 단위 모듈은 수량만큼). '
+      + (amc ? '유지보수 ' + amcText(mz.rows, amc) + (PUB ? '' : ' ' + k(amc.q * amc.u) + '천원') + '이 항목1에 포함' : '유지보수(AMC)는 견적에 없음'));
+    var scan = rows.some(function (r) { return r.sym === 'SCN'; });
+    var nspec = rows.filter(function (r) { return r.chk === 'spec'; }).length + rows.filter(function (r) { return r.sub && /없음/.test(r.sp); }).length;
+    var lumps = rows.filter(function (r) { return r.chk === 'lump'; }), ts = rows.filter(function (r) { return r.g.indexOf('항목5') === 0; });
+    setT('ql-g-spec', '사양이 없는 구성품 ' + nspec + '건(운영 PC·노트북·모니터링 구성품' + (scan ? ', 스캐너 성능 수치' : '') + '·로컬 HW 하위 품목) — 공급사에 사양서 요청');
+    setT('ql-g-lump', '1식 금액 ' + lumps.length + '건 ' + k(sum(lumps, function (r) { return r.amt; })) + "천원을 '금액 미구분'으로 표시");
+    setT('ql-q-ts', '기술지원 ' + ts.length + '건 ' + k(sum(ts, function (r) { return r.amt; })) + '천원, 유지보수 ' + (amc ? amcText(mz.rows, amc) : '없음') + ' 항목1에 포함 — 범위·산출물 명시 필요');
+    var g = document.getElementById('ql-opc');
+    if (g) g.innerHTML = opcBlock(rows);
+    show('ql-scan', scan); show('ql-noscan', !scan);
+    var role = document.getElementById('ql-role-SCN');
+    if (role) role.hidden = !scan;
+    return rows;
+  }
+
+  // ------------------------------------------------------------------ DOM
+  var SNAP = {};
+  function setH(id, h) { var n = document.getElementById(id); if (n) n.innerHTML = h; }
+  function setT(id, t) { var n = document.getElementById(id); if (n) n.textContent = t; }
+  function show(id, on) { var n = document.getElementById(id); if (n) { if (on) n.removeAttribute('display'); else n.setAttribute('display', 'none'); } }
+  function snapshot() {
+    Array.prototype.forEach.call(document.querySelectorAll('[id^="ql-"],[data-qlu],[data-qlr],[data-qlq]'), function (n, i) {
+      if (n.closest('.qlive')) return;
+      n.setAttribute('data-qls', i);
+      SNAP[i] = {h: n.innerHTML, d: n.getAttribute('display'), hid: n.hidden};
+    });
+  }
+  function restore() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-qls]'), function (n) {
+      var s = SNAP[n.getAttribute('data-qls')];
+      n.innerHTML = s.h;
+      if (s.d == null) n.removeAttribute('display'); else n.setAttribute('display', s.d);
+      n.hidden = s.hid;
+    });
+  }
+
+  function apply(q) {
+    restore();
+    var panel = document.getElementById('qlive');
+    if (q && !B.zones.some(function (z) { return q.zones[z.id]; })) q = B.page === 'dmw' ? q : null;
+    var mzs = B.zones.map(function (z) { return merge(z.rows, q && q.zones[z.id]); });
+    if (B.page === 'dmw') {
+      if (q) renderDmw(q, mzs);
+      dmwPanel(q, mzs);
+    } else {
+      if (q && q.zones[B.zones[0].id]) renderOcs(q, mzs[0]);
+      ocsBanner(q, mzs[0]);
+    }
+    if (panel) panel.classList.toggle('on', !!q);
+  }
+
+  function dmwPanel(q, mzs) {
+    var cur = document.getElementById('ql-cur'), msg = document.getElementById('ql-msg'), dl = document.getElementById('ql-diff'), rst = document.getElementById('ql-reset');
+    rst.hidden = !q;
+    if (!q) {
+      cur.innerHTML = '기준 견적: <b>10/15 최종 견적 3건(1015-1~3)</b> — 페이지 작성 기준';
+      dl.innerHTML = '';
+      return;
+    }
+    var got = B.zones.filter(function (z) { return q.zones[z.id]; });
+    cur.innerHTML = '적용 견적: <b>' + E(q.name) + '</b> — ' + (got.length ? got.map(function (z) { return E(z.short) + ' ' + E(q.zones[z.id].no || ''); }).join(' · ') : '읽은 존 없음');
+    var n = 0, items = [];
+    B.zones.forEach(function (z, i) {
+      if (!q.zones[z.id]) return;
+      var d = diffList(mzs[i]);
+      n += d.length;
+      if (d.length) items.push('<li><b>' + E(z.short) + '</b><ul>' + diffHtml(d) + '</ul></li>');
+    });
+    dl.innerHTML = items.join('') + (q.warn || []).map(function (w) { return '<li class="ql-warn"><b>주의</b> ' + E(w) + '</li>'; }).join('');
+    if (!msg.textContent) msg.textContent = got.length ? '기준 견적 대비 변경·추가·삭제 ' + n + '건. OCS 시뮬레이션 Cell 3종 페이지에도 자동 반영됨.' : '견적서 시트를 찾지 못함 — 이지로보틱스 견적서 엑셀 양식(항목1~6)인지 확인';
+  }
+
+  function ocsBanner(q, mz) {
+    var bn = document.getElementById('qlive');
+    if (!bn) return;
+    var z = B.zones[0], up = q && q.zones[z.id];
+    document.getElementById('ql-reset').hidden = !q;
+    if (!q) {
+      document.getElementById('ql-cur').innerHTML = '기준 견적: <b>10/15 최종 견적</b> — 페이지 작성 기준';
+      document.getElementById('ql-diff').innerHTML = '';
+      return;
+    }
+    var d = up ? diffList(mz) : [];
+    document.getElementById('ql-cur').innerHTML = up
+      ? '적용 견적: <b>' + E(q.name) + '</b> — ' + E(up.no || '') + (up.date ? ' (' + E(up.date) + ')' : '') + ' · 기준 견적(10/15 최종) 대비 ' + (d.length ? '변경·추가·삭제 ' + d.length + '건' : '변경 없음')
+      : '적용 견적 <b>' + E(q.name) + '</b>에 이 존(' + E(z.short) + ') 시트가 없어 기준 견적(10/15 최종)을 표시함';
+    document.getElementById('ql-diff').innerHTML = diffHtml(d);
+  }
+
+  function readFile(file) {
+    var msg = document.getElementById('ql-msg');
+    msg.textContent = '읽는 중… (' + file.name + ')';
+    loadXLSX().then(function (X) {
+      return file.arrayBuffer().then(function (buf) {
+        var wb = X.read(buf, {type: 'array', cellDates: true});
+        return wb.SheetNames.map(function (n) { return {name: n, rows: X.utils.sheet_to_json(wb.Sheets[n], {header: 1, raw: true, defval: null})}; });
+      });
+    }).then(function (sheets) {
+      var q = parseBook(sheets, file.name);
+      if (!Object.keys(q.zones).length) { msg.textContent = '견적서 시트를 찾지 못함 — 이지로보틱스 견적서 엑셀 양식(항목1~6, 수량·단가·견적가 열)인지 확인'; return; }
+      var ok = save(q);
+      msg.textContent = '';
+      apply(q);
+      if (!ok) msg.textContent = '이 브라우저에서 저장이 막혀 있어 다른 페이지에는 반영되지 않음(이 페이지에만 적용)';
+    }).catch(function (e) { msg.textContent = '읽지 못함: ' + (e && e.message || e); });
+  }
+  function loadXLSX() {
+    if (root.XLSX) return Promise.resolve(root.XLSX);
+    return new Promise(function (res, rej) {
+      var s = document.createElement('script');
+      s.src = B.sheetjs;
+      s.onload = function () { res(root.XLSX); };
+      s.onerror = function () { rej(new Error('엑셀 읽기 모듈을 불러오지 못함 (인터넷 연결 필요)')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function init() {
+    var el = document.getElementById('qlbase');
+    if (!el) return;
+    B = JSON.parse(el.textContent);
+    PUB = B.public;
+    snapshot();
+    var inp = document.getElementById('ql-file'), panel = document.getElementById('qlive');
+    if (inp) inp.addEventListener('change', function () { if (inp.files[0]) readFile(inp.files[0]); inp.value = ''; });
+    if (panel && inp) {
+      panel.addEventListener('dragover', function (e) { e.preventDefault(); panel.classList.add('drag'); });
+      panel.addEventListener('dragleave', function () { panel.classList.remove('drag'); });
+      panel.addEventListener('drop', function (e) { e.preventDefault(); panel.classList.remove('drag'); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]); });
+    }
+    var rst = document.getElementById('ql-reset');
+    if (rst) rst.addEventListener('click', function () { save(null); var m = document.getElementById('ql-msg'); if (m) m.textContent = '기준 견적(10/15 최종)으로 되돌림'; apply(null); });
+    root.addEventListener('storage', function (e) { if (e.key === KEY) apply(load()); });
+    apply(load());
+  }
+
+  root.QuoteLive = {parseSheet: parseSheet, parseBook: parseBook, keyOf: keyOf, merge: merge, dmRows: dmRows, quoteTable: quoteTable, summaryTable: summaryTable,
+    pzRows: pzRows, pzTable: pzTable, ocsRows: ocsRows, itemTable: itemTable, dmTemplates: dmTemplates,
+    _base: function (b) { B = b; PUB = b.public; }};
+  if (root.document) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  }
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
 
 </body>
 </html>

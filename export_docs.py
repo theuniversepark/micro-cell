@@ -172,7 +172,7 @@ def tight(par, before=0, after=0, line=1.0):
 # ------------------------------------------------------------------ HTML → docx
 def clean(soup):
     """화면 전용 요소(이동 바·목차·'도면 ↑'·'탑재 SW ↓' 안내·막대그래프)는 문서에서 뺌."""
-    for sel in ["nav", "script", "div.catbar", "section#quote", "span.where", 'a.tolink[href^="#topo-"]:not(.sw)', "span.meter"]:
+    for sel in ["nav", "script", "div.catbar", "div.qlive", "section#quote", "span.where", 'a.tolink[href^="#topo-"]:not(.sw)', "span.meter"]:
         for e in soup.select(sel):
             e.decompose()
 

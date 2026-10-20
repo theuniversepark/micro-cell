@@ -3,7 +3,9 @@
 import html
 import re
 
+import build_ocs_sim as S
 import build_page as bp
+import quote_live as ql
 from privacy import PUBLIC, PUBLIC_NOTE, money as km, out, pick
 
 E = html.escape
@@ -270,7 +272,8 @@ def key_table():
         ("확인 항목", "AMC '5년' 표기와 ×4 계산 불일치, 표지 VAT 포함 vs 참고사항 부가세 별도. 로컬 HW 상세 사양(견적서 '별도 협의'). 정밀검사 AIMS(측정 HW 없음)·TESCar·ACS OLP 메이커. 나머지 SW·HW는 적합", "존별 검토"),
         ("정밀조립", "견적 대상이 아님. 같은 단가로 Base·MULTIPLE PROCESS·PLC·Plug-in User·USD Converter 1좌석을 잡으면 " + pick(f"약 {k(pz_total())}천원", "금액은 비공개"), "견적 단가 적용"),
     ]
-    body = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, b, c in rows)
+    ids = {"견적 개요": ' id="ql-k-ov"', "금액이 큰 항목": ' id="ql-k-big"'}  # quote_live.js가 업로드 견적 기준으로 고침
+    body = "".join(f'<tr><th scope="row">{E(a)}</th><td{ids.get(a, "")}>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, b, c in rows)
     return f'<div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>항목</th><th>내용</th><th>근거</th></tr></thead><tbody>{body}</tbody></table></div>'
 
 
@@ -299,12 +302,12 @@ def price_table():
         n, code, lp, func, note = OPT[key]
         func = re.sub(r"\s*\d{1,3}(?:,\d{3})+", "", func) if PUBLIC else func  # 기능 설명 속 정가
         qp = lp * RATE
-        use = "".join(f'<td class="dz">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
-        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">{E(code)}</span></td><td class="num">{km(lp)}</td><td class="num"><b>{km(qp)}</b></td>'
-                    f'<td class="q">57.2%</td><td>{E(func)}</td><td class="note">{E(note)}</td>{use}</tr>')
+        use = "".join(f'<td class="dz" data-qlq="{key}|{z["id"]}">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
+        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">{E(code)}</span></td><td class="num">{km(lp)}</td><td class="num" data-qlu="{key}"><b>{km(qp)}</b></td>'
+                    f'<td class="q" data-qlr="{key}">57.2%</td><td>{E(func)}</td><td class="note">{E(note)}</td>{use}</tr>')
     for key, (n, qp, func, note) in NEW.items():
-        use = "".join(f'<td class="dz">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
-        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num"><b>{km(qp)}</b></td>'
+        use = "".join(f'<td class="dz" data-qlq="{key}|{z["id"]}">{sum(q for g, kk, _, q, *_ in Q[z["id"]]["items"] if kk == key) or "–"}</td>' for z in ZONES)
+        rows.append(f'<tr><td class="nm">{E(n)}<br><span class="chg">신규 · 정가표 외</span></td><td class="num">–</td><td class="num" data-qlu="{key}"><b>{km(qp)}</b></td>'
                     f'<td class="q">–</td><td>{E(func)}</td><td class="note">{E(note)}</td>{use}</tr>')
     head = "".join(f"<th class='dz'>{E(z['id'])}</th>" for z in ZONES)
     return ('<div class="tbl-wrap"><table class="bom wide"><thead><tr><th>옵션·제품</th><th class="r">정가</th><th class="r">견적 단가</th><th style="text-align:center">비율</th>'
@@ -401,35 +404,55 @@ def refs_table():
             f'<tbody>{body}</tbody></table></div>')
 
 
+def ql_base():
+    """quote_live.js용 기준 견적 — 존별 품목 행(견적서 기재 품목·분류는 OCS Cell 페이지 데이터와 같은 순서로 맞춤) + 이 페이지 표기·검토 의견"""
+    zs = []
+    for z in ZONES:
+        oz = next(o for o in S.ZONES if o["id"] == z["id"])
+        orows = [r for r in S.zone_rows(oz) if not r[12]]
+        items = Q[z["id"]]["items"]
+        assert len(orows) == len(items), z["id"]
+        rows = []
+        for r, (g, key, det, q, u, v, why) in zip(orows, items):
+            assert r[5] == q and abs(r[7] - u) < 1e-6, (z["id"], r[1], det)
+            rows.append({"g": int(r[0][2]), "cat": S.quote_cat(oz, r[0], r[2], r[1]), "label": r[9], "q": q, "u": u,
+                         "dm": {"grp": g, "nm": name_of(key) if key else det, "dd": det if key else "", "v": v, "why": why}})
+        zs.append({"id": z["id"], "slug": z["slug"], "name": z["name"], "short": oz["short"], "purpose": z["purpose"], "no": Q[z["id"]]["no"], "date": "2026.10.15",
+                   "total": Q[z["id"]]["total"], "ga": Q[z["id"]]["ga"], "rows": rows})
+    return {"zones": zs, "names": {**{k_: v[0] for k_, v in OPT.items()}, **{k_: v[0] for k_, v in NEW.items()}, "AMC": name_of("AMC")},
+            "list": {k_: v[2] for k_, v in OPT.items()}, "pz": [{"key": k_, "q": q, "why": why, "nm": name_of(k_), "u": OPT[k_][2] * RATE if k_ in OPT else NEW[k_][1]} for k_, q, why in PZ]}
+
+
 def page():
     zsecs = "".join(f'''
 <section id="{z["slug"]}">
-  <p class="eyebrow">{E(z["id"])} · {E(z["purpose"])} · {E(Q[z["id"]]["no"])}</p>
-  <h2>{E(z["name"])} · 견적 {won(Q[z["id"]]["total"])}</h2>
+  <p class="eyebrow" id="ql-zeb-{z["slug"]}">{E(z["id"])} · {E(z["purpose"])} · {E(Q[z["id"]]["no"])}</p>
+  <h2 id="ql-zh2-{z["slug"]}">{E(z["name"])} · 견적 {won(Q[z["id"]]["total"])}</h2>
   <h3>해야 할 일과 필요한 기능</h3>
   {task_table(z)}
-  <h3>10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
-  <p class="note-box">10/8 견적 대비: {E(pick(CHANGES[z["id"]], CHANGES[z["id"]].split(". ", 1)[1]))}. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
-  {quote_table(z["id"])}
+  <h3 id="ql-zh3-{z["slug"]}">10/15 최종 견적 구성과 검토 <span class="chg">(단위 천원)</span></h3>
+  <p class="note-box" id="ql-zchg-{z["slug"]}">10/8 견적 대비: {E(pick(CHANGES[z["id"]], CHANGES[z["id"]].split(". ", 1)[1]))}. 공통으로 단가 ×1.1, 연산 서버 8GPU → 4GPU + 방화벽.</p>
+  <div id="ql-qt-{z["slug"]}">{quote_table(z["id"])}</div>
 </section>''' for z in ZONES)
     return f'''<title>DMWorks 존별 옵션 구성</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{EXTRA}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · 이지로보틱스 10/15 최종 견적서(1015-1~3) 기준 · 10/12 비용 조정 반영 · 2026.10.19 갱신 · 검토본</p>
+  <p class="eyebrow">총괄5-세부1 기술실증 테스트베드 · <span id="ql-eb">이지로보틱스 10/15 최종 견적서(1015-1~3) 기준</span> · 10/12 비용 조정 반영 · 2026.10.19 갱신 · 검토본</p>
   <h1>DMWorks 존별 옵션 구성</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
   <a href="#sum">요약</a><a href="#why">구매 필요성</a><a href="#opt">단가·제품</a>{"".join(f'<a href="#{z["slug"]}">{z["id"]}</a>' for z in ZONES)}<a href="#z3">A-3</a><a href="#issues">확인 필요</a><a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
+{ql.dmw_panel([(f"ocs_sim_{z['slug']}.html", z["short"]) for z in S.ZONES])}
 <section id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
-  <h2>10/15 최종 견적 3개 존 · 합계 {won(QTOTAL)}</h2>
+  <h2 id="ql-sumh2">10/15 최종 견적 3개 존 · 합계 {won(QTOTAL)}</h2>
   {f'<p class="note-box">{E(PUBLIC_NOTE)}</p>' if PUBLIC else ""}{key_table()}
   <h3>존별 견적 합계</h3>
-  {summary_table()}
+  <div id="ql-sumtbl">{summary_table()}</div>
 </section>
 <section id="why">
   <p class="eyebrow">1. 구매 필요성</p>
@@ -447,7 +470,7 @@ def page():
   <p class="eyebrow">A-3 · 셀 배치·물류·상태머신 검증 · 견적 없음</p>
   <h2>정밀조립존 (OCS 셀 없음 · DT 워크스테이션 1대)</h2>
   <p class="note-box">10/15 최종 견적 대상에 없음. 같은 견적 단가로 1좌석을 산정함. 협동로봇(국산)은 OLP 목록에 없어 제외.</p>
-  {pz_table()}
+  <div id="ql-pz">{pz_table()}</div>
 </section>
 <section id="issues">
   <p class="eyebrow">확인 필요 사항</p>
@@ -460,6 +483,7 @@ def page():
   {refs_table()}
 </section>
 </main>
+{ql.assets("dmw", ql_base())}
 '''
 
 

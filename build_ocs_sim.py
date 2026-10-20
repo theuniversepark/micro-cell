@@ -8,6 +8,7 @@ import base64
 import os
 
 import build_ocs_pz as pz
+import quote_live as ql
 from privacy import OUT_DIR, PUBLIC, PUBLIC_NOTE, money as km, out, pick
 
 E = html.escape
@@ -350,14 +351,16 @@ def topo_svg(z):
     dev(776, 142, 160, 58, "DT·시뮬레이션 운영 PC", "운영 데스크 1 · 시뮬레이션 SW", "dv", 12, "OPC")
     dev(946, 142, 140, 58, "운영 노트북", "운영 데스크 2 · 시운전·스캔", "dv", 12, "NB")
     dev(776, 212, 310, 58, "DT 모니터링 시스템", "운영실 벽면 표시장치 · 모니터링 모듈 표시", "dv", 12.5, "MON")
-    if z["scan"]:
-        nm, _, _, _, where = z["scan"]
-        dev(776, 282, 310, 52, nm.split(" (")[0], where + " · 스캔 데이터 → 운영 PC·통합 스토리지", "dv", 12, "SCN")
-        link([(1016, 334), (1016, 346)], "l1")
-    else:
-        dev(776, 282, 310, 52, "측정·검사 장비는 각 Cell 소속", "측정 시스템 통합 제어 모듈(1-19)이 Cell 측정기를 제어", "dvx", 11.5)
+    # 스캐너 유무 두 가지를 모두 그리고 하나만 보임 — 업로드 견적에 따라 quote_live.js가 바꿈
+    nm, where = (z["scan"][0], z["scan"][4]) if z["scan"] else ("3D 스캐너 (HW·운영 SW 포함)", "견적 추가 품목")
+    o.append('<g id="ql-scan"' + ("" if z["scan"] else ' display="none"') + ">")
+    dev(776, 282, 310, 52, nm.split(" (")[0], where + " · 스캔 데이터 → 운영 PC·통합 스토리지", "dv", 12, "SCN")
+    link([(1016, 334), (1016, 346)], "l1")
+    o.append('</g><g id="ql-noscan"' + (' display="none"' if z["scan"] else "") + ">")
+    dev(776, 282, 310, 52, "측정·검사 장비는 각 Cell 소속", "측정 시스템 통합 제어 모듈(1-19)이 Cell 측정기를 제어", "dvx", 11.5)
+    o.append("</g>")
     nsw = len([s for s in z["sw"] if GEN[s[1]][2] == "OPC"])
-    o.append(f'<a href="#it-OPC" class="nlink"><g data-node="OPC"><rect x="776" y="346" width="310" height="132" rx="4" class="dv3"/>'
+    o.append(f'<a href="#it-OPC" class="nlink"><g data-node="OPC" id="ql-opc"><rect x="776" y="346" width="310" height="132" rx="4" class="dv3"/>'
              f'<text x="931" y="368" class="dvt" font-size="12">운영 PC 탑재 SW {nsw}종 (항목1)</text>')
     names = [GEN[s[1]][0].split(" (")[0] for s in z["sw"] if GEN[s[1]][2] == "OPC"]
     lines, cur = [], ""
@@ -487,9 +490,9 @@ def item_table(z):
             f'<tr class="tot strong"><th colspan="6">견적 합계 (단위절삭 후)</th><td class="num">{km(z["total"])}</td><td colspan="2">{E(z["no"])}</td></tr>')
     return ('<div class="catbar"><button type="button" data-all="open">모두 펼치기</button><button type="button" data-all="close">모두 접기</button>'
             '<span>견적서 항목 행을 누르면 하위 구성품을 접거나 펼침</span></div>'
-            '<div class="tbl-wrap"><table class="bom wide2"><thead><tr><th>번호</th><th>구성품 (일반 명칭)</th><th>세부 사양</th><th style="text-align:center">수량</th><th>단위</th>'
+            '<div id="ql-items"><div class="tbl-wrap"><table class="bom wide2"><thead><tr><th>번호</th><th>구성품 (일반 명칭)</th><th>세부 사양</th><th style="text-align:center">수량</th><th>단위</th>'
             '<th class="r">단가</th><th class="r">금액</th><th>지침 점검</th><th>견적서 기재 품목 <span class="chg">(내부 대조용 · 제출 문서에는 쓰지 않음)</span></th></tr></thead>'
-            f'<tbody>{"".join(body)}</tbody><tfoot>{foot}</tfoot></table></div>'), pre
+            f'<tbody>{"".join(body)}</tbody><tfoot>{foot}</tfoot></table></div></div>'), pre
 
 
 def group_sums(z):
@@ -516,7 +519,8 @@ def summary_table(z):
                            + " · ".join(f"{c[0]} {c[1]}('{c[2][1:]} · {c[3]})" for c in z["cells"])
                            + " — 각 Cell 장비의 제어기·PLC를 Edge Gateway에 OPC UA·AAS로 연결. 장비 단위 엣지는 구매 제외"),
     ]
-    body = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td></tr>' for a, b in rows)
+    ids = {"견적": "ql-s-quote", "구성 (견적서 6개 항목)": "ql-s-comp", "SW 라이선스": "ql-s-lic"}
+    body = "".join(f'<tr><th scope="row">{E(a)}</th><td{f" id={chr(34)}{ids[a]}{chr(34)}" if a in ids else ""}>{E(b)}</td></tr>' for a, b in rows)
     return f'<div class="tbl-wrap"><table class="bom sumtbl"><tbody>{body}</tbody></table></div>'
 
 
@@ -531,7 +535,7 @@ def roles_table(z):
             ("네트워크 (코어·TSN·방화벽·PTP·AP·배선)", "NET", "Zone 백본, OT/IT 경계 보호, 가상·실측 데이터 시간동기, AMR·이동 로봇 무선", "서버실 R1 · 각 Cell 캐비닛 · 통로 트레이")]
     if z["scan"]:
         rows.insert(2, (z["scan"][0].split(" (")[0], "SCN", "현장·제품 3D 스캔 → 점군 처리 모듈로 가상 작업장·검사모델 구성", "Zone 운영실 · " + z["scan"][4]))
-    body = "".join(f'<tr><th scope="row"><a href="#topo-{s}" class="tolink sw">{E(a)}</a></th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, s, b, c in rows)
+    body = "".join(f'<tr{" id=" + chr(34) + "ql-role-SCN" + chr(34) if s == "SCN" else ""}><th scope="row"><a href="#topo-{s}" class="tolink sw">{E(a)}</a></th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, s, b, c in rows)
     return f'<div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>장비</th><th>용도</th><th>설치 위치</th></tr></thead><tbody>{body}</tbody></table></div>'
 
 
@@ -568,8 +572,9 @@ def guide_table(z):
     if z["slug"] in ("adaptive", "qms"):
         Q.append(("같은 솔루션 사용 이유", "적응가공·정밀검사에 같은 솔루션을 쓰는 이유", "공통 기본 모듈 위에 존별 모듈(가공: OpenUSD·가공 포맷 / 검사: 측정·리워크·분석)을 달리 구성 — 모델·데이터 재사용"))
     st = {"ok": ("충족", "ok"), "chk": ("보완", "chk"), "adj": ("필수 조치", "adj")}
-    g = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td>{E(c)}</td><td><span class="tag {st[s][1]}">{st[s][0]}</span></td><td>{E(d)}</td></tr>' for a, b, c, d, s in G)
-    q = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td>{E(c)}</td></tr>' for a, b, c in Q)
+    gid = {"규격서·사양서": ("", ' id="ql-g-spec"'), "구성품별 금액": (' id="ql-g-lump"', "")}  # quote_live.js가 업로드 견적 기준으로 고침
+    g = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td{gid.get(a, ("", ""))[0]}>{E(c)}</td><td><span class="tag {st[s][1]}">{st[s][0]}</span></td><td{gid.get(a, ("", ""))[1]}>{E(d)}</td></tr>' for a, b, c, d, s in G)
+    q = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td{" id=" + chr(34) + "ql-q-ts" + chr(34) if a == "커스터마이징·유지보수" else ""}>{E(c)}</td></tr>' for a, b, c in Q)
     return ('<h3>공통 지침 적용 점검</h3><div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>지침</th><th>요구</th><th>이 페이지 반영</th><th>상태</th><th>남은 조치</th></tr></thead>'
             f'<tbody>{g}</tbody></table></div>'
             '<h3>OCS Cell 3종 심의위원 질의 대응</h3><div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>질의</th><th>내용</th><th>대응</th></tr></thead>'
@@ -909,7 +914,7 @@ def quote_section(z):
     return f'''<section id="quote">
   <p class="eyebrow">5. 견적서 원본</p>
   <h2>{E(z["no"])} (2026.10.15)</h2>
-  <p class="note-box">이지로보틱스 「캠틱종합기술원 디지털 트윈 시뮬레이션 시스템 구축 견적서」 PDF 중 이 존 쪽. 업체·모델명이 그대로 있어 내부 대조용이며, 암호를 넣어야 열림(PDF·Word 저장본에는 넣지 않음).{note}</p>
+  <p class="note-box">기준 견적(10/15 최종) 원본 — 견적서 파일을 따로 골랐어도 이 원본은 바뀌지 않음. 이지로보틱스 「캠틱종합기술원 디지털 트윈 시뮬레이션 시스템 구축 견적서」 PDF 중 이 존 쪽. 업체·모델명이 그대로 있어 내부 대조용이며, 암호를 넣어야 열림(PDF·Word 저장본에는 넣지 않음).{note}</p>
   <button type="button" class="qtoggle" aria-expanded="false" aria-controls="qpanel"><span class="tw" aria-hidden="true">▸</span> 견적서 원본 열기</button>
   <div id="qpanel" class="qpanel" hidden>
     <form class="qform"><label for="qpw">암호</label><input id="qpw" type="password" inputmode="numeric" autocomplete="off" required>
@@ -918,6 +923,23 @@ def quote_section(z):
   </div>
   <script type="application/json" id="qdata">{data}</script>
 </section>'''
+
+
+def ql_base(z):
+    """quote_live.js용 기준 견적 — 품목 행(견적서 기재 품목·분류·수량·단가 + 표기), 로컬 HW 하위 구성품, 다른 존 품목(새 품목 표기 틀)"""
+    def rows_of(zz):
+        out, sub = [], []
+        for g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sb in zone_rows(zz):
+            o = {"sym": sym, "nm": nm, "sp": sp, "unit": unit, "node": node, "chk": chk, "lab": lab}
+            if sb:
+                sub.append(dict(o, sfx=no[4:], q=q, sub=2 if sb == 2 else 1))
+            else:
+                out.append({"g": int(g[2]), "cat": quote_cat(zz, g, sym, no), "label": lab, "q": q, "u": u, "o": o})
+        return out, sub
+    rows, sub = rows_of(z)
+    return {"zones": [{"id": z["id"], "slug": z["slug"], "short": z["short"], "no": z["no"], "date": "2026.10.15", "total": z["total"], "ga": z["ga"], "cmp": z["cmp"], "rows": rows}],
+            "sub": sub, "tmpl": [r for zz in ZONES for r in rows_of(zz)[0]], "gen": GEN, "nodes": NODE_NAME,
+            "chk": {c: list(v) for c, v in CHK.items()}, "chkNote": CHK_NOTE}
 
 
 def page(z):
@@ -931,17 +953,18 @@ def page(z):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{PZ_EXTRA}{EXTRA}{SPACE_CSS}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · 10/15 최종 견적({E(z["no"])}) 기준 · 10/18 중장위 심의 준비 지침 적용 · 2026.10.19 작성 · 검토본</p>
+  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · <span id="ql-eb">10/15 최종 견적({E(z["no"])}) 기준</span> · 10/18 중장위 심의 준비 지침 적용 · 2026.10.19 작성 · 검토본</p>
   <h1>{E(z["name"])}</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
   <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a>{'<a href="#quote">견적서 원본</a>' if qsec else ""}<a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
+{ql.ocs_banner()}
 <section id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
-  <h2>견적 {won(z["total"])} · 견적서 6개 항목을 서버실·운영실·Cell 캐비닛에 배치</h2>
-  {f'<p class="note-box">{E(PUBLIC_NOTE)}</p>' if PUBLIC else ""}<div class="kpis">{kp}</div>
+  <h2 id="ql-h2">견적 {won(z["total"])} · 견적서 6개 항목을 서버실·운영실·Cell 캐비닛에 배치</h2>
+  {f'<p class="note-box">{E(PUBLIC_NOTE)}</p>' if PUBLIC else ""}<div class="kpis" id="ql-kpis">{kp}</div>
   {summary_table(z)}
 </section>
 <section id="topo">
@@ -974,6 +997,7 @@ def page(z):
   <div class="tbl-wrap"><table class="bom"><thead><tr><th>표기</th><th>구분</th><th>문서·내용</th><th>일자</th><th>위치</th></tr></thead><tbody>{refs}</tbody></table></div>
 </section>
 </main>
+{ql.assets("ocs", ql_base(z))}
 <script>
 (function(){{
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
