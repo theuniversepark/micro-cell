@@ -1,5 +1,5 @@
 """OCS 시뮬레이션 Cell 3종(유연제조·적응가공·AI정밀검사) 장비 설치·연결 구성 페이지 → ocs_sim_fms.html · ocs_sim_adaptive.html · ocs_sim_qms.html
-근거: 이지로보틱스 10/23 견적서(견26CAMTIC-DMWorks-1023-1~3, 엑셀)·10/15 최종 견적서(1015-1~3, PDF 원본), 10/16 자체장비심의 발표자료(1-3. 발표자료_이형수),
+근거: 이지로보틱스 10/23 견적서(견26CAMTIC-DMWorks-1023-1~3, 엑셀)·10/15 최종 견적서(1015-1~3), 10/16 자체장비심의 발표자료(1-3. 발표자료_이형수),
 10/18 유지연 팀장 메일 「자체장비 심의시 질의&제안사항 공유 및 중장위 심의 준비(~10.21/수) 안내」·첨부 「26.10.16_자체장비심의 질의응답_제안사항.hwpx」.
 심의위원 공통 지침에 따라 품목은 일반 명칭·사양으로 적고, 견적서 기재 품목명(업체·모델)은 내부 대조 열에만 둠."""
 import html
@@ -149,7 +149,7 @@ L_LWC = (1, "LWC", "", 1, 30000, "디지털 트윈용 3D 형상 데이터 경량
 ZONES = [
     {
         "slug": "fms", "id": "A-1-4", "name": "유연제조(FMS) 통합 OCS 시뮬레이션 Cell", "short": "유연제조",
-        "zone": "유연제조존 (A-1)", "no": "견26CAMTIC-DMWorks-1023-1", "qno": "견26CAMTIC-DMWorks-1015-1", "title": "캠틱종합기술원 유연제조 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
+        "zone": "유연제조존 (A-1)", "no": "견26CAMTIC-DMWorks-1023-1", "title": "캠틱종합기술원 유연제조 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
         "total": 2100000, "ga": 98143.52, "cmp": 2258000, "groups": GROUP_FA,
         "lines": [
             (1, "BASE", "", 1, 81338.4, "DMWorks Base"),
@@ -182,7 +182,7 @@ ZONES = [
     },
     {
         "slug": "adaptive", "id": "A-2-5", "name": "적응가공(Adaptive) 통합 OCS 시뮬레이션 Cell", "short": "적응가공",
-        "zone": "적응가공존 (A-2)", "no": "견26CAMTIC-DMWorks-1023-2", "qno": "견26CAMTIC-DMWorks-1015-2", "title": "캠틱종합기술원 적응가공 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
+        "zone": "적응가공존 (A-2)", "no": "견26CAMTIC-DMWorks-1023-2", "title": "캠틱종합기술원 적응가공 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
         "total": 2320000, "ga": 102886.08, "cmp": 2400000, "groups": GROUP_FA,
         "lines": [
             (1, "BASE", "", 1, 81338.4, "DMWorks Base"),
@@ -214,7 +214,7 @@ ZONES = [
     },
     {
         "slug": "qms", "id": "A-4-5", "name": "AI 정밀검사(QMS) 통합 OCS 시뮬레이션 Cell", "short": "AI정밀검사",
-        "zone": "AI정밀검사존 (A-4)", "no": "견26CAMTIC-DMWorks-1023-3", "qno": "견26CAMTIC-DMWorks-1015-3", "title": "캠틱종합기술원 AI 정밀 검사 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
+        "zone": "AI정밀검사존 (A-4)", "no": "견26CAMTIC-DMWorks-1023-3", "title": "캠틱종합기술원 AI 정밀 검사 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
         "total": 2600000, "ga": 120540.28, "cmp": 3059000, "groups": GROUP_Q,
         "lines": [
             (1, "ACSB", "", 1, 28600, "Auto Control System - BASE"),
@@ -967,7 +967,7 @@ SPACE_CSS = """<style>
 
 REFS = [
     ("Q", "견적서", "이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 (10/23, 엑셀 — 이 페이지 기준)", "2026-10-23", "OneDrive Workspace / Customers / 이지로보틱스 / 2026-10-23"),
-    ("Q0", "견적서", "같은 견적서 10/15 최종본 (PDF 원본 — 5장 견적서 원본)", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류"),
+    ("Q0", "견적서", "같은 견적서 10/15 최종본 (PDF) — 1015-1~3", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류"),
     ("G1", "이메일", "유지연 팀장 「자체장비 심의시 질의&제안사항 공유 및 중장위 심의 준비(~10.21/수) 안내」 — 공통 제안의견·중장위 제출서류", "2026-10-18", "Outlook"),
     ("G2", "첨부", "26.10.16_자체장비심의 질의응답_제안사항.hwpx — 장비별 질의응답·심의요청서 작성 항목", "2026-10-16", "메일 첨부 · llm-wiki raw"),
     ("R", "계획서", "17. 연구개발계획서(협약용) — 1-1 제조 특화 메타팩토리 Zone별 Cell 구성·연차별 구축계획, OCS Cell 대상 품목·공정, 전용공간 확보 현황(Cell별 설치 위치)", "2026-08-27", "OneDrive Workspace / 피지컬AI 테스트베드"),
@@ -989,13 +989,13 @@ def quote_section(z):
     note = " 공개본은 공급사 담당자 연락처와 직인을 가렸음." if pub else ""
     return f'''<section id="quote">
   <p class="eyebrow">5. 견적서 원본</p>
-  <h2>{E(z["qno"])} (2026.10.15 최종)</h2>
-  <p class="note-box">10/15 최종 견적 원본 — 10/23 견적은 엑셀본만 받아 PDF 원본은 10/15 것을 둠(페이지 기준인 10/23 견적과 금액·구성이 다름). 견적서 파일을 따로 골랐어도 이 원본은 바뀌지 않음. 이지로보틱스 「캠틱종합기술원 디지털 트윈 시뮬레이션 시스템 구축 견적서」 PDF 중 이 존 쪽. 업체·모델명이 그대로 있어 내부 대조용이며, 암호를 넣어야 열림(PDF·Word 저장본에는 넣지 않음).{note}</p>
+  <h2>{E(z["no"])} (2026.10.23)</h2>
+  <p class="note-box">기준 견적(10/23) 원본 — 견적서 파일을 따로 골랐어도 이 원본은 바뀌지 않음. 이지로보틱스 「캠틱종합기술원 디지털 트윈 시뮬레이션 시스템 구축 견적서」 엑셀(10/23)의 이 존 시트를 인쇄 설정 그대로 옮긴 것(날인 PDF는 아직 받지 않음). 업체·모델명이 그대로 있어 내부 대조용이며, 암호를 넣어야 열림(PDF·Word 저장본에는 넣지 않음).{note}</p>
   <button type="button" class="qtoggle" aria-expanded="false" aria-controls="qpanel"><span class="tw" aria-hidden="true">▸</span> 견적서 원본 열기</button>
   <div id="qpanel" class="qpanel" hidden>
     <form class="qform"><label for="qpw">암호</label><input id="qpw" type="password" inputmode="numeric" autocomplete="off" required>
       <button type="submit">열기</button><span class="qmsg" role="status" aria-live="polite"></span></form>
-    <figure class="fig quote" hidden><img alt="{E(z["qno"])} 견적서 원본"></figure>
+    <figure class="fig quote" hidden><img alt="{E(z["no"])} 견적서 원본"></figure>
   </div>
   <script type="application/json" id="qdata">{data}</script>
 </section>'''

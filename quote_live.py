@@ -56,7 +56,7 @@ def ocs_banner():
   <div class="ql-row"><b>견적서 파일</b><span id="ql-cur">기준 견적: <b>{BL}</b> — 페이지 작성 기준</span>
     <label class="ql-pick">견적서 파일 선택<input type="file" id="ql-file" accept=".xlsx,.xls,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"></label>
     <button type="button" id="ql-reset" hidden>기준 견적으로 되돌리기</button></div>
-  <p class="ql-help">이지로보틱스 견적서 엑셀(존별 시트, 항목1~7)을 고르거나 이 상자에 끌어다 놓으면 이 존 시트를 읽어 요약·KPI·구성품 표·지침 점검 수치·토폴로지(스캐너·운영 PC 탑재 SW)를 다시 그림. <a href="dmworks_zones.html#qlive">DMWorks 존별 옵션 구성</a> 페이지에서 고른 견적도 같은 브라우저라면 자동 반영됨. 파일은 어디에도 전송되지 않음. 공간 배치도(2장)·서술형 설명·PDF·Word 저장본은 기준 견적({BL}) 기준, 견적서 원본은 10/15 최종 PDF.</p>
+  <p class="ql-help">이지로보틱스 견적서 엑셀(존별 시트, 항목1~7)을 고르거나 이 상자에 끌어다 놓으면 이 존 시트를 읽어 요약·KPI·구성품 표·지침 점검 수치·토폴로지(스캐너·운영 PC 탑재 SW)를 다시 그림. <a href="dmworks_zones.html#qlive">DMWorks 존별 옵션 구성</a> 페이지에서 고른 견적도 같은 브라우저라면 자동 반영됨. 파일은 어디에도 전송되지 않음. 공간 배치도(2장)·서술형 설명·견적서 원본·PDF·Word 저장본은 기준 견적({BL}) 기준.</p>
   <p class="ql-msg" id="ql-msg" role="status" aria-live="polite"></p>
   <ul class="ql-diff" id="ql-diff"></ul>
 </div>'''
