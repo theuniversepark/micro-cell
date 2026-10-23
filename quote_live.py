@@ -9,6 +9,7 @@ from privacy import PUBLIC
 
 E = html.escape
 SHEETJS = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+BL, BLNO = "10/23 견적", "1023-1~3"  # 기준 견적(페이지 작성 기준) 표기
 JS = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "quote_live.js"), encoding="utf-8").read()
 
 CSS = """<style>
@@ -35,27 +36,27 @@ def blob(obj):
 
 def assets(page, base):
     """page: 'dmw' | 'ocs'. base: 기준 견적 데이터(zones 등)"""
-    return CSS + blob(dict(base, page=page, public=PUBLIC, sheetjs=SHEETJS)) + f"<script>{JS}</script>"
+    return CSS + blob(dict(base, page=page, public=PUBLIC, sheetjs=SHEETJS, bl=BL, blno=BLNO)) + f"<script>{JS}</script>"
 
 
 def dmw_panel(ocs_pages):
     links = " · ".join(f'<a href="{E(f)}">{E(t)}</a>' for f, t in ocs_pages)
     return f'''<div class="qlive" id="qlive">
-  <div class="ql-row"><b>견적서 파일</b><span id="ql-cur">기준 견적: <b>10/15 최종 견적 3건(1015-1~3)</b> — 페이지 작성 기준</span>
+  <div class="ql-row"><b>견적서 파일</b><span id="ql-cur">기준 견적: <b>{BL} 3건({BLNO})</b> — 페이지 작성 기준</span>
     <label class="ql-pick">견적서 파일 선택<input type="file" id="ql-file" accept=".xlsx,.xls,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"></label>
     <button type="button" id="ql-reset" hidden>기준 견적으로 되돌리기</button></div>
-  <p class="ql-help">이지로보틱스 견적서 엑셀(존별 시트, 항목1~6)을 고르거나 이 상자에 끌어다 놓으면 브라우저 안에서 읽어 존별 견적 표·요약·단가표·정밀조립 산정을 다시 그리고, 기준 견적과 달라진 품목을 '확인'으로 표시함. 고른 견적은 이 브라우저에 기억되어 OCS 시뮬레이션 Cell 3종({links})에도 자동 반영됨(각 페이지에서 직접 골라도 됨). 파일은 어디에도 전송되지 않음. 구매 필요성·쟁점 등 서술형 내용과 PDF·Word 저장본은 기준 견적 기준.</p>
+  <p class="ql-help">이지로보틱스 견적서 엑셀(존별 시트, 항목1~7)을 고르거나 이 상자에 끌어다 놓으면 브라우저 안에서 읽어 존별 견적 표·요약·단가표·정밀조립 산정을 다시 그리고, 기준 견적과 달라진 품목을 '확인'으로 표시함. 고른 견적은 이 브라우저에 기억되어 OCS 시뮬레이션 Cell 3종({links})에도 자동 반영됨(각 페이지에서 직접 골라도 됨). 파일은 어디에도 전송되지 않음. 구매 필요성·쟁점 등 서술형 내용과 PDF·Word 저장본은 기준 견적 기준.</p>
   <p class="ql-msg" id="ql-msg" role="status" aria-live="polite"></p>
   <ul class="ql-diff" id="ql-diff"></ul>
 </div>'''
 
 
 def ocs_banner():
-    return '''<div class="qlive" id="qlive">
-  <div class="ql-row"><b>견적서 파일</b><span id="ql-cur">기준 견적: <b>10/15 최종 견적</b> — 페이지 작성 기준</span>
+    return f'''<div class="qlive" id="qlive">
+  <div class="ql-row"><b>견적서 파일</b><span id="ql-cur">기준 견적: <b>{BL}</b> — 페이지 작성 기준</span>
     <label class="ql-pick">견적서 파일 선택<input type="file" id="ql-file" accept=".xlsx,.xls,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"></label>
     <button type="button" id="ql-reset" hidden>기준 견적으로 되돌리기</button></div>
-  <p class="ql-help">이지로보틱스 견적서 엑셀(존별 시트, 항목1~6)을 고르거나 이 상자에 끌어다 놓으면 이 존 시트를 읽어 요약·KPI·구성품 표·지침 점검 수치·토폴로지(스캐너·운영 PC 탑재 SW)를 다시 그림. <a href="dmworks_zones.html#qlive">DMWorks 존별 옵션 구성</a> 페이지에서 고른 견적도 같은 브라우저라면 자동 반영됨. 파일은 어디에도 전송되지 않음. 공간 배치도(2장)·서술형 설명·견적서 원본·PDF·Word 저장본은 기준 견적(10/15 최종) 기준.</p>
+  <p class="ql-help">이지로보틱스 견적서 엑셀(존별 시트, 항목1~7)을 고르거나 이 상자에 끌어다 놓으면 이 존 시트를 읽어 요약·KPI·구성품 표·지침 점검 수치·토폴로지(스캐너·운영 PC 탑재 SW)를 다시 그림. <a href="dmworks_zones.html#qlive">DMWorks 존별 옵션 구성</a> 페이지에서 고른 견적도 같은 브라우저라면 자동 반영됨. 파일은 어디에도 전송되지 않음. 공간 배치도(2장)·서술형 설명·PDF·Word 저장본은 기준 견적({BL}) 기준, 견적서 원본은 10/15 최종 PDF.</p>
   <p class="ql-msg" id="ql-msg" role="status" aria-live="polite"></p>
   <ul class="ql-diff" id="ql-diff"></ul>
 </div>'''

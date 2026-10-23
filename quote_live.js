@@ -4,12 +4,10 @@
    수량·단가·구성이 바뀌거나 새로 생긴 품목은 '확인'으로 표시함. 서술형 설명·공간 배치도·PDF·Word 저장본은 기준 견적 그대로. */
 (function (root) {
   'use strict';
-  var KEY = 'ocsQuote.v1';
-  var GN = ['', '항목1. OCS SW', '항목2. OCS HW', '항목3. 로컬 HW', '항목4. 로컬 OCS·보안', '항목5. 기술지원'];
-  var DMG = {1: 'SW', 2: 'OCS HW', 3: '로컬 HW', 4: '로컬 OCS·보안', 5: '기술지원'};
+  var KEY = 'ocsQuote.v2';  // v2: 10/23 양식(항목1~7, 항목 제목 gt) — v1 저장분은 읽지 않음
   var DETAIL = {CADI: 1, CADE: 1, OLP: 1, RRS: 1, PLC: 1, ACSO: 1, AIMSS: 1, AIMSC: 1};
   var ROBOT = {OLP: 1, RRS: 1, ACSO: 1, AIMSS: 1, AIMSC: 1};
-  var ANCH = ['SCN', 'GPU', 'OPC', 'NB', 'MON', 'DPS', 'NAS', 'BAK', 'EGW', 'VNODE', 'NET', 'RACK'];
+  var LOCK = {LSV: 1, EGW: 1, NET: 1, RACK: 1, SEC: 1, LHW: 1, TSDB: 1}, SUBSCR = {DEL: 1, XCL: 1};
   var ZRE = [['A-1-4', /유연\s*제조/], ['A-2-5', /적응\s*가공/], ['A-4-5', /정밀\s*검사/]];
   var B = null, PUB = false;
 
@@ -22,7 +20,7 @@
   function pad(n) { return ('0' + n).slice(-2); }
   function str(v) {
     if (v == null) return '';
-    if (v instanceof Date) return v.getFullYear() + '.' + pad(v.getMonth() + 1) + '.' + pad(v.getDate());
+    if (v instanceof Date) { v = new Date(v.getTime() + 432e5); return v.getFullYear() + '.' + pad(v.getMonth() + 1) + '.' + pad(v.getDate()); }  // 엑셀 날짜가 시간대 탓에 전날 23시대로 읽히는 경우 반올림
     return String(v).trim();
   }
   function sq(v) { return str(v).replace(/\s+/g, ''); }
@@ -33,6 +31,7 @@
   }
   function norm(s) { return str(s).toUpperCase().replace(/[^0-9A-Z가-힣]/g, ''); }
   function oneLine(s) { return str(s).split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean).join(' · '); }
+  function gtNorm(s) { return str(s).replace(/ㆍ/g, '·').replace(/\s+/g, ' ').trim(); }
   function toks(label) {
     var s = str(label), m = s.match(/\(([^)]*)\)\s*$/) || s.match(/-\s*([^-]+)$/);
     return m ? m[1].split(/[,·]/).map(function (t) { return t.trim().toUpperCase(); }).filter(Boolean) : [];
@@ -52,10 +51,12 @@
     return -1;
   }
 
-  /* 견적서 시트 1장(2차원 배열) → {id, no, date, title, total, ga, items:[{g, cat, label, q, u}], warn}
-     '항목N. …' 절 머리 → 표 머리(수량·단가·견적가) → 품목 행 → '항목N. 합계', 항목6 일반관리비, 마지막 '합계' 행 순서를 따름 */
+  /* 견적서 시트 1장(2차원 배열) → {id, no, date, title, total, ga, items:[{g, gt, cat, label, q, u}], warn}
+     '항목N. …' 절 머리 → 표 머리(수량·단가·금액) → 품목 행 → '항목N. 소계·합계', 일반관리비 절, 마지막 '합계' 행 순서를 따름.
+     10/23 양식은 첫 열이 번호(1.1 · 3.2.1 …) — 3단계 이하 하위 구성품 중 단가 없는 행은 건너뛰고, 금액이 '무상'인 행은 0원 품목으로 읽음.
+     10/15 양식(첫 열이 분류, '상세'·'견적가' 열)도 읽음 */
   function parseSheet(name, rows) {
-    var z = {sheet: name, items: [], warn: [], ga: null, total: null}, sec = 0, cat = '', col = null, sub = {}, head = null;
+    var z = {sheet: name, items: [], warn: [], ga: null, total: null}, sec = 0, gt = '', cat = '', col = null, sub = {}, head = null, gaSec = 0;
     rows.forEach(function (r) {
       r = r || [];
       var a = str(r[0]), as = sq(r[0]), m, v1 = '';
@@ -67,39 +68,41 @@
       if (find(r, /^수량$/) >= 0) {
         var q = find(r, /^수량$/), u = find(r, /^단가$|기준금액/), am = find(r, /견적가/);
         if (am < 0) am = find(r, /금액/, u);
-        var d = find(r, /상세/);
+        var d = find(r, /상세|세부품목|세부내용/);
         col = {q: q, u: u, a: am, d: d < 0 ? 1 : d};
         return;
       }
-      if ((m = as.match(/^항목(\d)\./))) {
-        if (/합계/.test(as)) { if (col && num(r[col.a]) != null) sub[m[1]] = num(r[col.a]) / 1000; sec = 0; }
-        else { sec = +m[1]; cat = ''; }
+      if ((m = as.match(/^항목(\d+)\./))) {
+        if (/합계|소계/.test(as)) { if (col && num(r[col.a]) != null) sub[m[1]] = num(r[col.a]) / 1000; sec = 0; }
+        else { sec = +m[1]; gt = gtNorm(a); cat = ''; if (/일반관리비/.test(a)) gaSec = sec; }
         return;
       }
       if (as === '합계' && col && num(r[col.a]) != null) { z.total = num(r[col.a]) / 1000; return; }
-      if (!col || as === '항목') return;
-      if (sec >= 1 && sec <= 5 && num(r[col.q]) != null && num(r[col.u]) != null) {
-        cat = a || cat;
-        var label = str(r[col.d]);
-        if (!label) label = r.slice(1, col.q).map(str).filter(Boolean).join(' ');
-        z.items.push({g: sec, cat: cat, label: label || cat, q: num(r[col.q]), u: num(r[col.u]) / 1000});
-      } else if (sec === 6 && /일반관리비/.test(a) && num(r[col.a]) != null) z.ga = num(r[col.a]) / 1000;
+      if (!col || as === '항목' || !sec) return;
+      if (sec === gaSec) { if (/일반관리비/.test(a) && num(r[col.a]) != null) z.ga = num(r[col.a]) / 1000; return; }
+      var no = /^\d+(\.\d+)*$/.test(as) ? as : '', lv = no ? no.split('.').length : 1, qv = num(r[col.q]), uv = num(r[col.u]);
+      var label = str(r[col.d]), sect = gt.replace(/^항목\d+\.\s*/, '');
+      if (!label) label = r.slice(1, col.q).map(str).filter(Boolean).join(' ');
+      if (qv != null && uv != null && (uv > 0 || lv <= 2)) {
+        if (!no) cat = a || cat;  // 10/15 양식: 첫 열이 분류(빈 칸은 위 분류를 이어 씀)
+        z.items.push({g: sec, gt: gt, cat: no ? sect : cat, label: label || a || cat, q: qv, u: uv / 1000});
+      } else if (!no && a && /무상/.test(str(r[col.a]))) z.items.push({g: sec, gt: gt, cat: a, label: label || a, q: 1, u: 0});
     });
     if (!z.items.length) return null;
     z.id = zoneOf([z.title, name, z.no]);
     Object.keys(sub).forEach(function (n) {
-      var s = n === '6' ? z.ga : sum(z.items, function (x) { return x.g === +n ? x.q * x.u : 0; });
-      if (Math.abs(s - sub[n]) > 1) z.warn.push(name + ': 항목' + n + ' 품목 합 ' + k(s) + '천원 ≠ 견적서 소계 ' + k(sub[n]) + '천원');
+      var s = +n === gaSec ? z.ga : sum(z.items, function (x) { return x.g === +n ? x.q * x.u : 0; });
+      if (s != null && Math.abs(s - sub[n]) > 1) z.warn.push(name + ': 항목' + n + ' 품목 합 ' + k(s) + '천원 ≠ 견적서 소계 ' + k(sub[n]) + '천원');
     });
     var pre = sum(z.items, function (x) { return x.q * x.u; });
     if (z.ga == null) {
-      z.ga = sum(z.items, function (x) { return x.g === 1 || x.g === 2 || x.g === 5 ? x.q * x.u : 0; }) * 0.1;
-      z.warn.push(name + ': 일반관리비 행이 없어 (항목1+2+5)의 10%로 계산');
+      z.ga = sum(z.items, function (x) { return x.g <= 3 ? x.q * x.u : 0; }) * 0.1;
+      z.warn.push(name + ': 일반관리비 행이 없어 (항목1+2+3)의 10%로 계산');
     }
     if (z.total == null) z.total = head;
-    if (z.total == null) { z.total = Math.floor((pre + z.ga) / 1000) * 1000; z.warn.push(name + ': 합계 행이 없어 백만 원 미만 절삭으로 계산'); }
+    if (z.total == null) { z.total = Math.floor((pre + z.ga) / 10000) * 10000; z.warn.push(name + ': 합계 행이 없어 천만 원 미만 절삭으로 계산'); }
     var gap = pre + z.ga - z.total;
-    if (gap < -1 || gap >= 1000) z.warn.push(name + ': 항목 합계 ' + k(pre + z.ga) + '천원과 견적 합계 ' + k(z.total) + '천원 차이가 단위절삭(백만 원 미만)보다 큼');
+    if (gap < -1 || gap >= 10000) z.warn.push(name + ': 항목 합계 ' + k(pre + z.ga) + '천원과 견적 합계 ' + k(z.total) + '천원 차이가 단위절삭(천만 원 미만)보다 큼');
     return z;
   }
 
@@ -118,61 +121,60 @@
   }
 
   // ------------------------------------------------------------------ 품목 키·기준 견적 대조
-  var SWK = [[/AMC|유지보수/i, 'AMC'], [/ACS\s*OLP/i, 'ACSO'], [/ACS/i, 'ACSB'], [/AIMS.*SIM/i, 'AIMSS'], [/AIMS.*CONT/i, 'AIMSC'], [/TESCAR/i, 'TES'],
-    [/^PIA\b|PREDICTIVE/i, 'PIA'], [/CAD\s*IMPORT/i, 'CADI'], [/CAD\s*EXPORT/i, 'CADE'], [/RRS/i, 'RRS'], [/OLP/i, 'OLP'], [/POINT\s*CLOUD/i, 'PC'],
-    [/MULTIPLE\s*PROCESS/i, 'MP'], [/PLC/i, 'PLC'], [/PLUG-?IN.*USER/i, 'PIU'], [/PLUG-?IN/i, 'PID'], [/USD/i, 'USD'], [/LIVE\s*EDIT/i, 'LE'],
-    [/MONITORING/i, 'MON'], [/BASE/i, 'BASE']];
+  /* 키는 품목명으로만 정함 — 존마다 견적서 항목 구성이 달라(정밀검사는 운영 PC가 항목2, DM-Monitoring이 항목3) 항목 번호는 쓰지 않음 */
+  var SWK = [[/AMC|ANNUAL\s*MAINT|유지보수/i, 'AMC'], [/OFFLINE\s*PROGRAM|ACS\s*OLP/i, 'ACSO'], [/AUTO\s*CONTROL|\bACS\b/i, 'ACSB'], [/AIMS.*SIM/i, 'AIMSS'], [/AIMS.*CONT/i, 'AIMSC'],
+    [/TESCAR/i, 'TES'], [/^PIA\b|PREDICTIVE/i, 'PIA'], [/DELMIA/i, 'DEL'], [/X-?CLOUD|XCELERATOR/i, 'XCL'], [/경량화|표준\s*변환/, 'LWC'], [/CAD\s*IMPORT/i, 'CADI'],
+    [/CAD\s*EXPORT/i, 'CADE'], [/\bRRS\b/i, 'RRS'], [/\bOLP\b/i, 'OLP'], [/POINT\s*CLOUD/i, 'PC'], [/MULTIPLE\s*PROCESS/i, 'MP'], [/PLC\s*SIM/i, 'PLC'],
+    [/PLUG-?IN.*USER/i, 'PIU'], [/PLUG-?IN/i, 'PID'], [/\bUSD\b/i, 'USD'], [/LIVE\s*EDIT/i, 'LE'], [/DM-?\s*MONITORING/i, 'DMON'], [/DMWORKS\s*BASE|^BASE$/i, 'BASE']];
+  var HWR = [[/스캐너|SCANNER/i, 'SCN'], [/LOCAL\s*SERVER|로컬\s*서버/i, 'LSV'], [/EDGE\s*GATE/i, 'EGW'], [/NETWORK|네트워크/i, 'NET'], [/기반\s*시설/, 'RACK'],
+    [/TSDB/i, 'TSDB'], [/보안|IAM|PKI/i, 'SEC'], [/연산\s*서버|GPU/i, 'GPU'], [/모니터링/, 'MON'], [/노트북/, 'NB'], [/운영\s*PC/i, 'OPC'],
+    [/데이터\s*(처리\s*)?서버/, 'LHW'], [/교육|기술\s*지원/, 'TS']];
+  var SWSET = {};
+  SWK.forEach(function (x) { SWSET[x[1]] = 1; });
+  function isSW(key) { return !!SWSET[key]; }
+  function isTS(key) { return /^TS/.test(key || ''); }
   function keyOf(g, cat, label) {
-    var c = str(cat), l = str(label), t = c + ' ' + l, i;
-    if (g === 1) {
-      if (/유지보수/.test(c)) return 'AMC';
-      for (i = 0; i < SWK.length; i++) if (SWK[i][0].test(l)) return SWK[i][1];
-      return 'S1:' + norm(l);
-    }
-    if (g === 2) {
-      if (/스캐너|SCAN/i.test(t)) return 'SCN';
-      if (/연산\s*서버|GPU/i.test(t)) return 'GPU';
-      if (/노트북/.test(l)) return 'NB';
-      if (/운영\s*PC/i.test(l)) return 'OPC';
-      if (/모니터링/.test(t)) return 'MON';
-      return 'H2:' + norm(l);
-    }
-    if (g === 3) return /데이터\s*(처리\s*)?서버/.test(t) ? 'LHW' : 'L3:' + norm(l);
-    if (g === 4) return /TSDB/i.test(l) ? 'TSDB' : (/보안|IAM|PKI/i.test(t) ? 'SEC' : 'L4:' + norm(l));
-    if (/ACS/i.test(l)) return 'TS4';
-    if (/PLUG-?IN/i.test(l)) return 'TS3';
-    if (/시각화|UI/i.test(l)) return 'TS2';
-    if (/설비|연동/.test(l)) return 'TS1';
-    return 'T5:' + norm(l);
+    var c = str(cat), l = str(label), i;
+    if (/CUSTOMIZING/i.test(l)) return /ACS/i.test(l) ? 'TS4' : (/PLUG-?IN/i.test(l) ? 'TS3' : (/시각화|UI/i.test(l) ? 'TS2' : 'TS1'));  // 10/15 맞춤 개발
+    if (/유지보수|^AMC/i.test(c)) return 'AMC';
+    for (i = 0; i < SWK.length; i++) if (SWK[i][0].test(l)) return SWK[i][1];
+    for (i = 0; i < HWR.length; i++) if (HWR[i][0].test(l)) return HWR[i][1];
+    return 'X:' + norm(l);
   }
+  function gtOf(m) { return m.gt || (m.base && m.base.gt) || ('항목' + m.g); }
 
-  /* 기준 견적 행(base: {g, cat, label, q, u, …표기}) ↔ 업로드 품목 대조.
+  /* 기준 견적 행(base: {g, gt, cat, label, q, u, …표기}) ↔ 업로드 품목 대조 — 같은 키·같은 항목을 먼저, 없으면 같은 키(항목 이동).
      st: same(수량·단가·구성 같음) · chg(바뀜, diff에 내역) · new(기준에 없음). removed: 업로드에 없는 기준 품목 */
   function merge(base, up) {
     var bk = base.map(function (r) { return {r: r, key: keyOf(r.g, r.cat, r.label), used: false}; });
-    if (!up) return {live: false, rows: bk.map(function (b) { return {g: b.r.g, cat: b.r.cat, label: b.r.label, key: b.key, q: b.r.q, u: b.r.u, base: b.r, st: 'same', diff: []}; }), removed: []};
+    if (!up) return {live: false, rows: bk.map(function (b) { return {g: b.r.g, gt: b.r.gt, cat: b.r.cat, label: b.r.label, key: b.key, q: b.r.q, u: b.r.u, base: b.r, st: 'same', diff: []}; }), removed: []};
     var rows = up.items.map(function (it) {
-      var key = keyOf(it.g, it.cat, it.label), b = null, diff = [];
-      for (var i = 0; i < bk.length && !b; i++) if (!bk[i].used && bk[i].key === key && bk[i].r.g === it.g) { b = bk[i]; b.used = true; }
+      var key = keyOf(it.g, it.cat, it.label), diff = [];
+      var take = function (sameG) {
+        for (var i = 0; i < bk.length; i++) if (!bk[i].used && bk[i].key === key && (!sameG || bk[i].r.g === it.g)) { bk[i].used = true; return bk[i]; }
+        return null;
+      };
+      var b = take(true) || take(false);
       if (b) {
         var r = b.r;
+        if (r.g !== it.g) diff.push('항목' + r.g + '→' + it.g);
         if (Math.abs(r.q - it.q) > 1e-9) diff.push('수량 ' + r.q + '→' + it.q);
-        if (Math.abs(r.u - it.u) > 0.0005) diff.push(PUB && it.g === 1 ? '단가 변경' : '단가 ' + k(r.u) + '→' + k(it.u));
+        if (Math.abs(r.u - it.u) > 0.0005) diff.push(PUB && isSW(key) ? '단가 변경' : '단가 ' + k(r.u) + '→' + k(it.u));
         if (DETAIL[key] && toks(r.label).join('·') !== toks(it.label).join('·')) diff.push('구성 ' + toks(r.label).join('·') + '→' + toks(it.label).join('·'));
         if (key === 'SCN' && norm(r.label) !== norm(it.label)) diff.push('모델 변경');
       }
-      return {g: it.g, cat: it.cat, label: it.label, key: key, q: it.q, u: it.u, base: b ? b.r : null, st: b ? (diff.length ? 'chg' : 'same') : 'new', diff: diff};
+      return {g: it.g, gt: it.gt, cat: it.cat, label: it.label, key: key, q: it.q, u: it.u, base: b ? b.r : null, st: b ? (diff.length ? 'chg' : 'same') : 'new', diff: diff};
     });
     return {live: true, rows: rows, removed: bk.filter(function (b) { return !b.used; }).map(function (b) { return b.r; })};
   }
 
   function amcText(rows, amc) {
-    var sw = sum(rows, function (x) { return x.g === 1 && x.key !== 'AMC' ? x.q * x.u : 0; });
+    var sw = sum(rows, function (x) { return isSW(x.key) && x.key !== 'AMC' && !SUBSCR[x.key] ? x.q * x.u : 0; });  // 외산 1년 구독은 AMC 대상 아님
     return '연 ' + (sw ? Math.round(amc.u / sw * 1000) / 10 : 0) + '% × ' + amc.q + '년';
   }
   function itemName(m) {
     if (m.base && m.base.dm) return m.base.dm.nm;
-    if (m.g === 1 && B.names && B.names[m.key]) return B.names[m.key];
+    if (B.names && B.names[m.key]) return B.names[m.key];
     if (m.base && m.base.o) return m.base.o.nm;
     return oneLine(m.label);
   }
@@ -180,7 +182,7 @@
     var out = [];
     mz.rows.forEach(function (m) {
       if (m.st === 'chg') out.push({t: 'chg', s: itemName(m) + ' — ' + m.diff.join(', ')});
-      if (m.st === 'new') out.push({t: 'new', s: itemName(m) + ' — 추가 (수량 ' + m.q + (PUB && m.g === 1 ? '' : ', 금액 ' + k(m.q * m.u) + '천원') + ')'});
+      if (m.st === 'new') out.push({t: 'new', s: itemName(m) + ' — 추가 (수량 ' + m.q + (PUB && isSW(m.key) ? '' : ', 금액 ' + k(m.q * m.u) + '천원') + ')'});
     });
     mz.removed.forEach(function (r) { out.push({t: 'del', s: itemName({base: r, g: r.g, label: r.label, key: keyOf(r.g, r.cat, r.label)}) + ' — 삭제'}); });
     return out;
@@ -201,7 +203,6 @@
   // ------------------------------------------------------------------ DMWorks 존별 옵션 구성 페이지
   var TAG = {ok: ['적합', 'ok'], chk: ['확인', 'chk'], adj: ['조정', 'adj']};
   function tag(v) { return '<span class="tag ' + TAG[v][1] + '">' + TAG[v][0] + '</span>'; }
-  function fm(grp) { return grp === 'SW' || grp === '유지보수' ? km : k; }
 
   function dmTemplates() {
     var t = {};
@@ -210,9 +211,9 @@
   }
   function dmRows(mz, tm) {
     return mz.rows.map(function (m) {
-      if (m.st === 'same') return {grp: m.base.dm.grp, nm: m.base.dm.nm, dd: m.base.dm.dd, q: m.q, u: m.u, v: m.base.dm.v, why: m.base.dm.why, key: m.key, g: m.g};
-      var t = m.base ? m.base.dm : tm[m.key], grp = m.g === 1 ? (m.key === 'AMC' ? '유지보수' : 'SW') : DMG[m.g], nm, dd;
-      if (m.g === 1 && B.names[m.key]) { nm = B.names[m.key]; dd = DETAIL[m.key] ? toks(m.label).join('·') : (m.key === 'AMC' ? amcText(mz.rows, m) : ''); }
+      if (m.st === 'same') return {grp: gtOf(m), nm: m.base.dm.nm, dd: m.base.dm.dd, q: m.q, u: m.u, v: m.base.dm.v, why: m.base.dm.why, key: m.key, g: m.g};
+      var t = m.base ? m.base.dm : tm[m.key], grp = gtOf(m), nm, dd;
+      if (B.names[m.key]) { nm = B.names[m.key]; dd = DETAIL[m.key] ? toks(m.label).join('·') : (m.key === 'AMC' ? amcText(mz.rows, m) : ''); }
       else if (t) { nm = t.nm; dd = t.dd; }
       else { nm = oneLine(m.label); dd = ''; }
       var why = m.st === 'new' ? '기준 견적에 없던 품목 — 존 목적에 맞는지 검토 필요'
@@ -221,7 +222,9 @@
     });
   }
   function quoteTable(rs, z) {
-    var h = [], cur = null;
+    var h = [], cur = null, mg = {};
+    rs.forEach(function (r) { if (isSW(r.key)) mg[r.grp] = 1; });
+    var fm = function (g) { return mg[g] ? km : k; };  // SW 품목이 든 항목은 공개본에서 가림
     rs.forEach(function (r) {
       if (r.grp !== cur) {
         cur = r.grp;
@@ -230,15 +233,16 @@
       h.push('<tr><td class="nm">' + E(r.nm) + '</td><td>' + E(r.dd) + '</td><td class="q"><b>' + r.q + '</b></td><td class="num">' + fm(r.grp)(r.u) + '</td>'
         + '<td class="num">' + fm(r.grp)(r.q * r.u) + '</td><td>' + tag(r.v) + '</td><td>' + E(r.why) + '</td></tr>');
     });
-    var foot = '<tr class="tot"><th colspan="4">일반관리비·기업이윤 ((OCS SW + OCS HW + 기술지원)의 10%, 견적서 기재값)</th><td class="num">' + km(z.ga) + '</td><td colspan="2"></td></tr>'
+    var foot = '<tr class="tot"><th colspan="4">항목7. 일반관리비·기업이윤 ((항목1 + 항목2 + 항목3)의 10%, 견적서 기재값)</th><td class="num">' + km(z.ga) + '</td><td colspan="2"></td></tr>'
       + '<tr class="tot strong"><th colspan="4">견적 합계 (단위절삭 후)</th><td class="num">' + km(z.total) + '</td><td colspan="2">' + E(z.no) + '</td></tr>';
     return '<div class="tbl-wrap"><table class="bom"><thead><tr><th>품목</th><th>상세(포맷·컨트롤러·사양)</th><th style="text-align:center">수량</th>'
       + '<th class="r">단가</th><th class="r">금액</th><th>검토</th><th>검토 의견</th></tr></thead>'
       + '<tbody>' + h.join('') + '</tbody><tfoot>' + foot + '</tfoot></table></div>';
   }
   function parts(rs, z) {
-    var g = function (n) { return sum(rs, function (x) { return n.indexOf(x.g) >= 0 ? x.q * x.u : 0; }); };
-    return [g([1]), g([2]), g([3, 4]), g([5]), z.ga];
+    /* 품목 성격별 — SW(DMWorks·외산·AMC) · OCS HW(나머지) · 로컬 HW·보안 · 기술지원 · 일반관리비 */
+    var f = function (c) { return sum(rs, function (x) { return c(x.key) ? x.q * x.u : 0; }); };
+    return [f(isSW), f(function (y) { return !isSW(y) && !LOCK[y] && !isTS(y); }), f(function (y) { return !!LOCK[y]; }), f(isTS), z.ga];
   }
   function summaryTable(Z, pzt) {
     var F = [km, k, k, k, km], t = [0, 0, 0, 0, 0, 0], rows = [];
@@ -251,9 +255,9 @@
     rows.push('<tr><td><a href="#z3">A-3</a></td><td class="nm">정밀조립존</td><td class="note">견적 없음 · 견적 단가로 산정</td>'
       + '<td class="num">' + km(pzt) + '</td>' + new Array(5).join('<td class="num">–</td>') + '<td class="num">' + km(pzt) + '</td></tr>');
     rows.push('<tr class="tot strong"><th colspan="3">견적 합계 (3개 존)</th>' + F.concat([km]).map(function (f, i) { return '<td class="num">' + f(t[i]) + '</td>'; }).join('') + '</tr>');
-    return '<div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">OCS SW(AMC 포함)</th><th class="r">OCS HW</th>'
-      + '<th class="r">로컬 HW·OCS·보안</th><th class="r">기술지원</th><th class="r">일반관리비·이윤</th><th class="r">견적 합계</th></tr></thead>'
-      + '<tbody>' + rows.join('') + '</tbody></table></div><p class="note-box">단위 천원. 견적서 표지는 \'VAT 포함\', 참고사항은 \'부가세 별도\'로 엇갈림. 일반관리비·이윤은 (OCS SW + OCS HW + 기술지원)의 10%로 로컬 HW·로컬 OCS·보안에는 붙지 않음. 견적 합계는 업체 단위절삭(백만 원 미만 버림) 후 금액.</p>';
+    return '<div class="tbl-wrap"><table class="bom"><thead><tr><th>존</th><th>구분</th><th>견적번호</th><th class="r">SW(DMWorks·외산·AMC)</th><th class="r">OCS HW(서버·PC·모니터링·스캐너)</th>'
+      + '<th class="r">로컬 HW·보안</th><th class="r">기술지원</th><th class="r">일반관리비·이윤</th><th class="r">견적 합계</th></tr></thead>'
+      + '<tbody>' + rows.join('') + '</tbody></table></div><p class="note-box">단위 천원. 열은 품목 성격별로 다시 묶은 것으로 견적서 항목 번호와 다름. 일반관리비·이윤은 견적서 기재값. 견적 합계는 업체 단위절삭 후 금액.</p>';
   }
   function unitOf(Z, key) {
     for (var i = 0; i < Z.length; i++) for (var j = 0; j < Z[i].rs.length; j++) if (Z[i].rs[j].key === key) return Z[i].rs[j].u;
@@ -267,7 +271,7 @@
     return '<div class="tbl-wrap"><table class="bom"><thead><tr><th>옵션</th><th style="text-align:center">수량</th><th class="r">단가</th><th class="r">금액</th><th>쓰는 이유</th></tr></thead><tbody>'
       + rs.map(function (r) { return '<tr><td class="nm">' + E(r.nm) + '</td><td class="q"><b>' + r.q + '</b></td><td class="num">' + km(r.u) + '</td><td class="num">' + km(r.u * r.q) + '</td><td>' + E(r.why) + '</td></tr>'; }).join('')
       + '<tr class="tot strong"><th colspan="3">합계 (SW만, 일반관리비·AMC 제외)</th><td class="num">' + km(tot) + '</td><td>'
-      + (live ? '업로드 견적 단가 적용' + (nb ? ' (견적에 없는 ' + nb + '종은 기준 견적 단가)' : '') : '10/15 최종 견적 단가(정가×57.2%) 적용') + '</td></tr></tbody></table></div>';
+      + (live ? '업로드 견적 단가 적용' + (nb ? ' (견적에 없는 ' + nb + '종은 기준 견적 단가)' : '') : B.bl + ' 단가(정가×57.2%) 적용') + '</td></tr></tbody></table></div>';
   }
 
   function renderDmw(q, mzs) {
@@ -280,26 +284,27 @@
       setH('ql-qt-' + s, quoteTable(x.rs, x.meta));
       setT('ql-zeb-' + s, x.z.id + ' · ' + x.z.purpose + ' · ' + x.meta.no);
       setT('ql-zh2-' + s, x.z.name + ' · 견적 ' + won(x.meta.total));
-      setH('ql-zh3-' + s, (x.up ? '업로드 견적' : '기준 견적(10/15)') + ' 구성과 검토 <span class="chg">(단위 천원 · ' + E(x.meta.no) + (x.meta.date ? ' · ' + E(x.meta.date) : '') + ')</span>');
+      setH('ql-zh3-' + s, (x.up ? '업로드 견적' : '기준 견적(' + B.bl + ')') + ' 구성과 검토 <span class="chg">(단위 천원 · ' + E(x.meta.no) + (x.meta.date ? ' · ' + E(x.meta.date) : '') + ')</span>');
       var d = diffList(x.mz);
-      setH('ql-zchg-' + s, x.up ? '<b>기준 견적(10/15 최종, ' + E(x.z.no) + ') 대비</b> ' + (d.length ? '변경 ' + d.filter(function (y) { return y.t === 'chg'; }).length + '건 · 추가 ' + d.filter(function (y) { return y.t === 'new'; }).length
+      setH('ql-zchg-' + s, x.up ? '<b>기준 견적(' + B.bl + ', ' + E(x.z.no) + ') 대비</b> ' + (d.length ? '변경 ' + d.filter(function (y) { return y.t === 'chg'; }).length + '건 · 추가 ' + d.filter(function (y) { return y.t === 'new'; }).length
         + '건 · 삭제 ' + d.filter(function (y) { return y.t === 'del'; }).length + '건' + (PUB ? '' : ' · 합계 ' + k(x.z.total) + ' → ' + k(x.meta.total) + '천원') + '<ul class="ql-diff">' + diffHtml(d) + '</ul>' : '— 품목·수량·단가가 같음')
-        : '업로드한 견적서에 이 존 시트가 없어 기준 견적(10/15 최종)을 그대로 표시함.');
+        : '업로드한 견적서에 이 존 시트가 없어 기준 견적(' + B.bl + ')을 그대로 표시함.');
     });
     var pz = pzRows(Z), pzt = sum(pz, function (r) { return r.u * r.q; }), T = sum(Z, function (x) { return x.meta.total; });
     setH('ql-sumtbl', summaryTable(Z, pzt));
     setH('ql-pz', pzTable(pz, true));
     setT('ql-sumh2', '업로드 견적 3개 존 · 합계 ' + won(T));
-    setT('ql-eb', '업로드 견적서 「' + q.name + '」 기준(기준 견적 10/15 최종과 대조)');
+    setT('ql-eb', '업로드 견적서 「' + q.name + '」 기준(기준 견적 ' + B.bl + '와 대조)');
     var B0 = sum(B.zones, function (z) { return z.total; });
     setT('ql-k-ov', '업로드 견적서 「' + q.name + '」 기준 — ' + Z.map(function (x) { return x.z.short + ' ' + (PUB ? '' : k(x.meta.total) + ' ') + '(' + x.meta.no + (x.up ? '' : ', 기준 유지') + ')'; }).join(' · ')
-      + (PUB ? '. 견적 합계는 공개본에서 비공개.' : ' = 합계 ' + k(T) + '천원 (기준 10/15 최종 ' + k(B0) + '천원 대비 ' + (T >= B0 ? '+' : '') + k(T - B0) + '천원).'));
+      + (PUB ? '. 견적 합계는 공개본에서 비공개.' : ' = 합계 ' + k(T) + '천원 (기준 ' + B.bl + ' ' + k(B0) + '천원 대비 ' + (T >= B0 ? '+' : '') + k(T - B0) + '천원).'));
     var all = [].concat.apply([], Z.map(function (x) { return x.rs; })), amt = function (f) { return sum(all, function (r) { return f(r) ? r.q * r.u : 0; }); };
-    var loc = amt(function (r) { return r.g === 3 || r.g === 4; }), srv = amt(function (r) { return r.key === 'GPU'; }), amc = amt(function (r) { return r.key === 'AMC'; }), scn = amt(function (r) { return r.key === 'SCN'; });
+    var loc = amt(function (r) { return LOCK[r.key]; }), srv = amt(function (r) { return r.key === 'GPU'; }), amc = amt(function (r) { return r.key === 'AMC'; }), scn = amt(function (r) { return r.key === 'SCN'; });
+    var sub = amt(function (r) { return SUBSCR[r.key]; });
     var nsrv = sum(all, function (r) { return r.key === 'GPU' ? r.q : 0; }), nscn = sum(all, function (r) { return r.key === 'SCN' ? r.q : 0; });
     var yrs = all.filter(function (r) { return r.key === 'AMC'; }).map(function (r) { return r.q; })[0];
-    setT('ql-k-big', PUB ? '로컬 HW 3존 ' + k(loc) + ' · 연산 서버 ' + nsrv + '대 ' + k(srv) + ' · 스캐너 ' + nscn + '대 ' + k(scn) + '천원 · AMC ' + (yrs || 0) + '년(DMWorks SW 기준이라 비공개)'
-      : '로컬 HW 3존 ' + k(loc) + ' · 연산 서버 ' + nsrv + '대 ' + k(srv) + ' · AMC ' + (yrs || 0) + '년 ' + k(amc) + ' · 스캐너 ' + nscn + '대 ' + k(scn) + '천원 — 네 가지가 전체의 약 ' + Math.round((loc + srv + amc + scn) / T * 100) + '%');
+    setT('ql-k-big', PUB ? '로컬 HW 3존 ' + k(loc) + ' · 연산 서버 ' + nsrv + '대 ' + k(srv) + ' · 외산 구독 ' + k(sub) + ' · 스캐너 ' + nscn + '대 ' + k(scn) + '천원 · AMC ' + (yrs || 0) + '년(DMWorks SW 기준이라 비공개)'
+      : '로컬 HW 3존 ' + k(loc) + ' · 연산 서버 ' + nsrv + '대 ' + k(srv) + ' · AMC ' + (yrs || 0) + '년 ' + k(amc) + ' · 외산 구독 ' + k(sub) + ' · 스캐너 ' + nscn + '대 ' + k(scn) + '천원 — 다섯 가지가 전체의 약 ' + Math.round((loc + srv + amc + sub + scn) / T * 100) + '%');
     // 단가·제품 표: 견적 단가·비율·존별 수량
     Array.prototype.forEach.call(document.querySelectorAll('[data-qlu]'), function (td) {
       var key = td.getAttribute('data-qlu'), u = unitOf(Z, key);
@@ -318,7 +323,8 @@
   var CHKX = {chg: ['변경 확인', 'chk'], new: ['신규 품목', 'adj']};
   var CHKX_NOTE = {chg: '기준 견적 대비 수량·단가·구성 변경 — 사양·근거 재확인', new: '기준 견적에 없던 품목 — 일반 명칭·세부 사양 정리 필요'};
   function chkTag(c) { var t = B.chk[c] || CHKX[c]; return '<span class="tag ' + t[1] + '">' + t[0] + '</span>'; }
-  function gk(g) { return g.indexOf('항목1') === 0 ? km : k; }
+  var MG = {};  // SW 품목이 든 견적서 항목 — 공개본에서 금액을 가림 (renderOcs가 채움)
+  function gk(g) { return MG[g] ? km : k; }
 
   function ocsTemplate(key, label) {
     for (var i = 0; i < B.tmpl.length; i++) {
@@ -329,36 +335,36 @@
   }
   function ocsPres(m, mz) {
     if (m.st === 'same') return {sym: m.base.o.sym, nm: m.base.o.nm, sp: m.base.o.sp, unit: m.base.o.unit, node: m.base.o.node, chk: m.base.o.chk, lab: m.base.o.lab, cat: m.base.cat};
-    var t = m.base || ocsTemplate(m.key, m.label), to = t && t.o, gen = m.g === 1 && B.gen[m.key], p;
+    var t = m.base || ocsTemplate(m.key, m.label), to = t && t.o, gen = B.gen[m.key], p;
     if (gen) {
       var det = '', n = toks(m.label).length || m.q, sp = gen[1];
       if (m.key === 'CADI' || m.key === 'CADE') det = toks(m.label).join('·') + ' ' + n + '종';
       else if (ROBOT[m.key]) det = 'Cell 로봇 제어기 ' + n + '종';
       else if (m.key === 'PLC') det = 'Cell PLC ' + n + '종';
       if (m.key === 'AMC') sp = sp.replace(/연 [\d.]+% × \d+년/, amcText(mz.rows, m));
-      p = {sym: m.key, nm: gen[0], sp: det ? det + ' — ' + sp : sp, node: gen[2], unit: m.key === 'AMC' ? '년' : (m.q === 1 ? '카피' : '모듈'),
-        chk: ROBOT[m.key] || m.key === 'PLC' ? 'maker' : (m.key === 'AMC' ? 'amc' : 'ok')};
+      p = {sym: m.key, nm: gen[0], sp: det ? det + ' — ' + sp : sp, node: gen[2], unit: m.key === 'AMC' ? '년' : (SUBSCR[m.key] ? '년 구독' : (m.q === 1 ? '카피' : '모듈')),
+        chk: ROBOT[m.key] || m.key === 'PLC' ? 'maker' : (m.key === 'AMC' ? 'amc' : (SUBSCR[m.key] ? 'sub' : (m.key === 'LWC' ? 'prod' : 'ok')))};
     } else if (to) p = {sym: to.sym, nm: to.nm, sp: to.sp, node: to.node, unit: to.unit, chk: to.chk};
     else {
       var scn = m.key === 'SCN';
-      p = {sym: scn ? 'SCN' : (m.g === 1 ? 'SW' : 'HW'), nm: scn ? '3D 스캐너 (HW·운영 SW 포함)' : oneLine(m.label).split(' · ')[0],
+      p = {sym: scn ? 'SCN' : (isSW(m.key) ? 'SW' : 'HW'), nm: scn ? '3D 스캐너 (HW·운영 SW 포함)' : oneLine(m.label).split(' · ')[0],
         sp: scn ? '측정 범위·정확도·스캔 속도는 견적서에 없음 — 규격서 기재 필요' : '견적서 기재 품목 — 일반 명칭·세부 사양 정리 필요',
-        node: scn ? 'SCN' : null, unit: m.g === 1 ? (m.q === 1 ? '카피' : '모듈') : (m.g === 2 ? '대' : '식'), chk: 'ok'};
+        node: scn ? 'SCN' : null, unit: isSW(m.key) ? (m.q === 1 ? '카피' : '모듈') : (scn ? '대' : '식'), chk: 'ok'};
     }
     var bc = m.base ? m.base.o.chk : p.chk;
     p.chk = m.st === 'chg' ? (bc !== 'ok' ? bc : 'chg') : (p.chk !== 'ok' ? p.chk : 'new');
     p.lab = oneLine(m.label);
-    p.cat = m.base ? m.base.cat : oneLine(m.cat.replace(/,\s*\n/g, '·'));
+    p.cat = m.base ? m.base.cat : (B.catOf[m.key] || (isSW(m.key) ? 'DMWorks' : oneLine(str(m.cat).replace(/,\s*\n/g, '·'))));
     return p;
   }
   function ocsRows(mz) {
-    var out = [], cnt = {}, subs = false;
+    var out = [], cnt = {}, done = {};
     mz.rows.forEach(function (m) {
-      var n = cnt[m.g] = (cnt[m.g] || 0) + 1, no = m.g + '-' + n, p = ocsPres(m, mz);
-      out.push({g: GN[m.g], no: no, sym: p.sym, nm: p.nm, sp: p.sp, q: m.q, unit: p.unit, u: m.u, amt: m.q * m.u, lab: p.lab, node: p.node, chk: p.chk, sub: 0, cat: p.cat, key: m.key});
-      if (m.key === 'LHW' && !subs) {
-        subs = true;
-        B.sub.forEach(function (s) { out.push({g: GN[3], no: no + '-' + s.sfx, sym: s.sym, nm: s.nm, sp: s.sp, q: s.q, unit: s.unit, u: null, amt: null, lab: s.lab, node: s.node, chk: s.chk, sub: s.sub, cat: p.cat}); });
+      var n = cnt[m.g] = (cnt[m.g] || 0) + 1, no = m.g + '-' + n, p = ocsPres(m, mz), g = gtOf(m), ss = B.sub[m.key];
+      out.push({g: g, no: no, sym: p.sym, nm: p.nm, sp: p.sp, q: m.q, unit: p.unit, u: m.u, amt: m.q * m.u, lab: p.lab, node: p.node, chk: p.chk, sub: 0, cat: p.cat, key: m.key});
+      if (ss && !done[m.key]) {  // 1식 품목의 하위 구성품 (기준 견적 기준)
+        done[m.key] = 1;
+        ss.forEach(function (s) { out.push({g: g, no: no + '-' + s.sfx, sym: s.sym, nm: s.nm, sp: s.sp, q: s.q, unit: s.unit, u: null, amt: null, lab: s.lab, node: s.node, chk: s.chk, sub: s.sub, cat: p.cat}); });
       }
     });
     return out;
@@ -366,8 +372,8 @@
   function itemTable(rows, z) {
     var gsum = {}, swBy = {}, csum = {}, ccnt = {}, push = function (o, key, v) { (o[key] = o[key] || []).push(v); };
     rows.forEach(function (r) { if (r.amt != null) gsum[r.g] = (gsum[r.g] || 0) + r.amt; });
-    rows.forEach(function (r) { if (r.g.indexOf('항목1') === 0 && r.node) push(swBy, r.node, r.no); });
-    rows.forEach(function (r) { if (r.g.indexOf('항목4') === 0) push(swBy, 'DPS', r.no); });
+    rows.forEach(function (r) { if (B.gen[r.sym] && r.node && !r.sub) push(swBy, r.node, r.no); });
+    rows.forEach(function (r) { if (r.sym === 'SEC' || r.sym === 'TSDB') push(swBy, 'DPS', r.no); });
     rows.forEach(function (r) { var c = r.g + '|' + r.cat; csum[c] = (csum[c] || 0) + (r.amt || 0); ccnt[c] = (ccnt[c] || 0) + (r.sub ? 0 : 1); });
     var body = [], cur = null, ccur = null, seen = {}, cn = 0;
     rows.forEach(function (r) {
@@ -379,7 +385,7 @@
           + '<td class="sym"><span class="tw" aria-hidden="true">▸</span>견적서 항목</td><th colspan="5" scope="rowgroup">' + E(r.cat) + ' <span>· ' + ccnt[c] + '품목</span></th>'
           + '<td class="num">' + gk(r.g)(csum[c]) + '</td><td colspan="2"></td></tr>');
       }
-      var anchor = ANCH.indexOf(r.sym) >= 0 ? r.sym : null, rid = '';
+      var anchor = B.anch.indexOf(r.sym) >= 0 ? r.sym : null, rid = '';
       if (anchor && !seen[anchor]) { rid = ' id="it-' + anchor + '"'; seen[anchor] = 1; }
       var nmh = E(r.nm);
       if (anchor && swBy[anchor]) {
@@ -397,8 +403,8 @@
         + '<td>' + chkTag(r.chk) + '<span class="where">' + E(B.chkNote[r.chk] || CHKX_NOTE[r.chk] || '') + '</span></td><td class="note">' + E(r.lab) + '</td></tr>');
     });
     var amt = rows.filter(function (r) { return r.amt != null; }), pre = sum(amt, function (r) { return r.amt; });
-    var base = sum(amt, function (r) { return /^항목[125]/.test(r.g) ? r.amt : 0; });
-    var foot = '<tr class="tot"><th colspan="6">항목6. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목5)' + (PUB ? '' : ' ' + k(base)) + '의 10%, 견적서 기재값</th><td class="num">' + km(z.ga) + '</td><td colspan="2"></td></tr>'
+    var base = sum(amt, function (r) { return /^항목[123]\./.test(r.g) ? r.amt : 0; });
+    var foot = '<tr class="tot"><th colspan="6">항목7. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목3)' + (PUB ? '' : ' ' + k(base)) + '의 10%, 견적서 기재값' + (Math.abs(base * 0.1 - z.ga) > 0.5 ? ' (산식에서 ' + k(base * 0.1 - z.ga) + '천원 차감)' : '') + '</th><td class="num">' + km(z.ga) + '</td><td colspan="2"></td></tr>'
       + '<tr class="tot"><th colspan="6">합계 (단위절삭 전)</th><td class="num">' + km(pre + z.ga) + '</td><td colspan="2"></td></tr>'
       + '<tr class="tot strong"><th colspan="6">견적 합계 (단위절삭 후)</th><td class="num">' + km(z.total) + '</td><td colspan="2">' + E(z.no) + '</td></tr>';
     return '<div class="tbl-wrap"><table class="bom wide2"><thead><tr><th>번호</th><th>구성품 (일반 명칭)</th><th>세부 사양</th><th style="text-align:center">수량</th><th>단위</th>'
@@ -406,33 +412,36 @@
       + '<tbody>' + body.join('') + '</tbody><tfoot>' + foot + '</tfoot></table></div>';
   }
   function opcBlock(rows) {
-    var names = rows.filter(function (r) { return r.g.indexOf('항목1') === 0 && r.node === 'OPC'; }).map(function (r) { return r.nm.split(' (')[0]; });
+    var names = rows.filter(function (r) { return B.gen[r.sym] && !r.sub && r.node === 'OPC'; }).map(function (r) { return r.nm.split(' (')[0]; });
     var lines = [], cur = '';
     names.forEach(function (n) { var nx = (cur ? cur + ' · ' : '') + n; if (nx.length > 34) { lines.push(cur); cur = n; } else cur = nx; });
     lines.push(cur);
-    return '<rect x="776" y="346" width="310" height="132" rx="4" class="dv3"/><text x="931" y="368" class="dvt" font-size="12">운영 PC 탑재 SW ' + names.length + '종 (항목1)</text>'
+    return '<rect x="776" y="346" width="310" height="132" rx="4" class="dv3"/><text x="931" y="368" class="dvt" font-size="12">운영 PC 탑재 SW ' + names.length + '종 (항목1·2)</text>'
       + lines.slice(0, 8).map(function (l, i) { return '<text x="931" y="' + (386 + i * 12.5) + '" class="dvs" font-size="9.5">' + E(l) + '</text>'; }).join('');
   }
 
   function renderOcs(q, mz) {
     var z = B.zones[0], up = q && q.zones[z.id], meta = up || z, rows = ocsRows(mz);
+    MG = {};
+    rows.forEach(function (r) { if (B.gen[r.sym]) MG[r.g] = 1; });
     setH('ql-items', itemTable(rows, meta));
     var gs = {}, gl = [];
     rows.forEach(function (r) { if (r.amt != null) { if (!(r.g in gs)) { gs[r.g] = 0; gl.push(r.g); } gs[r.g] += r.amt; } });
     setH('ql-kpis', gl.map(function (g) { return '<div><b>' + gk(g)(gs[g] / 1000) + '</b><span>' + E(g.split('. ')[1]) + ' (백만원)</span></div>'; }).join(''));
-    setT('ql-h2', '견적 ' + won(meta.total) + ' · 견적서 6개 항목을 서버실·운영실·Cell 캐비닛에 배치');
-    setT('ql-eb', up ? '업로드 견적(' + meta.no + ') 기준' : '10/15 최종 견적(' + z.no + ') 기준');
-    setT('ql-s-quote', meta.no + ' (' + (meta.date || '') + ') · 합계 ' + won(meta.total) + ' · 비교견적 ' + k(z.cmp) + '천원(발표자료 별첨 3' + (up ? ' · 기준 견적 때 확보' : '') + ')');
+    setT('ql-h2', '견적 ' + won(meta.total) + ' · 견적서 ' + (gl.length + 1) + '개 항목을 서버실·운영실·Cell 캐비닛에 배치');
+    setT('ql-eb', up ? '업로드 견적(' + meta.no + ') 기준' : B.bl + '(' + z.no + ') 기준');
+    setT('ql-s-quote', meta.no + ' (' + (meta.date || '') + ') · 합계 ' + won(meta.total) + ' · 비교견적 ' + k(z.cmp) + '천원(10/15 기준, 발표자료 별첨 3)');
     setT('ql-s-comp', gl.map(function (g) { return g.split('. ')[1] + ' ' + gk(g)(gs[g]); }).join(' · ') + ' · 일반관리비·이윤 ' + won(meta.ga));
     var amc = rows.filter(function (r) { return r.key === 'AMC'; })[0];
     setT('ql-s-lic', '네트워크 라이선스(Network-Lock), 모듈별 1카피(포맷·제어기·PLC 단위 모듈은 수량만큼). '
-      + (amc ? '유지보수 ' + amcText(mz.rows, amc) + (PUB ? '' : ' ' + k(amc.q * amc.u) + '천원') + '이 항목1에 포함' : '유지보수(AMC)는 견적에 없음'));
+      + (amc ? '유지보수 ' + amcText(mz.rows, amc) + (PUB ? '' : ' ' + k(amc.q * amc.u) + '천원') + '은 ' + amc.g.split('. ')[0] + '에 별도 계상' : '유지보수(AMC)는 견적에 없음'));
     var scan = rows.some(function (r) { return r.sym === 'SCN'; });
-    var nspec = rows.filter(function (r) { return r.chk === 'spec'; }).length + rows.filter(function (r) { return r.sub && /없음/.test(r.sp); }).length;
-    var lumps = rows.filter(function (r) { return r.chk === 'lump'; }), ts = rows.filter(function (r) { return r.g.indexOf('항목5') === 0; });
-    setT('ql-g-spec', '사양이 없는 구성품 ' + nspec + '건(운영 PC·노트북·모니터링 구성품' + (scan ? ', 스캐너 성능 수치' : '') + '·로컬 HW 하위 품목) — 공급사에 사양서 요청');
+    var nspec = rows.filter(function (r) { return r.chk === 'spec'; }).length + rows.filter(function (r) { return r.sub && (/없음|미기재/.test(r.sp) || !r.sp); }).length;
+    var lumps = rows.filter(function (r) { return r.chk === 'lump'; }), ts = rows.filter(function (r) { return isTS(r.key); }), tsAmt = sum(ts, function (r) { return r.amt; });
+    setT('ql-g-spec', '사양이 없는 구성품 ' + nspec + '건(로컬 서버·Edge Gateway·기반시설 하위 품목 등) — 공급사에 사양서 요청');
     setT('ql-g-lump', '1식 금액 ' + lumps.length + '건 ' + k(sum(lumps, function (r) { return r.amt; })) + "천원을 '금액 미구분'으로 표시");
-    setT('ql-q-ts', '기술지원 ' + ts.length + '건 ' + k(sum(ts, function (r) { return r.amt; })) + '천원, 유지보수 ' + (amc ? amcText(mz.rows, amc) : '없음') + ' 항목1에 포함 — 범위·산출물 명시 필요');
+    setT('ql-q-ts', (tsAmt ? '기술지원 ' + ts.length + '건 ' + k(tsAmt) + '천원 — 범위·산출물 명시 필요' : '교육·기술지원 무상 — 맞춤 개발 포함 여부·산출물 서면 확인 필요')
+      + '. 유지보수 ' + (amc ? amcText(mz.rows, amc) + ' — ' + amc.g.split('. ')[0] : '없음'));
     var g = document.getElementById('ql-opc');
     if (g) g.innerHTML = opcBlock(rows);
     show('ql-scan', scan); show('ql-noscan', !scan);
@@ -481,7 +490,7 @@
     var cur = document.getElementById('ql-cur'), msg = document.getElementById('ql-msg'), dl = document.getElementById('ql-diff'), rst = document.getElementById('ql-reset');
     rst.hidden = !q;
     if (!q) {
-      cur.innerHTML = '기준 견적: <b>10/15 최종 견적 3건(1015-1~3)</b> — 페이지 작성 기준';
+      cur.innerHTML = '기준 견적: <b>' + E(B.bl) + ' 3건(' + E(B.blno) + ')</b> — 페이지 작성 기준';
       dl.innerHTML = '';
       return;
     }
@@ -495,7 +504,7 @@
       if (d.length) items.push('<li><b>' + E(z.short) + '</b><ul>' + diffHtml(d) + '</ul></li>');
     });
     dl.innerHTML = items.join('') + (q.warn || []).map(function (w) { return '<li class="ql-warn"><b>주의</b> ' + E(w) + '</li>'; }).join('');
-    if (!msg.textContent) msg.textContent = got.length ? '기준 견적 대비 변경·추가·삭제 ' + n + '건. OCS 시뮬레이션 Cell 3종 페이지에도 자동 반영됨.' : '견적서 시트를 찾지 못함 — 이지로보틱스 견적서 엑셀 양식(항목1~6)인지 확인';
+    if (!msg.textContent) msg.textContent = got.length ? '기준 견적 대비 변경·추가·삭제 ' + n + '건. OCS 시뮬레이션 Cell 3종 페이지에도 자동 반영됨.' : '견적서 시트를 찾지 못함 — 이지로보틱스 견적서 엑셀 양식(항목1~7)인지 확인';
   }
 
   function ocsBanner(q, mz) {
@@ -504,14 +513,14 @@
     var z = B.zones[0], up = q && q.zones[z.id];
     document.getElementById('ql-reset').hidden = !q;
     if (!q) {
-      document.getElementById('ql-cur').innerHTML = '기준 견적: <b>10/15 최종 견적</b> — 페이지 작성 기준';
+      document.getElementById('ql-cur').innerHTML = '기준 견적: <b>' + E(B.bl) + '</b> — 페이지 작성 기준';
       document.getElementById('ql-diff').innerHTML = '';
       return;
     }
     var d = up ? diffList(mz) : [];
     document.getElementById('ql-cur').innerHTML = up
-      ? '적용 견적: <b>' + E(q.name) + '</b> — ' + E(up.no || '') + (up.date ? ' (' + E(up.date) + ')' : '') + ' · 기준 견적(10/15 최종) 대비 ' + (d.length ? '변경·추가·삭제 ' + d.length + '건' : '변경 없음')
-      : '적용 견적 <b>' + E(q.name) + '</b>에 이 존(' + E(z.short) + ') 시트가 없어 기준 견적(10/15 최종)을 표시함';
+      ? '적용 견적: <b>' + E(q.name) + '</b> — ' + E(up.no || '') + (up.date ? ' (' + E(up.date) + ')' : '') + ' · 기준 견적(' + E(B.bl) + ') 대비 ' + (d.length ? '변경·추가·삭제 ' + d.length + '건' : '변경 없음')
+      : '적용 견적 <b>' + E(q.name) + '</b>에 이 존(' + E(z.short) + ') 시트가 없어 기준 견적(' + E(B.bl) + ')을 표시함';
     document.getElementById('ql-diff').innerHTML = diffHtml(d);
   }
 
@@ -525,7 +534,7 @@
       });
     }).then(function (sheets) {
       var q = parseBook(sheets, file.name);
-      if (!Object.keys(q.zones).length) { msg.textContent = '견적서 시트를 찾지 못함 — 이지로보틱스 견적서 엑셀 양식(항목1~6, 수량·단가·견적가 열)인지 확인'; return; }
+      if (!Object.keys(q.zones).length) { msg.textContent = '견적서 시트를 찾지 못함 — 이지로보틱스 견적서 엑셀 양식(항목1~7, 수량·단가·금액 열)인지 확인'; return; }
       var ok = save(q);
       msg.textContent = '';
       apply(q);
@@ -557,7 +566,7 @@
       panel.addEventListener('drop', function (e) { e.preventDefault(); panel.classList.remove('drag'); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]); });
     }
     var rst = document.getElementById('ql-reset');
-    if (rst) rst.addEventListener('click', function () { save(null); var m = document.getElementById('ql-msg'); if (m) m.textContent = '기준 견적(10/15 최종)으로 되돌림'; apply(null); });
+    if (rst) rst.addEventListener('click', function () { save(null); var m = document.getElementById('ql-msg'); if (m) m.textContent = '기준 견적(' + B.bl + ')으로 되돌림'; apply(null); });
     root.addEventListener('storage', function (e) { if (e.key === KEY) apply(load()); });
     apply(load());
   }

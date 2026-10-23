@@ -1,5 +1,5 @@
 """OCS 시뮬레이션 Cell 3종(유연제조·적응가공·AI정밀검사) 장비 설치·연결 구성 페이지 → ocs_sim_fms.html · ocs_sim_adaptive.html · ocs_sim_qms.html
-근거: 이지로보틱스 10/15 최종 견적서(견26CAMTIC-DMWorks-1015-1~3), 10/16 자체장비심의 발표자료(1-3. 발표자료_이형수),
+근거: 이지로보틱스 10/23 견적서(견26CAMTIC-DMWorks-1023-1~3, 엑셀)·10/15 최종 견적서(1015-1~3, PDF 원본), 10/16 자체장비심의 발표자료(1-3. 발표자료_이형수),
 10/18 유지연 팀장 메일 「자체장비 심의시 질의&제안사항 공유 및 중장위 심의 준비(~10.21/수) 안내」·첨부 「26.10.16_자체장비심의 질의응답_제안사항.hwpx」.
 심의위원 공통 지침에 따라 품목은 일반 명칭·사양으로 적고, 견적서 기재 품목명(업체·모델)은 내부 대조 열에만 둠."""
 import html
@@ -20,8 +20,8 @@ def k(n):
 
 
 def gk(g):
-    """견적서 항목별 금액 표기 — 항목1(DMWorks SW·AMC)은 공개본에서 가림"""
-    return km if g.startswith("항목1") else k
+    """견적서 항목별 금액 표기 — SW 품목이 든 항목(DMWorks·AMC 등)은 공개본에서 가림"""
+    return km if g in SWG else k
 
 
 def won(n):
@@ -30,42 +30,49 @@ def won(n):
 
 
 # ------------------------------------------------------------------ 일반 명칭·사양 (업체·모델명 없음)
-# key: (구성품 일반 명칭, 세부 사양, 설치 노드)
+# SW key: (구성품 일반 명칭, 세부 사양, 설치 노드)
 GEN = {
     "BASE": ("3D 공정 시뮬레이션 SW 기본 모듈", "설비 기구학 모델링(관절·좌표계·CAD 형상) + 공장 레이아웃·로봇 라이브러리·모션/Task·충돌검사·케이블 시뮬레이션(단일 공정). 네트워크 라이선스", "OPC"),
-    "MON": ("DT 실시간 모니터링 모듈", "설비 실시간 연동으로 가상모델 동작 동기화, Cell/Zone 생산량·진행률·사이클타임 분할 화면, 사용자 권한 관리", "MON"),
+    "DMON": ("DT 실시간 모니터링 모듈", "설비 실시간 연동으로 가상모델 동작 동기화, Cell/Zone 생산량·진행률·사이클타임 분할 화면, 사용자 권한 관리", "MON"),
     "CADI": ("CAD 입력 변환 모듈 (포맷당)", "외부 CAD 형상을 시뮬레이션 모델로 변환·경량화. 포맷당 1모듈", "OPC"),
     "CADE": ("CAD 출력 변환 모듈 (포맷당)", "시뮬레이션 모델을 외부 표준 포맷으로 출력. 포맷당 1모듈", "OPC"),
     "OLP": ("로봇 오프라인 프로그래밍 모듈 (제어기당)", "가상환경에서 로봇 작업 프로그램 생성·간섭 검증 후 제어기 언어로 변환·다운로드. 제어기 기종당 1모듈", "OPC"),
     "RRS": ("로봇 제어기 연동 사이클타임 정밀 산출 모듈 (제어기당)", "로봇 제조사 제어 알고리즘(RCS) 연동으로 경로·사이클타임 정밀 산출. RCS 모듈은 로봇 제조사 별도 제공", "OPC"),
-    "PC": ("3D 스캔 점군 처리 모듈", "점군 데이터 반입·정합·경량화, 실측 점군 위에 가상 작업장 구성", "OPC"),
+    "PC": ("3D 스캔 점군·파노라마 처리 모듈", "점군 데이터 반입·정합·경량화, 실측 점군·파노라마 이미지 위에 가상 작업장 구성", "OPC"),
     "MP": ("다공정·물류 시뮬레이션 모듈", "다공정 라인·컨베이어·AMR 물류·버퍼 모델링, UPH·가동률·병목 분석", "OPC"),
     "PLC": ("PLC 가상 시운전 모듈 (PLC 기종당)", "PLC 프로그램–가상 설비 연동(OPC UA), I/O 매핑, 인터록·시퀀스·이상복구 검증. 상태 읽기 + 핸드셰이크 방식", "OPC"),
     "PID": ("기능 확장 개발 키트 (API)", "API로 전용 기능·UI 개발 — AAS 출력, OCS 연동, 외부 AI 연계", "OPC"),
     "PIU": ("기능 확장 실행 모듈", "개발한 확장 기능 실행 환경", "OPC"),
     "USD": ("OpenUSD 변환 모듈", "Workcell을 계층 구조 그대로 OpenUSD로 변환해 학습 DT 서버에 업로드, 물리 설정 정보 반영", "OPC"),
     "LE": ("OpenUSD 실시간 동기화 모듈", "공정 시뮬레이션–학습 DT 간 위치·동작 실시간 동기화(리뷰 세션용)", "OPC"),
+    "DEL": ("디지털 제조·공정 시뮬레이션 SW (1년 구독)", "수요기업 표준 CAD·공정계획(BOP) 데이터 연계, 로봇·작업자·라인 공정 시뮬레이션 비교 검증. 1년 구독 — 과제 종료 후 갱신 비용 별도", "OPC"),
+    "XCL": ("클라우드 기반 설계·제조 SW (1년 구독)", "수요기업 CAD·가공 공정 데이터 연계, 가공 공정 시뮬레이션 비교 검증. 1년 구독 — 포함 모듈 구성은 견적서에 없음, 갱신 비용 별도", "OPC"),
+    "LWC": ("3D 형상 데이터 경량화·표준 변환 SW", "DT용 3D 형상 경량화·표준 포맷 변환 — 제품·기능 범위는 견적서에 없음. CAD 입출력·OpenUSD 변환 모듈과 역할 구분 필요", "OPC"),
     "ACSB": ("검사결과 기반 리워크 프로그램 자동생성 모듈", "결함 위치 3D 좌표로 로봇 리워크 경로·레시피 자동 생성, AI 판정 결과 연동", "OPC"),
     "ACSO": ("리워크 경로 로봇 프로그램 변환 모듈 (제어기당)", "리워크 경로를 로봇 제어기 형식 프로그램으로 생성. 제어기 기종당 1모듈", "OPC"),
     "PIA": ("스캔 측정결과 분석·시각화 SW", "3D 스캔 데이터 경량화, 설계 대비 편차 컬러맵·단면·차트 시각화로 품질 경향 분석", "OPC"),
     "TES": ("용접부 품질 자동 판정 SW", "스캔 데이터로 저항 점용접 품질 자동 판정, 용접 조건 제시", "OPC"),
     "AIMSS": ("로봇 자동 측정 시뮬레이션 모듈 (제어기당)", "가상 측정 작업장 구성, 측정기 캘리브레이션·측정 경로 시뮬레이션, 측정 로봇 오프라인 프로그래밍", "OPC"),
     "AIMSC": ("측정 시스템 통합 제어 모듈 (제어기당)", "측정기·로봇 통합 제어, 측정 데이터 수집, 실시간 결과 모니터링", "OPC"),
-    "AMC": ("SW 유지보수 (연간)", "위 SW 합계의 연 18% × 4년. 버전 업데이트·기술지원", None),
+    "AMC": ("SW 유지보수 (연간)", "SW 합계의 연 18% × 4년(최초 1년 무상 → 5년). 버전 업데이트·기술지원", None),
 }
+SUBSCR = ("DEL", "XCL")  # 1년 구독 — AMC 계상 대상 아님
 
-# 견적서 공통 HW·로컬 구성 (단가 천원)
+# HW·서비스 sym: (구성품 일반 명칭, 세부 사양, 단위, 설치 노드, 점검)
 SRV_SPEC = ("4U급 GPU 서버 · 서버용 CPU 128코어급 ×2 · DDR5 RDIMM 64GB ×12(768GB) · 데이터 SSD U.2 7.68TB ×4 · OS SSD M.2 NVMe 8TB ×2 · "
             "전문가용 GPU 96GB ×4 · 차세대 방화벽 1식 포함 · 설치")
-LOCAL_SUB = [  # (기호, 구성품, 사양, 수량 표기)
-    ("DPS", "데이터 처리 서버", "2U 2소켓 랙서버 · RAM 128GB · NVMe SSD 3.84TB (견적서 '등')", "5대"),
-    ("NAS", "통합 스토리지", "올플래시 · U.2 4TB SSD ×15 (raw 60TB)", "1식"),
-    ("BAK", "백업 스토리지", "견적서에 사양 없음", "1식"),
-    ("EGW", "Edge Gateway", "견적서에 사양·수량 없음", "–"),
-    ("VNODE", "영상 수집 노드", "견적서에 사양·수량 없음", "–"),
-    ("NET", "네트워크 — 코어·TSN·방화벽·PTP·AP·배선", "견적서에 사양·수량 없음 — 아래 8개 구성품으로 세분 제안(연결 구성도 기준)", "1식"),
-    ("RACK", "서버실 — 랙·캐비닛·UPS·KVM", "견적서에 사양·수량 없음", "1식"),
-]
+HW = {
+    "GPU": ("DT·AI 연산 서버 (방화벽 포함)", SRV_SPEC, "대", "GPU", "ok"),
+    "OPC": ("DT·시뮬레이션 운영 PC", "데스크톱 CPU 24코어급 · GPU 16GB GDDR7 · RAM 64GB DDR5(6400MT/s) · SSD 1TB NVMe Gen5 · PCIe 5.0 메인보드 · 2.5GbE·Wi-Fi 7 · 1,200W 이상 전원·고성능 냉각", "대", "OPC", "ok"),
+    "NB": ("시뮬레이션 운영 노트북", "모바일 CPU 24코어급 · GPU 12GB GDDR7 · RAM 32GB DDR5 · SSD 1TB NVMe · 16인치 WQXGA(2560×1600) 이상 · Wi-Fi 7·Bluetooth·유선 LAN · HDMI·USB-C·Thunderbolt 4급", "대", "NB", "ok"),
+    "MON": ("DT 모니터링 시스템 (구성품·설치·연동 셋업)", "55인치 산업용 비디오월 4면(2×2, FHD·700nit급·24시간 연속운전) · 거치 프레임 · 4채널 영상 제어기 · 27인치 4K 운영 콘솔 · 영상 전송·배선 · DT·OCS 모니터링 연동 셋업 — 구성품별 금액 없음", "식", "MON", "lump"),
+    "LSV": ("로컬 서버 (1식)", "아래 5개 구성품 — 견적서에 사양·금액 없음, 수량 각 1", "식", "DPS", "lump"),
+    "EGW": ("Edge Gateway (1식)", "아래 3개 구성품 — 견적서에 사양·금액 없음, 수량 각 1", "식", "EGW", "lump"),
+    "NET": ("네트워크·시간동기 (1식)", "아래 8개 구성품(10/22 사양서 세분안과 같은 구성) — 견적서에 사양·금액 없음, 수량 각 1", "식", "NET", "lump"),
+    "RACK": ("서버실 기반시설 (1식)", "아래 4개 구성품 — 견적서에 용량·금액 없음, 수량 각 1", "식", "RACK", "lump"),
+    "SEC": ("통합 인증·접근통제 SW (IAM/PKI · 서버 접근제어)", "사용자 인증·SSO·역할별 권한(OIDC·OAuth 2.0·SAML 2.0), 서버·네트워크 관리자 접근제어·작업이력 감사, 시스템 계정·비밀번호 관리, TLS 인증서·PKI 연동", "식", "DPS", "ok"),
+    "TS": ("교육·기술지원", "사용자 교육·매뉴얼·초기 오류 보완·기술지원 — 과제기간 내 무상", "식", None, "free"),
+}
 
 
 def remote_cells(z):
@@ -73,46 +80,96 @@ def remote_cells(z):
     return [c for c in z["cells"] if c[3] not in z["site"]]
 
 
-def net_sub(n, nr=0):
-    """3-1-f 네트워크 세분 제안 (구성품, 사양, 수량, 단위). n = 연결 Cell 수, nr = 타 층 Cell 수. 코어 2대 이중화·Cell 이중 업링크 가정"""
+def subs(sym, z):
+    """1식 품목의 하위 구성품 (기호, 구성품, 사양, 수량, 점검) — 10/23 견적서 나열 순서. 네트워크 사양·제안 수량은 연결 구성도 기준(코어 2대 이중화·Cell 이중 업링크 가정)"""
+    n, nr = len(z["cells"]), len(remote_cells(z))
     riser = f" · 층간 수직 광(라이저) {2 * nr}회선(타 층 Cell {nr}개)" if nr else ""
-    return [
-        ("방화벽 (OT/IT 경계)", "차세대 방화벽 · 10GbE 이상 · 산업 프로토콜(OPC UA·MQTT) 검사 · VPN — 항목2 연산 서버 포함 방화벽과 같은 장비인지 확인(같으면 삭제)", "1", "대"),
-        ("코어 스위치 (L3)", f"25GbE(SFP28) 24포트 이상 + 100GbE 2포트 이상 · 2대 이중화(MLAG) · PTP 중계(Boundary Clock). 대당 소요 약 {13 + n}포트", "2", "대"),
-        ("관리망 스위치", "1GbE 24포트 · 서버 원격관리(IPMI/BMC)·장비 관리 전용", "1", "대"),
-        ("PTP 시간동기 장치 (그랜드마스터)", "IEEE 1588v2·802.1AS · NTP 겸용 · OCXO 홀드오버 · GNSS 수신(안테나 설치 가능 시)", "1", "대"),
-        ("Cell TSN 산업용 스위치", "관리형 · GbE 8포트 이상(PoE+ 2포트 포함, AP 급전) + 10G SFP+ 업링크 2 · IEEE 802.1AS·Qbv. Cell당 1대", str(n), "대"),
-        ("산업용 무선 AP", "Wi-Fi 6E · PoE 급전 · 로밍 50ms 이하 · 관리 컨트롤러(또는 클라우드 관리) 포함. Cell당 1대", str(n), "대"),
-        ("광 트랜시버·연결 케이블", f"10G SFP+ SR {4 * n}개(Cell 이중 업링크 양단) · 25G DAC 약 18개(서버·스토리지–코어) · 100G DAC 2개(코어 간) · 10GBASE-T 모듈 2개(운영실)", "1", "식"),
-        ("배선·케이블 트레이·패치패널 (설치 포함)", f"OM4 광 이중 {2 * n}회선(코어–Cell 캐비닛){riser} · Cat6A(운영실 2회선·관리망) · 패치패널 4개 · 통로 상부 트레이(길이 실측) · 포설·성단·시험", "1", "식"),
-    ]
+    return {
+        "LSV": [("DPS", "로컬 서버 노드", "견적서에 사양·수량 없음 — 운영 시계열 DB·인증·SW 라이선스 서버 탑재(추정)", "1", "split"),
+                ("LGPU", "로컬 GPU 서버", "견적서에 사양 없음 — 항목3 DT·AI 연산 서버와 역할 구분 필요", "1", "split"),
+                ("NAS", "Scale-out 스토리지 노드", "견적서에 용량·노드 수 없음", "1", "split"),
+                ("BAK", "백업 NAS", "견적서에 용량 없음", "1", "split"),
+                ("TSDB", "운영 시계열 DB (클러스터)", "분산형 시계열 DBMS·클러스터 라이선스(코디네이터·브로커·웨어하우스·룩업), 로봇·검사장비·PLC 상태·측정결과·공정 이벤트 저장·조회, "
+                 "TAG·LOG 데이터 모델·SQL·SDK, 복제·장애 대응·보존·집계 — 10/15엔 별도 49,500", "1", "split")],
+        "EGW": [("EGWS", "Edge Gateway 서버", f"Cell 상태·이벤트 OPC UA 수집·AAS 매핑 — 견적 수량 1, Cell {n}개면 Cell별 1대인지 확인", "1", "split"),
+                ("VNODE", "영상 수집 노드", "영상 버퍼·전처리 — 사양 없음", "1", "split"),
+                ("CAB", "Cell 네트워크 캐비닛", f"Cell 현장 함체(스위치·AP·게이트웨이 실장) — 견적 수량 1, Cell {n}개", "1", "split")],
+        "NET": [("NET", "코어 스위치 (L3)", f"25GbE(SFP28) 24포트 이상 + 100GbE 2포트 이상 · 2대 이중화(MLAG) · PTP 중계(Boundary Clock). 대당 소요 약 {13 + n}포트 · 제안 2대", "1", "prop"),
+                ("NET", "Cell TSN 산업용 스위치", f"관리형 · GbE 8포트 이상 + 10G SFP+ 업링크 2 · IEEE 802.1AS·Qbv · 제안 Cell당 1대({n}대)", "1", "prop"),
+                ("NET", "Cell 액세스·PoE 스위치", f"PoE+ GbE 8~16포트 · AP·카메라 급전 · 제안 Cell당 1대({n}대)", "1", "prop"),
+                ("NET", "관리망 스위치", "1GbE 24포트 · 서버 원격관리(IPMI/BMC)·장비 관리 전용", "1", "prop"),
+                ("NET", "산업용 방화벽 (OT/IT 경계)", "차세대 방화벽 · 10GbE 이상 · 산업 프로토콜(OPC UA·MQTT) 검사 · VPN — 항목3 연산 서버 포함 방화벽과 같은 장비인지 확인", "1", "prop"),
+                ("NET", "PTP 시간동기 장치 (그랜드마스터)", "IEEE 1588v2·802.1AS · NTP 겸용 · OCXO 홀드오버 · GNSS 수신(안테나 설치 가능 시)", "1", "prop"),
+                ("NET", "산업용 무선 AP", f"Wi-Fi 6E · PoE 급전 · 로밍 50ms 이하 · 관리 컨트롤러 포함 · 제안 Cell당 1대({n}대)", "1", "prop"),
+                ("NET", "광·UTP 배선·케이블 트레이 (설치 포함)", f"OM4 광 이중 {2 * n}회선(코어–Cell 캐비닛){riser} · 10G SFP+ {4 * n}개·25G/100G DAC · Cat6A · 패치패널 · 통로 상부 트레이(길이 실측) · 포설·성단·시험", "1", "prop")],
+        "RACK": [("RK", "서버랙", "42U — 배치안 3대(R1~R3), 견적 수량 1", "1", "split"),
+                 ("UPS", "UPS", "용량 미기재 — 15kVA급 이상 권장(전력 산정)", "1", "split"),
+                 ("AC", "항온항습기", "용량 미기재 — 10kW급 필요(전력 산정). 10/15엔 견적 외", "1", "split"),
+                 ("KVM", "KVM·콘솔", "", "1", "split")],
+    }.get(sym, [])
 
-# ------------------------------------------------------------------ 존별 10/15 최종 견적 (천원)
-# SW: (번호, key, 상세(일반), 수량, 단가, 견적서 기재 품목)
+
+# ------------------------------------------------------------------ 존별 10/23 견적 (천원)
+# lines: (항목 번호, key, 상세(일반), 수량, 단가, 견적서 기재 품목) — 견적서 행 순서 그대로
+GROUP_FA = {1: "디지털트윈 공정 시뮬레이션 SW", 2: "PLC 가상 시운전 SW", 3: "디지털트윈·AI 연산서버·워크스테이션", 4: "PLC/PAC·산업통신 연동시스템",
+            5: "교육 및 기술지원", 6: "라이선스", 7: "일반관리비 및 기업이윤"}
+GROUP_Q = {1: "형상측정(스캔)·측정 결과 분석 SW", 2: "공정·로봇 시뮬레이션 SW", 3: "QMS·OCS 통합운영 시스템", 4: "최적화·제조데이터 플랫폼",
+           5: "교육 및 기술지원", 6: "라이선스", 7: "일반관리비 및 기업이윤"}
+L_GPU = (1, "GPU", "", 1, 385000, "디지털트윈/시뮬레이션ㆍAI 연산 서버 - ESC8000A-E13P · EPYC 9755×2 · RTX PRO 6000 96GB ×4 · 방화벽 BLUEMAX NGF 1300")
+L_OPC = (1, "OPC", "", 1, 13200, "디지털트윈 운영 PC - Core Ultra 9 285K · RTX 5080 16GB · 64GB")
+L_NB = (1, "NB", "", 1, 7150, "시뮬레이션 운영 노트북 - Core Ultra 9 290HX Plus · RTX 5070 Ti 12GB · 32GB")
+L_LOCAL = [  # 항목4 로컬 공통 (Local Server 금액만 존별로 다름)
+    ("EGW", 81796, "Edge Gateway - Edge Gateway server · 영상 수집 노드 · 셀 네트워크 캐비닛"),
+    ("NET", 198863.5, "Network·시간동기 - 코어 스위치 · 셀 TSN · 셀 엑세스·PoE · 관리망 스위치 · 산업용 방화벽 · PTP 그랜드마스터 · Wi-Fi 6E AP · 광·UTP 배선·트레이"),
+    ("RACK", 42773.5, "기반시설 - 서버랙 · UPS · 항온항습기 · KVM·콘솔"),
+    ("SEC", 38500, "보안 SW - 보안 스택(IAM/PKI) Keycloak + HIWARE"),
+]
+
+
+def _g(n, rows):
+    return [(n,) + r[1:] for r in rows]
+
+
+def lsv(u):
+    return (4, "LSV", "", 1, u, "Local Server - 로컬서버노드 · GPU 서버 · Scale-out 스토리지 노드 · 백업 NAS · Operational TSDB")
+
+
+L_TS = (5, "TS", "", 1, 0, "SW 교육 및 기술지원 - 사용자 교육, 매뉴얼 제공, 초기 오류 보완 및 기술지원 (무상 제공)")
+
+
+def amc(u):
+    return (6, "AMC", "4년", 4, u, "AMC(Annual Maintenance Charge, 18%) - 최초 1년 무상")
+
+
+DMW_COMMON = [("PC", 21736, "DM POINT CLOUD & DM Panorama"), ("MP", 26312, "DM MULTIPLE PROCESS")]
+OMNI = [(1, "USD", "", 1, 15840, "Omniverse USD Converter"), (1, "LE", "", 1, 11440, "Omniverse Live Edit")]
+PLUG = [(1, "PID", "", 1, 24024, "DM PLUG-IN For Developer"), (1, "PIU", "", 1, 8008, "DM PLUG-IN For User")]
+L_LWC = (1, "LWC", "", 1, 30000, "디지털 트윈용 3D 형상 데이터 경량화 및 표준 변환 SW")
+
 ZONES = [
     {
         "slug": "fms", "id": "A-1-4", "name": "유연제조(FMS) 통합 OCS 시뮬레이션 Cell", "short": "유연제조",
-        "zone": "유연제조존 (A-1)", "no": "견26CAMTIC-DMWorks-1015-1", "title": "캠틱종합기술원 유연제조 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
-        "total": 1991000, "ga": 125088.606, "cmp": 2258000, "lhw": 528000,
-        "sw": [
-            ("1-1", "BASE", "", 1, 81338.4, "DMWorks Base"),
-            ("1-2", "MON", "", 1, 35200, "DM-Monitoring"),
-            ("1-3", "CADI", "STL·CATIA·AutoCAD 3종", 3, 5148, "CAD IMPORT - STL, CATIA, AUTOCAD"),
-            ("1-4", "CADE", "JT 1종", 1, 5148, "CAD EXPORT - JT"),
-            ("1-5", "OLP", "Cell 로봇 제어기 2종", 2, 13728, "DM OLP - HYUNDAI, KAWASAKI"),
-            ("1-6", "RRS", "Cell 로봇 제어기 1종", 1, 11440, "DM RRS - HYUNDAI"),
-            ("1-7", "PC", "", 1, 21736, "DM POINT CLOUD"),
-            ("1-8", "MP", "", 1, 26312, "DM MULTIPLE PROCESS"),
-            ("1-9", "PLC", "Cell PLC 2종", 2, 25282.4, "DM PLC SIMULATION - LS, MITSUBISHI"),
-            ("1-10", "PID", "", 1, 24024, "DM PLUG-IN For Developer"),
-            ("1-11", "PIU", "", 1, 8008, "DM PLUG-IN For User"),
-            ("1-12", "USD", "", 1, 15840, "Omniverse USD Converter"),
-            ("1-13", "LE", "", 1, 11440, "Omniverse Live Edit"),
-            ("1-14", "AMC", "4년", 4, 60111.216, "AMC(Annual Maintenance Charge)"),
+        "zone": "유연제조존 (A-1)", "no": "견26CAMTIC-DMWorks-1023-1", "qno": "견26CAMTIC-DMWorks-1015-1", "title": "캠틱종합기술원 유연제조 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
+        "total": 2100000, "ga": 98143.52, "cmp": 2258000, "groups": GROUP_FA,
+        "lines": [
+            (1, "BASE", "", 1, 81338.4, "DMWorks Base"),
+            (1, "DMON", "", 1, 35200, "DM-Monitoring"),
+            (1, "CADI", "STL·CATIA·AutoCAD·Pro/E 4종", 4, 5148, "CAD IMPORT - STL, CATIA, AUTOCAD, PRO/E"),
+            (1, "CADE", "JT·VRML·OBJ 3종", 3, 5148, "CAD EXPORT - JT, VRML, OBJ"),
+            (1, "OLP", "Cell 로봇 제어기 2종", 2, 13728, "DM OLP - HYUNDAI, KAWASAKI"),
+            (1, "RRS", "Cell 로봇 제어기 1종", 1, 11440, "DM RRS - HYUNDAI"),
+            *[(1, k_, "", 1, u, lab) for k_, u, lab in DMW_COMMON], *OMNI, *PLUG,
+            (1, "DEL", "", 1, 121700, "디지털 제조ㆍ공정 시뮬레이션 SW - CATIA Delmia 1년 구독"),
+            L_LWC,
+            (2, "PLC", "Cell PLC 2종", 2, 25282.4, "DM PLC SIMULATION - LS, MITSUBISHI"),
+            *_g(3, [L_GPU, L_OPC, L_NB]),
+            (3, "MON", "", 1, 75000, "디지털트윈 모니터링 시스템 - 55인치 비디오월 ×4 · 영상 제어기 · 운영 콘솔 · 설치·연동"),
+            lsv(222591.6), *[(4, k_, "", 1, u, lab) for k_, u, lab in L_LOCAL],
+            (4, "SCN", "", 1, 171600, "광대역 스캐너 - RTC700 (HW 및 운영 SW 포함)"),
+            L_TS, amc(68291.136),
         ],
-        "scan": ("광대역 3D 공간 스캐너 (HW·운영 SW 포함)", "공장·Cell 공간 스캔, 컬러 점군 취득. 측정거리·정확도·스캔 속도는 견적서에 없음 — 규격서 기재 필요",
-                 171600, "광대역 스캐너 - RTC700 (HW 및 운영 SW포함)", "현장 이동형 · 삼각대"),
-        "ts": [("5-1", "Cell 구성 설비별 DT 연동 기능 개발", 11000), ("5-2", "DB 연동 시각화 UI 개발", 28050), ("5-3", "기능 확장(플러그인) 개발", 5500)],
+        "scan": ("광대역 3D 공간 스캐너 (HW·운영 SW 포함)", "측정거리 최대 270m · 최대 200만 점/초 · 시야각 360°×300° · 각도 정확도 100″ · 거리 정확도 ±(1.2mm+10ppm) · "
+                 "최고 해상도 1.6mm@10m · 영역 정밀 스캔 0.8mm급 · 전체 돔 스캔 약 1분 40초 · 아이세이프 레이저 · HDR 72MP 이미지·432MP 파노라마, 컬러 점군 자동 매핑", "현장 이동형 · 삼각대"),
         "site": "전북대 창조2관 3층", "plan": ("4개 Cell · 19종", "2,100백만원", "차체 판넬·BIW 판넬 부품, 도어 모듈",
                                                 "판넬 공급–정렬–지그 안착–용접·이송, 실링, 헤밍, 조립"),
         # (Cell ID, Cell 명, 구축연도, 설치 위치, 연결 대상 장비) — 연구개발계획서(협약용) 2026.08.27 연차별 구축계획·전용공간 확보 현황
@@ -125,26 +182,26 @@ ZONES = [
     },
     {
         "slug": "adaptive", "id": "A-2-5", "name": "적응가공(Adaptive) 통합 OCS 시뮬레이션 Cell", "short": "적응가공",
-        "zone": "적응가공존 (A-2)", "no": "견26CAMTIC-DMWorks-1015-2", "title": "캠틱종합기술원 적응가공 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
-        "total": 2192000, "ga": 129299.178, "cmp": 2400000, "lhw": 682000,
-        "sw": [
-            ("1-1", "BASE", "", 1, 81338.4, "DMWorks Base"),
-            ("1-2", "MON", "", 1, 35200, "DM-Monitoring"),
-            ("1-3", "CADI", "NX·JT·Solid Edge·SolidWorks 4종", 4, 5148, "CAD IMPORT - NX, JT, SOLID EDGE, SOLIDWORKS"),
-            ("1-4", "CADE", "AAS·JT·IGES·FBX 4종", 4, 5148, "CAD EXPORT - AAS, JT, IGES, FBX"),
-            ("1-5", "OLP", "Cell 로봇 제어기 2종", 2, 13728, "DM OLP - YASKAWA, KUKA"),
-            ("1-6", "PC", "", 1, 21736, "DM POINT CLOUD"),
-            ("1-7", "MP", "", 1, 26312, "DM MULTIPLE PROCESS"),
-            ("1-8", "PLC", "Cell PLC 1종", 1, 25282.4, "DM PLC SIMULATION - SIMENS"),
-            ("1-9", "PID", "", 1, 24024, "DM PLUG-IN For Developer"),
-            ("1-10", "PIU", "", 1, 8008, "DM PLUG-IN For User"),
-            ("1-11", "USD", "", 1, 15840, "Omniverse USD Converter"),
-            ("1-12", "LE", "", 1, 11440, "Omniverse Live Edit"),
-            ("1-13", "AMC", "4년", 4, 57207.744, "AMC(Annual Maintenance Charge)"),
+        "zone": "적응가공존 (A-2)", "no": "견26CAMTIC-DMWorks-1023-2", "qno": "견26CAMTIC-DMWorks-1015-2", "title": "캠틱종합기술원 적응가공 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
+        "total": 2320000, "ga": 102886.08, "cmp": 2400000, "groups": GROUP_FA,
+        "lines": [
+            (1, "BASE", "", 1, 81338.4, "DMWorks Base"),
+            (1, "DMON", "", 1, 35200, "DM-Monitoring"),
+            (1, "CADI", "NX·JT·Solid Edge·SolidWorks 4종", 4, 5148, "CAD IMPORT - NX, JT, SOLID EDGE, SOLIDWORKS"),
+            (1, "CADE", "AAS·JT·IGES·FBX 4종", 4, 5148, "CAD EXPORT - AAS, JT, IGES, FBX"),
+            (1, "OLP", "Cell 로봇 제어기 2종", 2, 13728, "DM OLP - YASKAWA, KUKA"),
+            *[(1, k_, "", 1, u, lab) for k_, u, lab in DMW_COMMON], *OMNI, *PLUG,
+            (1, "XCL", "", 1, 149700, "Siemens X-cloud 1년 구독"),
+            L_LWC,
+            (2, "PLC", "Cell PLC 1종", 1, 25282.4, "DM PLC SIMULATION - SIEMENS"),
+            *_g(3, [L_GPU, L_OPC, L_NB]),
+            (3, "MON", "", 1, 126000, "디지털트윈 모니터링 시스템 - 55인치 비디오월 ×4 · 영상 제어기 · 운영 콘솔 · 설치·연동"),
+            lsv(389535.3), *[(4, k_, "", 1, u, lab) for k_, u, lab in L_LOCAL],
+            (4, "SCN", "", 1, 209000, "소형 제품 스캐너(자동) - HyperScan (HW 및 운영 SW포함)"),
+            L_TS, amc(57207.744),
         ],
-        "scan": ("소형 제품 자동 3D 스캐너 (HW·운영 SW 포함)", "가공 소재·제품 자동 스캔, 점군을 가상 작업장·검사모델에 반영. 측정 범위·정확도·자동화 구성은 견적서에 없음 — 규격서 기재 필요",
-                 209000, "소형 제품 스캐너(자동) - HyperScan (HW 및 운영 SW포함)", "자동 스캔 스테이션"),
-        "ts": [("5-1", "Cell 구성 설비별 DT 연동 기능 개발", 22000), ("5-2", "DB 연동 시각화 UI 개발", 44000), ("5-3", "기능 확장(플러그인) 개발", 11000)],
+        "scan": ("소형 제품 자동 3D 스캐너 (HW·운영 SW 포함)", "측정거리 최대 5.5m · 초당 400만 점 이상 · 시야각 360°×300° · 측정 정확도 0.02~0.03mm · 체적 정확도 0.05~0.06mm(3.2m 기준) · "
+                 "출력 STL·PLY·OBJ·TXT·XYZ·ASC · 스캐너 본체·운영 SW. 자동 스캔 스테이션 구성(턴테이블·로봇 등)은 견적서에 없음", "자동 스캔 스테이션"),
         "site": "전북대 창조2관 3층", "plan": ("5개 Cell · 24종", "2,320백만원", "하우징·블록·커버류, 샤프트·회전체 가공품",
                                                 "소재 공급–CNC 머신텐딩–가공품 취출"),
         "cells": [
@@ -157,33 +214,30 @@ ZONES = [
     },
     {
         "slug": "qms", "id": "A-4-5", "name": "AI 정밀검사(QMS) 통합 OCS 시뮬레이션 Cell", "short": "AI정밀검사",
-        "zone": "AI정밀검사존 (A-4)", "no": "견26CAMTIC-DMWorks-1015-3", "title": "캠틱종합기술원 AI 정밀 검사 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
-        "total": 2610000, "ga": 172301.082, "cmp": 3059000, "lhw": 627000,
-        "sw": [
-            ("1-1", "BASE", "", 1, 81338.4, "DMWorks Base"),
-            ("1-2", "MON", "", 1, 35200, "DM-Monitoring"),
-            ("1-3", "CADI", "STEP·OBJ·AAS·Parasolid 4종", 4, 5148, "CAD IMPORT - STEP, OBJ, AAS, PARASOLID"),
-            ("1-4", "CADE", "AAS·STEP·Parasolid 3종", 3, 5148, "CAD EXPORT - AAS, STP, PARASOLID"),
-            ("1-5", "OLP", "Cell 로봇 제어기 2종", 2, 13728, "DM OLP - FANUC, ABB"),
-            ("1-6", "RRS", "Cell 로봇 제어기 1종", 1, 11440, "DM RRS - FANUC"),
-            ("1-7", "PC", "", 1, 21736, "DM POINT CLOUD"),
-            ("1-8", "MP", "", 1, 26312, "DM MULTIPLE PROCESS"),
-            ("1-9", "PLC", "Cell PLC 1종", 1, 25282.4, "DM PLC SIMULATION - ROCKWELL"),
-            ("1-10", "PID", "", 1, 24024, "DM PLUG-IN For Developer"),
-            ("1-11", "PIU", "", 1, 8008, "DM PLUG-IN For User"),
-            ("1-12", "USD", "", 1, 15840, "Omniverse USD Converter"),
-            ("1-13", "LE", "", 1, 11440, "Omniverse Live Edit"),
-            ("1-14", "ACSB", "", 1, 28600, "ACS BASE"),
-            ("1-15", "ACSO", "Cell 로봇 제어기 2종", 2, 18920, "ACS OLP - FANUC, ABB"),
-            ("1-16", "PIA", "", 1, 35200, "PIA"),
-            ("1-17", "TES", "", 1, 66000, "TESCar"),
-            ("1-18", "AIMSS", "Cell 로봇 제어기 2종", 2, 52800, "AIMS - SIMULATOR (FANUC, ABB)"),
-            ("1-19", "AIMSC", "Cell 로봇 제어기 2종", 2, 39600, "AIMS - CONTROLLER (FANUC, ABB)"),
-            ("1-20", "AMC", "4년", 4, 121779.504, "AMC(Annual Maintenance Charge)"),
+        "zone": "AI정밀검사존 (A-4)", "no": "견26CAMTIC-DMWorks-1023-3", "qno": "견26CAMTIC-DMWorks-1015-3", "title": "캠틱종합기술원 AI 정밀 검사 ZONE 디지털 트윈 시뮬레이션 시스템 구축 견적서",
+        "total": 2600000, "ga": 120540.28, "cmp": 3059000, "groups": GROUP_Q,
+        "lines": [
+            (1, "ACSB", "", 1, 28600, "Auto Control System - BASE"),
+            (1, "ACSO", "Cell 로봇 제어기 2종", 2, 18920, "Auto Control System Offline Programming - FANUC, ABB"),
+            (1, "AIMSS", "Cell 로봇 제어기 2종", 2, 52800, "AIMS-SIMULATOR (FANUC, ABB)"),
+            (1, "AIMSC", "Cell 로봇 제어기 2종", 2, 39600, "AIMS-CONTROLLER (FANUC, ABB)"),
+            (1, "PIA", "", 1, 35200, "PIA – Predictive Inspection & Analysis"),
+            (2, "BASE", "", 1, 81338.4, "DMWorks Base"),
+            (2, "CADI", "STEP·OBJ·AAS·Parasolid 4종", 4, 5148, "CAD IMPORT - STEP, OBJ, AAS, PARASOLID"),
+            (2, "CADE", "AAS·STEP·Parasolid 3종", 3, 5148, "CAD EXPORT - AAS, STP, PARASOLID"),
+            (2, "OLP", "Cell 로봇 제어기 2종", 2, 13728, "DM OLP - FANUC, ABB"),
+            (2, "RRS", "Cell 로봇 제어기 1종", 1, 11440, "DM RRS - FANUC"),
+            *[(2, k_, "", 1, u, lab) for k_, u, lab in DMW_COMMON], *_g(2, OMNI),
+            (2, "PLC", "Cell PLC 1종", 1, 25282.4, "DM PLC SIMULATION - ROCKWELL"),
+            *_g(2, PLUG), *_g(2, [L_OPC, L_NB, L_LWC]),
+            (3, "DMON", "", 1, 35200, "DM-Monitoring"),
+            (3, "MON", "", 1, 159500, "디지털트윈 모니터링 시스템 - 55인치 비디오월 ×4 · 영상 제어기 · 운영 콘솔(워크스테이션은 운영 PC 공용) · 설치·연동"),
+            (3, "GPU",) + L_GPU[2:],
+            (4, "TES", "", 1, 66000, "TESCar"),
+            lsv(340000), *[(4, k_, "", 1, u, lab) for k_, u, lab in L_LOCAL],
+            L_TS, amc(127179.504),
         ],
         "scan": None,
-        "ts": [("5-1", "Cell 구성 설비별 DT 연동 기능 개발", 22000), ("5-2", "DB 연동 시각화 UI 개발", 44000), ("5-3", "기능 확장(플러그인) 개발", 11000),
-               ("5-4", "리워크 자동생성 시스템 연동 개발", 22000)],
         "site": "전북대 산학융합플라자 3층", "plan": ("5개 Cell · 24종", "2,600백만원",
                                                       "3개 Zone 제조 결과물 — 차체 판넬·도어 모듈, 하우징·샤프트 가공품, E-Axle 조립품",
                                                       "검사–판정–재측정–리워크 (Cell 1~4 작업지시·검사상태·품질이력 통합관리)"),
@@ -196,73 +250,89 @@ ZONES = [
         "deck": "1-3. 발표자료_이형수 31~46쪽",
     },
 ]
-TS_LABEL = {"Cell 구성 설비별 DT 연동 기능 개발": "CELL 구성 설비별 디지털 트윈 연동 기능 Customizing", "DB 연동 시각화 UI 개발": "DB 연동 시각화 UI Customizing",
-            "기능 확장(플러그인) 개발": "DM PLUG-IN 기능 Customizing", "리워크 자동생성 시스템 연동 개발": "ACS 시스템 Customizing"}
-NODE_NAME = {"OPC": "DT·시뮬레이션 운영 PC", "MON": "DT 모니터링 시스템", "DPS": "데이터 처리 서버", "GPU": "DT·AI 연산 서버", "FW": "방화벽 (OT/IT 경계)"}
+NODE_NAME = {"OPC": "DT·시뮬레이션 운영 PC", "MON": "DT 모니터링 시스템", "DPS": "로컬 서버 노드", "GPU": "DT·AI 연산 서버", "FW": "방화벽 (OT/IT 경계)"}
+ANCH = ("SCN", "GPU", "OPC", "NB", "MON", "LSV", "DPS", "LGPU", "NAS", "BAK", "EGW", "VNODE", "NET", "RACK")
 
 
-def hw_rows(z):
-    """(번호, 구분, 기호, 구성품, 사양, 수량, 단가, 견적서 기재 품목, 노드, 점검)"""
-    r = []
-    n = 1
-    if z["scan"]:
-        nm, sp, up, lab, _ = z["scan"]
-        r.append((f"2-{n}", "OCS HW", "SCN", nm, sp, 1, up, lab, "SCN", "spec")); n += 1
-    r += [(f"2-{n}", "OCS HW", "GPU", "DT·AI 연산 서버 (방화벽 포함)", SRV_SPEC, 1, 385000, "서버 - ESC8000A-E13P · EPYC 9755×2 · RTX PRO 6000 ×4 · 방화벽 NGF 1300", "GPU", "ok"),
-          (f"2-{n + 1}", "OCS HW", "OPC", "DT·시뮬레이션 운영 PC", "견적서에 사양 없음 — CPU·RAM·GPU·모니터 사양 기재 필요", 1, 13200, "디지털 트윈 및 시뮬레이션 운영 PC", "OPC", "spec"),
-          (f"2-{n + 2}", "OCS HW", "NB", "시뮬레이션 운영 노트북", "견적서에 사양 없음 — 현장 시운전·스캔 작업용 사양 기재 필요", 1, 7150, "시뮬레이션 운영 노트북", "NB", "spec"),
-          (f"2-{n + 3}", "OCS HW", "MON", "DT 모니터링 시스템 (구성품·설치·연동 셋업)", "견적서에 구성품 없음 — 표시장치·제어 PC 등 구성품과 금액 구분 필요", 1, 55000, "모니터링 구성품 구매, 설치 시스템 연동 셋업", "MON", "lump")]
-    return r
+def gtitle(z, n):
+    return f"항목{n}. {z['groups'][n]}"
+
+
+def amc_base(z):
+    """AMC 계상 기준 — 견적서 산식 그대로: 외산 구독 제외 SW 합계, 적응가공만 형상 변환 SW도 제외"""
+    return sum(q * u for n, key, _, q, u, _ in z["lines"] if key in GEN and key not in SUBSCR + ("AMC",) and not (z["slug"] == "adaptive" and key == "LWC"))
+
+
+def amc_text(z):
+    a = next(l for l in z["lines"] if l[1] == "AMC")
+    return f"연 {a[4] / amc_base(z) * 100:.0f}% × {a[3]}년"
+
+
+def qlines(z):
+    """견적서 품목 행 (항목 제목, 번호, key, 상세, 수량, 단가, 견적서 품목) — 번호는 항목별 순번"""
+    cnt, out_ = {}, []
+    for n, key, det, q, u, lab in z["lines"]:
+        cnt[n] = cnt.get(n, 0) + 1
+        out_.append((gtitle(z, n), f"{n}-{cnt[n]}", key, det, q, u, lab))
+    return out_
 
 
 def zone_rows(z):
     """견적서 항목 순서 그대로 모든 행 (그룹, 번호, 기호, 구성품, 사양, 수량, 단위, 단가, 금액, 견적서 품목, 노드, 점검, sub)"""
     rows = []
-    for no, key, det, q, u, lab in z["sw"]:
-        nm, sp, node = GEN[key]
-        sp2 = f"{det} — {sp}" if det and key != "AMC" else sp
-        chk = "maker" if key in ("OLP", "RRS", "PLC", "ACSO", "AIMSS", "AIMSC") else ("amc" if key == "AMC" else "ok")
-        rows.append(("항목1. OCS SW", no, key, nm, sp2, q, "년" if key == "AMC" else ("카피" if q == 1 else "모듈"), u, q * u, lab, node, chk, False))
-    for no, g, sym, nm, sp, q, u, lab, node, chk in hw_rows(z):
-        rows.append(("항목2. OCS HW", no, sym, nm, sp, q, "식" if sym == "MON" else "대", u, q * u, lab, node, chk, False))
-    rows.append(("항목3. 로컬 HW", "3-1", "LHW", "로컬 데이터·네트워크 기반 (1식)", "아래 7개 구성품을 1식 금액으로만 제시 — 견적서 '상세 사양 별도 협의 필요'", 1, "식", z["lhw"], z["lhw"],
-                 "데이터 처리 서버 - HP3 ProLiant DL380 GEN12 x 5 등 · NAS(Dell PowerStore 1200T) · 백업 스토리지 · Edge Gateway · 영상 수집 노드 · 네트워크 · 서버실", None, "lump", False))
-    for i, (sym, nm, sp, qs) in enumerate(LOCAL_SUB):
-        rows.append(("항목3. 로컬 HW", f"3-1-{'abcdefg'[i]}", sym, nm, sp, qs, "", None, None, "", sym, "split", True))
-        if sym == "NET":
-            for j, (nm2, sp2, q2, u2) in enumerate(net_sub(len(z["cells"]), len(remote_cells(z))), 1):
-                rows.append(("항목3. 로컬 HW", f"3-1-f-{j}", sym, nm2, sp2, q2, u2, None, None, "", sym, "prop", 2))
-    rows.append(("항목4. 로컬 OCS·보안", "4-1", "TSDB", "운영 시계열 DB (클러스터·계층형)", "Cell 상태·이벤트·공정값 시계열 저장·조회, 계층형 클러스터 구성", 1, "식", 49500, 49500,
-                 "Operational TSDB - Machbase Cluster Edition (계층)", "DPS", "ok", False))
-    rows.append(("항목4. 로컬 OCS·보안", "4-2", "SEC", "통합 인증·접근통제 (IAM/PKI · 서버 접근제어)", "사용자·장비 인증(SSO·PKI 인증서), 서버·DB 접근통제·감사로그", 1, "식", 38500, 38500,
-                 "보안 스택(IAM/PKI) - Keyloak+HIWARE", "DPS", "ok", False))
-    for no, nm, u in z["ts"]:
-        rows.append(("항목5. 기술지원", no, "TS", nm, "공급사 맞춤 개발(Customizing) — 산출물·범위 명시 필요", 1, "식", u, u, TS_LABEL[nm], None, "scope", False))
+    for gt, no, key, det, q, u, lab in qlines(z):
+        if key in GEN:
+            nm, sp, node = GEN[key]
+            if key == "AMC":
+                sp = sp.replace("연 18% × 4년", amc_text(z)) + (" — 형상 변환 SW는 계상 기준에서 뺌(다른 두 존은 포함)" if z["slug"] == "adaptive" else "")
+            elif det:
+                sp = f"{det} — {sp}"
+            chk = ("maker" if key in ("OLP", "RRS", "PLC", "ACSO", "AIMSS", "AIMSC") else "amc" if key == "AMC" else
+                   "sub" if key in SUBSCR else "prod" if key == "LWC" else "ok")
+            unit = "년" if key == "AMC" else ("년 구독" if key in SUBSCR else ("카피" if q == 1 else "모듈"))
+            rows.append((gt, no, key, nm, sp, q, unit, u, q * u, lab, node, chk, False))
+            continue
+        if key == "SCN":
+            nm, sp, _ = z["scan"]
+            unit, node, chk = "대", "SCN", "ok"
+        else:
+            nm, sp, unit, node, chk = HW[key]
+        rows.append((gt, no, key, nm, sp, q, unit, u, q * u, lab, node, chk, False))
+        for i, (sym, nm2, sp2, q2, chk2) in enumerate(subs(key, z)):
+            rows.append((gt, f"{no}-{'abcdefgh'[i]}", sym, nm2, sp2, q2, "", None, None, "", sym if sym in ANCH else node, chk2, True))
     return rows
 
 
-# 견적서 '항목' 열 분류 (10/15 견적서 엑셀 기준)
-SW_CAT = {"AMC": "유지보수", "ACSB": "ACS", "ACSO": "ACS", "PIA": "PIA", "TES": "TESCar", "AIMSS": "AIMS", "AIMSC": "AIMS"}
-HW_CAT = {"GPU": "디지털 트윈·AI 연산 서버", "OPC": "시뮬레이션 연산 시스템", "NB": "시뮬레이션 연산 시스템", "MON": "디지털 트윈 모니터링 시스템"}
+# 견적서 품목 분류 — 항목 안에서 같은 분류를 묶어 소계를 냄
+CAT = {"AMC": "유지보수(AMC)", "ACSB": "ACS", "ACSO": "ACS", "PIA": "PIA", "TES": "TESCar", "AIMSS": "AIMS", "AIMSC": "AIMS",
+       "DEL": "외산 공정 시뮬레이션 SW (1년 구독)", "XCL": "외산 공정 시뮬레이션 SW (1년 구독)", "LWC": "3D 형상 경량화·변환 SW",
+       "GPU": "DT·AI 연산 서버", "OPC": "운영 PC·노트북", "NB": "운영 PC·노트북", "MON": "DT 모니터링 시스템", "LSV": "Local Server",
+       "EGW": "Edge Gateway", "NET": "네트워크·시간동기", "RACK": "기반시설", "SEC": "보안 SW", "SCN": "스캐너", "TS": "교육·기술지원"}
 
 
-def quote_cat(z, g, sym, no):
-    if g.startswith("항목1"):
-        return SW_CAT.get(sym, "DMWorks")
-    if g.startswith("항목2"):
-        return ("공장 스캐너" if z["slug"] == "fms" else "제품 스캐너") if sym == "SCN" else HW_CAT[sym]
-    if g.startswith("항목3"):
-        return "데이터 서버"
-    if g.startswith("항목4"):
-        return "로컬 제어 부스 하드웨어" if no == "4-1" else "보안"
-    return "기술 지원"
+def quote_cat(z, sym):
+    if sym == "SCN":
+        return "공장 스캐너" if z["slug"] == "fms" else "제품 스캐너"
+    return CAT.get(sym, "DMWorks")
+
+
+def row_cat(z, rows, i):
+    """하위 구성품은 부모 행 분류를 따름"""
+    while rows[i][12]:
+        i -= 1
+    return quote_cat(z, rows[i][2])
 
 
 CHK = {"ok": ("적합", "ok"), "spec": ("사양 보완", "chk"), "lump": ("금액 미구분", "adj"), "split": ("금액 미구분", "adj"),
-       "maker": ("기종 확인", "chk"), "amc": ("기간 확인", "chk"), "scope": ("범위 명시", "chk"), "prop": ("세분 제안", "chk")}
-CHK_NOTE = {"spec": "규격서에 성능·사양 수치 기재", "lump": "구성품별 금액으로 나눈 견적 필요(총액만이면 불인정)", "split": "구성품별 금액 없음",
-            "maker": "Cell 실발주 기종과 일치 확인. 제출 서류엔 제조사명 대신 '제어기 n종'", "amc": "견적서 참고사항 '5년 AMC' vs 계산 ×4",
-            "scope": "개발 범위·산출물·투입 M/M 명시", "prop": "구성도 기준 제안 수량 — 견적사 금액·수량 기재 요청"}
+       "maker": ("기종 확인", "chk"), "amc": ("기준 확인", "chk"), "scope": ("범위 명시", "chk"), "prop": ("세분 제안", "chk"),
+       "sub": ("구독 확인", "chk"), "prod": ("제품 확인", "chk"), "free": ("무상 범위", "chk")}
+CHK_NOTE = {"spec": "규격서에 성능·사양 수치 기재", "lump": "구성품별 금액으로 나눈 견적 필요(총액만이면 불인정)", "split": "구성품별 사양·금액 없음",
+            "maker": "Cell 실발주 기종과 일치 확인. 제출 서류엔 제조사명 대신 '제어기 n종'", "amc": "계상 SW 범위(외산 구독·형상 변환 SW 포함 여부) 3존 통일 확인",
+            "scope": "개발 범위·산출물·투입 M/M 명시", "prop": "구성도 기준 제안 사양·수량 — 견적사 사양·수량·금액 기재 요청",
+            "sub": "1년 구독 — 장비비 계상 가능 여부·과제 후 갱신 비용 확인", "prod": "제품명·기능 범위 미기재 — CAD 입출력·OpenUSD 변환 모듈과 중복 여부 확인",
+            "free": "10/15의 맞춤 개발(DT 연동·DB 시각화 UI·플러그인·ACS) 포함 여부 서면 확인"}
+# 공개본(PUBLIC=1)에서 금액을 가리는 견적서 항목 — DMWorks 등 SW 품목이 들어 있는 항목
+SWG = {gtitle(z, l[0]) for z in ZONES for l in z["lines"] if l[1] in GEN}
 
 
 # ------------------------------------------------------------------ 연결 토폴로지
@@ -325,17 +395,17 @@ def topo_svg(z):
     dev(40, 368, 180, 26, "KVM 콘솔", "", "dv3", 11, "RACK")
     o.append('<text x="130" y="414" class="lkt" text-anchor="middle">패치패널 ×2 · 코어 L3 이중화(가정)</text>')
     # R2 데이터
-    rack(242, 220, "R2", "R2 · 데이터 (항목3·4)")
-    for i in range(5):
-        dev(252 + (i % 3) * 70, 168 + (i // 3) * 46, 64, 40, f"DPS-{i + 1}", "데이터 처리", "dv", 11, "DPS")
-    o.append('<text x="352" y="276" class="dvs" font-size="9.5">탑재: 시계열 DB(4-1)·인증(4-2)</text>'
-             '<text x="352" y="289" class="dvs" font-size="9.5">SW 라이선스 서버</text>')
-    dev(252, 300, 200, 40, "통합 스토리지", "올플래시 60TB raw", "dv", 12, "NAS")
-    dev(252, 350, 200, 34, "백업 스토리지", "", "dv3", 11.5, "BAK")
+    rack(242, 220, "R2", "R2 · 로컬 서버 (항목4)")
+    dev(252, 168, 200, 40, "로컬 서버 노드", "수량·사양 미기재", "dv", 12, "DPS")
+    dev(252, 216, 200, 40, "로컬 GPU 서버", "사양 미기재", "dv", 12, "LGPU")
+    o.append('<text x="352" y="276" class="dvs" font-size="9.5">탑재: 운영 시계열 DB·인증·접근통제</text>'
+             '<text x="352" y="289" class="dvs" font-size="9.5">SW 라이선스 서버 (추정)</text>')
+    dev(252, 300, 200, 40, "Scale-out 스토리지 노드", "용량 미기재", "dv", 12, "NAS")
+    dev(252, 350, 200, 34, "백업 NAS", "", "dv3", 11.5, "BAK")
     # R3 DT·AI 연산
     rack(474, 170, "R3", "R3 · DT·AI 연산")
     dev(484, 168, 150, 40, "방화벽 (DT 연산 구간)", "서버와 일괄 공급", "dv2", 11, "GPU")
-    dev(484, 222, 150, 84, "DT·AI 연산 서버", "GPU 96GB ×4 (항목2)", "dv", 12.5, "GPU")
+    dev(484, 222, 150, 84, "DT·AI 연산 서버", "GPU 96GB ×4 (항목3)", "dv", 12.5, "GPU")
     link([(559, 208), (559, 222)], "l25")
     o.append('<text x="559" y="322" class="dvs" font-size="9.5">학습 DT·합성데이터·추론 검증</text>')
     dev(484, 334, 150, 28, "증설 여유 4U", "", "dvx", 10.5)
@@ -352,17 +422,16 @@ def topo_svg(z):
     dev(946, 142, 140, 58, "운영 노트북", "운영 데스크 2 · 시운전·스캔", "dv", 12, "NB")
     dev(776, 212, 310, 58, "DT 모니터링 시스템", "운영실 벽면 표시장치 · 모니터링 모듈 표시", "dv", 12.5, "MON")
     # 스캐너 유무 두 가지를 모두 그리고 하나만 보임 — 업로드 견적에 따라 quote_live.js가 바꿈
-    nm, where = (z["scan"][0], z["scan"][4]) if z["scan"] else ("3D 스캐너 (HW·운영 SW 포함)", "견적 추가 품목")
+    nm, where = (z["scan"][0], z["scan"][2]) if z["scan"] else ("3D 스캐너 (HW·운영 SW 포함)", "견적 추가 품목")
     o.append('<g id="ql-scan"' + ("" if z["scan"] else ' display="none"') + ">")
     dev(776, 282, 310, 52, nm.split(" (")[0], where + " · 스캔 데이터 → 운영 PC·통합 스토리지", "dv", 12, "SCN")
     link([(1016, 334), (1016, 346)], "l1")
     o.append('</g><g id="ql-noscan"' + (' display="none"' if z["scan"] else "") + ">")
-    dev(776, 282, 310, 52, "측정·검사 장비는 각 Cell 소속", "측정 시스템 통합 제어 모듈(1-19)이 Cell 측정기를 제어", "dvx", 11.5)
+    dev(776, 282, 310, 52, "측정·검사 장비는 각 Cell 소속", f"측정 시스템 통합 제어 모듈({next((l[1] for l in qlines(z) if l[2] == 'AIMSC'), '–')})이 Cell 측정기를 제어", "dvx", 11.5)
     o.append("</g>")
-    nsw = len([s for s in z["sw"] if GEN[s[1]][2] == "OPC"])
+    names = [GEN[l[1]][0].split(" (")[0] for l in z["lines"] if l[1] in GEN and GEN[l[1]][2] == "OPC"]
     o.append(f'<a href="#it-OPC" class="nlink"><g data-node="OPC" id="ql-opc"><rect x="776" y="346" width="310" height="132" rx="4" class="dv3"/>'
-             f'<text x="931" y="368" class="dvt" font-size="12">운영 PC 탑재 SW {nsw}종 (항목1)</text>')
-    names = [GEN[s[1]][0].split(" (")[0] for s in z["sw"] if GEN[s[1]][2] == "OPC"]
+             f'<text x="931" y="368" class="dvt" font-size="12">운영 PC 탑재 SW {len(names)}종 (항목1·2)</text>')
     lines, cur = [], ""
     for nme in names:
         nxt = (cur + " · " if cur else "") + nme
@@ -379,8 +448,8 @@ def topo_svg(z):
     # 케이블 트레이
     ty = 530
     far = remote_cells(z)
-    tray_t = ("Zone 케이블 트레이 — 코어 ↔ Cell 캐비닛 이중 광 업링크 · 타 층 Cell은 층간 수직 광(라이저) 경유 · PTP (항목3)" if far
-              else "Zone 케이블 트레이 — 코어 ↔ Cell 캐비닛 이중 광 업링크 · PTP 시간동기 (네트워크·배선, 항목3)")
+    tray_t = ("Zone 케이블 트레이 — 코어 ↔ Cell 캐비닛 이중 광 업링크 · 타 층 Cell은 층간 수직 광(라이저) 경유 · PTP (항목4)" if far
+              else "Zone 케이블 트레이 — 코어 ↔ Cell 캐비닛 이중 광 업링크 · PTP 시간동기 (네트워크·배선, 항목4)")
     o.append(f'<a href="#it-NET" class="nlink"><g data-node="NET"><rect x="20" y="{ty}" width="1080" height="16" rx="3" class="tray"/>'
              f'<text x="560" y="{ty + 12}" class="tray-t" text-anchor="middle">{E(tray_t)}</text></g></a>')
     link([(290, 486), (290, ty)], "l25a")
@@ -439,22 +508,23 @@ def item_table(z):
             gsum[r[0]] = gsum.get(r[0], 0) + r[8]
     sw_by_node = {}
     for r in rows:
-        if r[0].startswith("항목1") and r[10]:
+        if r[2] in GEN and r[10] and not r[12]:
             sw_by_node.setdefault(r[10], []).append(r[1])
     for r in rows:
-        if r[0].startswith("항목4"):
+        if r[2] in ("SEC", "TSDB"):
             sw_by_node.setdefault("DPS", []).append(r[1])
+    cats = [row_cat(z, rows, i) for i in range(len(rows))]
     csum, ccnt = {}, {}
-    for r in rows:
-        c = (r[0], quote_cat(z, r[0], r[2], r[1]))
+    for r, ct in zip(rows, cats):
+        c = (r[0], ct)
         csum[c] = csum.get(c, 0) + (r[8] or 0)
         ccnt[c] = ccnt.get(c, 0) + (0 if r[12] else 1)
     body, cur, ccur, seen, cn = [], None, None, set(), 0
-    for g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sub in rows:
+    for (g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sub), ct in zip(rows, cats):
         if g != cur:
             cur = g
             body.append(f'<tr class="grp"><th colspan="6" scope="rowgroup">{E(g)}</th><td class="num">{gk(g)(gsum[g])}</td><td colspan="2"></td></tr>')
-        c = (g, quote_cat(z, g, sym, no))
+        c = (g, ct)
         if c != ccur:
             ccur = c
             cn += 1
@@ -463,7 +533,7 @@ def item_table(z):
                         f'<td class="num">{gk(g)(csum[c])}</td><td colspan="2"></td></tr>')
         cin = f' data-in="c{cn}"'
         rid = ""
-        anchor = sym if sym in ("SCN", "GPU", "OPC", "NB", "MON", "DPS", "NAS", "BAK", "EGW", "VNODE", "NET", "RACK") else None
+        anchor = sym if sym in ANCH else None
         if anchor and anchor not in seen:
             rid = f' id="it-{anchor}"'
             seen.add(anchor)
@@ -484,8 +554,9 @@ def item_table(z):
                     f'<td class="num">{gk(g)(u) if u is not None else "–"}</td><td class="num">{gk(g)(amt) if amt is not None else "미구분"}</td>'
                     f'<td>{tag(chk)}<span class="where">{E(CHK_NOTE.get(chk, ""))}</span></td><td class="note">{E(lab)}</td></tr>')
     pre = sum(r[8] for r in rows if r[8] is not None)
-    base = sum(r[8] for r in rows if r[8] is not None and (r[0].startswith("항목1") or r[0].startswith("항목2") or r[0].startswith("항목5")))
-    foot = (f'<tr class="tot"><th colspan="6">항목6. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목5){pick(f" {k(base)}", "")}의 10%, 견적서 기재값</th><td class="num">{km(z["ga"])}</td><td colspan="2"></td></tr>'
+    base = sum(r[8] for r in rows if r[8] is not None and r[0][:4] in ("항목1.", "항목2.", "항목3."))
+    cut = " (산식에서 1천원 차감)" if abs(base * 0.1 - z["ga"]) > 0.5 else ""
+    foot = (f'<tr class="tot"><th colspan="6">항목7. 일반관리비·기업이윤 — (항목1 + 항목2 + 항목3){pick(f" {k(base)}", "")}의 10%, 견적서 기재값{cut}</th><td class="num">{km(z["ga"])}</td><td colspan="2"></td></tr>'
             f'<tr class="tot"><th colspan="6">합계 (단위절삭 전)</th><td class="num">{km(pre + z["ga"])}</td><td colspan="2"></td></tr>'
             f'<tr class="tot strong"><th colspan="6">견적 합계 (단위절삭 후)</th><td class="num">{km(z["total"])}</td><td colspan="2">{E(z["no"])}</td></tr>')
     return ('<div class="catbar"><button type="button" data-all="open">모두 펼치기</button><button type="button" data-all="close">모두 접기</button>'
@@ -506,20 +577,21 @@ def group_sums(z):
 
 def summary_table(z):
     gs = group_sums(z)
-    sw = gs["항목1. OCS SW"]
-    amc = [s for s in z["sw"] if s[1] == "AMC"][0]
+    amc = next(l for l in z["lines"] if l[1] == "AMC")
     rows = [
         ("장비명", f'{z["name"]} — 사업계획서·심의요청서 장비명과 같게 씀. 견적서 건명은 「{z["title"]}」로 달라 수정 요청 필요'),
-        ("견적", f'{z["no"]} (2026.10.15) · 합계 {won(z["total"])} · 비교견적 {k(z["cmp"])}천원(발표자료 별첨 3)'),
-        ("구성 (견적서 6개 항목)", " · ".join(f"{g.split('. ')[1]} {gk(g)(v)}" for g, v in gs.items()) + f' · 일반관리비·이윤 {won(z["ga"])}'),
-        ("SW 라이선스", f'네트워크 라이선스(Network-Lock), 모듈별 1카피(포맷·제어기·PLC 단위 모듈은 수량만큼). 유지보수 연 18% × 4년{pick(f" {k(amc[3] * amc[4])}천원", "")}이 항목1에 포함'),
+        ("견적", f'{z["no"]} (2026.10.23 · 엑셀 · VAT 포함) · 합계 {won(z["total"])}' + pick(f' — 연구개발계획서 1차년도 계획액 {z["plan"][1]}과 같음', '')
+                 + f' · 비교견적 {k(z["cmp"])}천원(10/15 기준, 발표자료 별첨 3)'),
+        ("구성 (견적서 7개 항목)", " · ".join(f"{g.split('. ')[1]} {gk(g)(v)}" for g, v in gs.items()) + f' · 일반관리비·이윤 {won(z["ga"])}'),
+        ("SW 라이선스", f'네트워크 라이선스(Network-Lock), 모듈별 1카피(포맷·제어기·PLC 단위 모듈은 수량만큼). 유지보수 {amc_text(z)}(최초 1년 무상 → 5년){pick(f" {k(amc[3] * amc[4])}천원", "")}은 항목6에 별도 계상'
+                        + (". 외산 공정 시뮬레이션 SW는 1년 구독(AMC 제외)" if any(l[1] in SUBSCR for l in z["lines"]) else "")),
         ("설치 장소", f"(임시) {z['site']} → (최종) 연구클러스터 메타팩토리 공장동. 이전 시 랙 단위 이설·재연결 (연구개발계획서 · 10/16 발표자료)"),
         ("대상 품목·공정", f"{z['plan'][2]} / {z['plan'][3]} (연구개발계획서 1차년도 {z['plan'][1]})"),
         ("Zone Cell 구성", f"{z['zone'].split(' (')[0]} {z['plan'][0]} = 이 OCS Cell({z['id']}, '26 · 4종) + "
                            + " · ".join(f"{c[0]} {c[1]}('{c[2][1:]} · {c[3]})" for c in z["cells"])
                            + " — 각 Cell 장비의 제어기·PLC를 Edge Gateway에 OPC UA·AAS로 연결. 장비 단위 엣지는 구매 제외"),
     ]
-    ids = {"견적": "ql-s-quote", "구성 (견적서 6개 항목)": "ql-s-comp", "SW 라이선스": "ql-s-lic"}
+    ids = {"견적": "ql-s-quote", "구성 (견적서 7개 항목)": "ql-s-comp", "SW 라이선스": "ql-s-lic"}
     body = "".join(f'<tr><th scope="row">{E(a)}</th><td{f" id={chr(34)}{ids[a]}{chr(34)}" if a in ids else ""}>{E(b)}</td></tr>' for a, b in rows)
     return f'<div class="tbl-wrap"><table class="bom sumtbl"><tbody>{body}</tbody></table></div>'
 
@@ -529,28 +601,28 @@ def roles_table(z):
              "Zone 운영실"),
             ("DT 모니터링 시스템", "MON", "모니터링 모듈로 Cell 운영 정보(생산량·진행률·사이클타임)와 가상모델 동작을 표시", "Zone 운영실"),
             ("DT·AI 연산 서버", "GPU", "학습 DT(OpenUSD 씬) 호스팅, 다중 시나리오 연산·합성데이터 생성·정책 추론 검증 (모델 학습은 외부 국가 GPU 인프라)", "서버실 R3"),
-            ("데이터 처리 서버 ×5", "DPS", "운영 시계열 DB 클러스터, 통합 인증·접근통제, SW 라이선스 서버, OCS 연계 서비스 (배치는 추정 — 공급사 협의)", "서버실 R2"),
-            ("통합·백업 스토리지", "NAS", "DT 모델·프로젝트·스캔 점군·Raw 운영 데이터 단기 보존, 백업", "서버실 R2"),
+            ("로컬 서버 (서버 노드·GPU 서버)", "DPS", "운영 시계열 DB 클러스터, 통합 인증·접근통제, SW 라이선스 서버, OCS 연계 서비스, 로컬 추론 (구성·수량은 견적서에 없음 — 공급사 협의)", "서버실 R2"),
+            ("Scale-out 스토리지 · 백업 NAS", "NAS", "DT 모델·프로젝트·스캔 점군·Raw 운영 데이터 단기 보존, 백업", "서버실 R2"),
             ("Edge Gateway · 영상 수집 노드", "EGW", "Cell 상태·이벤트 수집, 명령·레시피·프로그램 전달, Actual Trace 생성, 영상 버퍼·전처리", "각 Cell 캐비닛"),
-            ("네트워크 (코어·TSN·방화벽·PTP·AP·배선)", "NET", "Zone 백본, OT/IT 경계 보호, 가상·실측 데이터 시간동기, AMR·이동 로봇 무선", "서버실 R1 · 각 Cell 캐비닛 · 통로 트레이")]
+            ("네트워크 (코어·TSN·PoE·방화벽·PTP·AP·배선)", "NET", "Zone 백본, OT/IT 경계 보호, 가상·실측 데이터 시간동기, AMR·이동 로봇 무선", "서버실 R1 · 각 Cell 캐비닛 · 통로 트레이")]
     if z["scan"]:
-        rows.insert(2, (z["scan"][0].split(" (")[0], "SCN", "현장·제품 3D 스캔 → 점군 처리 모듈로 가상 작업장·검사모델 구성", "Zone 운영실 · " + z["scan"][4]))
+        rows.insert(2, (z["scan"][0].split(" (")[0], "SCN", "현장·제품 3D 스캔 → 점군 처리 모듈로 가상 작업장·검사모델 구성", "Zone 운영실 · " + z["scan"][2]))
     body = "".join(f'<tr{" id=" + chr(34) + "ql-role-SCN" + chr(34) if s == "SCN" else ""}><th scope="row"><a href="#topo-{s}" class="tolink sw">{E(a)}</a></th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, s, b, c in rows)
     return f'<div class="tbl-wrap"><table class="bom keytbl"><thead><tr><th>장비</th><th>용도</th><th>설치 위치</th></tr></thead><tbody>{body}</tbody></table></div>'
 
 
 def guide_table(z):
     rows_ = zone_rows(z)
-    n_spec = sum(1 for r in rows_ if r[11] == "spec") + sum(1 for r in rows_ if r[12] and "없음" in r[4])
+    n_spec = sum(1 for r in rows_ if r[11] == "spec") + sum(1 for r in rows_ if r[12] and ("없음" in r[4] or "미기재" in r[4] or not r[4]))
     lumps = [r for r in rows_ if r[11] == "lump"]
     lump_amt = sum(r[8] for r in lumps)
     G = [
         ("장비명 일치", "과제명·장비명은 사업계획서와 동일", f"페이지 제목·구성도에 「{z['name']}」 사용", f"견적서 건명 「{z['title']}」 → 장비명으로 수정 요청", "chk"),
         ("규격서·사양서", "판단 가능하게 사양·성능을 구체적으로 (전북대 자료 참고)", "구성품마다 일반 명칭 + 세부 사양 열로 정리",
-         f"사양이 없는 구성품 {n_spec}건(운영 PC·노트북·모니터링 구성품{', 스캐너 성능 수치' if z['scan'] else ''}·로컬 HW 하위 품목) — 공급사에 사양서 요청", "chk"),
-        ("견적서 유효", "6개월 이내 견적서 필수", "2026.10.15 견적 — 6개월 기준 충족", "견적서 자체 유효기간은 30일(~11.14) → 계약 시점 재견적", "ok"),
+         f"사양이 없는 구성품 {n_spec}건(로컬 서버·Edge Gateway·기반시설 하위 품목) — 공급사에 사양서 요청. 운영 PC·노트북·연산 서버{'·스캐너' if z['scan'] else ''}·모니터링 구성은 10/23 견적에 사양 기재됨", "chk"),
+        ("견적서 유효", "6개월 이내 견적서 필수", "2026.10.23 견적 — 6개월 기준 충족", "견적서 자체 유효기간은 30일(~11.22) → 계약 시점 재견적. 10/23 견적은 엑셀본만 받음 → 날인 PDF 원본 요청", "ok"),
         ("구성품별 금액", "세부 구성품명·구성품별 금액 구분 (총액만이면 불인정)", f"1식 금액 {len(lumps)}건 {k(lump_amt)}천원을 '금액 미구분'으로 표시",
-         "로컬 HW 1식(데이터 처리 서버·스토리지·백업·Edge Gateway·영상 노드·네트워크·서버실)과 모니터링 시스템 1식을 구성품별 금액으로 나눈 견적 요청", "adj"),
+         "모니터링 시스템·Local Server·Edge Gateway·네트워크·기반시설 1식 — 10/23 견적에 하위 구성품은 나열됐지만 사양·수량·금액이 없음 → 구성품별 금액 견적 요청", "adj"),
         ("복수 견적", "입찰 예정이면 업체별 견적서 2개 이상, 제조사가 다른 비교견적", f"비교견적 1건 확인({k(z['cmp'])}천원)", "'2개 이상' 기준이면 비교견적 1건 추가 확보", "chk"),
         ("A System = a社 + b社", "제조사별 사양 구분, 제조사별 견적서 첨부",
          "견적서 대조 열로 구성품별 제조사 구분 가능(SW 개발사·서버·스토리지·시계열 DB·보안·방화벽" + ("·스캐너" if z["scan"] else "") + ")",
@@ -564,11 +636,13 @@ def guide_table(z):
         ("3개 Cell 각각 도입 이유", "OCS 3개에 솔루션을 각각 넣는 이유", f"존별 대상 공정·로봇·PLC 기종·CAD 포맷이 다름 — {z['short']}은 " + {
             "fms": "용접·조립 로봇 OLP·PLC 2종·AMR 물류 중심", "adaptive": "가공기 머신텐딩·강화학습 연계(OpenUSD)·가공 CAD 4종 중심",
             "qms": "측정·리워크(자동 측정·리워크 자동생성·결과 분석) 중심"}[z["slug"]]),
-        ("커스터마이징·유지보수", "커스터마이징·기술지원·유지보수 견적 명확히", f"기술지원 {len(z['ts'])}건 {k(sum(t[2] for t in z['ts']))}천원, 유지보수 연 18% × 4년 항목1에 포함 — 범위·산출물 명시 필요"),
+        ("커스터마이징·유지보수", "커스터마이징·기술지원·유지보수 견적 명확히", f"교육·기술지원은 과제기간 내 무상(항목5) — 10/15 견적의 맞춤 개발(DT 연동·DB 시각화 UI·플러그인{'·ACS' if z['slug'] == 'qms' else ''})이 빠져 포함 여부·산출물 서면 확인 필요. 유지보수 {amc_text(z)}(최초 1년 무상)는 항목6"),
         ("이전 비용", "임시공간 → 메타팩토리 이동 시 비용·서버 운용 영향", "'29년 랙 단위 이설 계획. 이설 비용·중단 기간은 견적에 없음 → 운영계획에 추가"),
         ("자립화", "장비 운영 수익·인건비·유지비", "발표자료에 자립화(운영 수익·유지비) 장표 추가 필요"),
         ("공급사 규모", "작은 업체면 AS 질문", "공급사 매출·인력·AS 체계 자료 준비"),
     ]
+    if any(l[1] in SUBSCR for l in z["lines"]):
+        Q.append(("외산 SW 중복", "같은 기능 SW를 두 가지 사는 이유", "외산(1년 구독)은 수요기업 CAD·공정 데이터 호환·비교 검증용, 국산 공정 시뮬레이션 SW는 Cell 단위 PLC 핸드셰이크·AAS 출력·OpenUSD 연계용 영구 라이선스 — 구독 종료 후 운영은 국산 기준(10/12 결정)"))
     if z["slug"] in ("adaptive", "qms"):
         Q.append(("같은 솔루션 사용 이유", "적응가공·정밀검사에 같은 솔루션을 쓰는 이유", "공통 기본 모듈 위에 존별 모듈(가공: OpenUSD·가공 포맷 / 검사: 측정·리워크·분석)을 달리 구성 — 모델·데이터 재사용"))
     st = {"ok": ("충족", "ok"), "chk": ("보완", "chk"), "adj": ("필수 조치", "adj")}
@@ -591,10 +665,10 @@ def space_items(z):
     """(기호, 이름, 설명, kind, x, y, w, d, h, z0, 링크)"""
     it = [
         ("R1", "랙 1 · 네트워크·보안", "방화벽 · 코어 ×2 · PTP · KVM", "rack", 400, 800, 600, 1200, 2000, 0, "NET"),
-        ("R2", "랙 2 · 데이터", "데이터 처리 서버 ×5 · 스토리지 · 백업", "rack", 1000, 800, 600, 1200, 2000, 0, "DPS"),
+        ("R2", "랙 2 · 로컬 서버", "서버 노드 · GPU 서버 · 스토리지 · 백업 NAS", "rack", 1000, 800, 600, 1200, 2000, 0, "DPS"),
         ("R3", "랙 3 · DT·AI 연산", "GPU 서버 4U · 방화벽(DT 구간)", "gpu", 1600, 800, 600, 1200, 2000, 0, "GPU"),
         ("UPS", "UPS · 배터리", "랙 이중 PDU 급전", "ups", 2400, 800, 800, 900, 1900, 0, "RACK"),
-        ("AC", "항온항습기 (견적 외)", "열부하 약 10kW", "ext", 500, 4500, 1000, 600, 1900, 0, None),
+        ("AC", "항온항습기 (기반시설)", "열부하 약 10kW · 용량 미기재", "ups", 500, 4500, 1000, 600, 1900, 0, "RACK"),
         ("VW", "DT 모니터링 시스템", "표시장치(구성 가정)", "screen", 4700, 0, 2800, 120, 1400, 800, "MON"),
         ("D1", "운영 데스크 1", "DT·시뮬레이션 운영 PC", "desk", 4600, 2000, 1300, 800, 750, 0, "OPC"),
         ("D2", "운영 데스크 2", "운영 노트북 · 스캔 처리", "desk", 6200, 2000, 1300, 800, 750, 0, "NB"),
@@ -771,8 +845,8 @@ def space_3d(z):
 RACKS = [
     ("R1 · 네트워크·보안", "NET", [(42, 2, "패치패널 ×2", "net"), (40, 1, "방화벽 (OT/IT 경계)", "net"), (39, 1, "코어 스위치 1", "net"), (38, 1, "코어 스위치 2", "net"),
                                   (37, 1, "관리망 스위치 (가정)", "opt"), (36, 1, "PTP 시간동기", "net"), (20, 1, "KVM 콘솔", "net")]),
-    ("R2 · 데이터", "DPS", [(42, 2, "패치패널", "net"), (36, 2, "데이터 처리 서버 1", "srv"), (34, 2, "데이터 처리 서버 2", "srv"), (32, 2, "데이터 처리 서버 3", "srv"),
-                           (30, 2, "데이터 처리 서버 4", "srv"), (28, 2, "데이터 처리 서버 5", "srv"), (24, 2, "통합 스토리지 (60TB raw)", "sto"), (20, 2, "백업 스토리지", "sto")]),
+    ("R2 · 로컬 서버", "DPS", [(42, 2, "패치패널", "net"), (36, 2, "로컬 서버 노드 (수량 미기재)", "srv"), (32, 4, "로컬 GPU 서버 (가정 4U)", "gpu"),
+                              (26, 2, "Scale-out 스토리지 노드", "sto"), (22, 2, "백업 NAS", "sto")]),
     ("R3 · DT·AI 연산", "GPU", [(42, 2, "패치패널", "net"), (40, 1, "방화벽 (DT 연산 구간)", "net"), (16, 4, "DT·AI 연산 서버 (GPU ×4)", "gpu"), (11, 4, "증설 여유 4U", "opt")]),
 ]
 
@@ -800,9 +874,10 @@ def rack_svg():
 
 POWER = [  # (장비, 수량, kW, 근거)
     ("DT·AI 연산 서버", 1, 3.8, "GPU 600W ×4 + CPU ×2 + 기타, 최대 부하 (추정)"),
-    ("데이터 처리 서버", 5, 0.6, "2U 2소켓, 평상 부하 (추정)"),
-    ("통합 스토리지", 1, 1.0, "올플래시 2U (추정)"),
-    ("백업 스토리지", 1, 0.4, "(추정)"),
+    ("로컬 서버 노드", 2, 0.6, "2U 2소켓, 평상 부하 — 견적서에 수량 없어 2대 가정 (추정)"),
+    ("로컬 GPU 서버", 1, 2.0, "GPU 2장급 가정 — 사양 미기재 (추정)"),
+    ("Scale-out 스토리지 노드", 1, 1.0, "2U (추정)"),
+    ("백업 NAS", 1, 0.4, "(추정)"),
     ("네트워크·보안·시간동기", 1, 0.8, "방화벽 ×2 · 코어 ×2 · 관리·PTP·KVM (추정)"),
 ]
 
@@ -813,7 +888,7 @@ def power_table():
     ups = it_kw / 0.8
     foot = (f'<tr class="tot strong"><th colspan="3">서버실 IT 부하</th><td class="num">{it_kw:.1f} kW</td><td></td></tr>'
             f'<tr class="tot"><th colspan="3">UPS (부하율 80%)</th><td class="num">{ups:.1f} kW↑</td><td class="note">15kVA급 이상 권장 — 견적서 UPS 용량 미기재</td></tr>'
-            f'<tr class="tot"><th colspan="3">냉방 (IT 부하 + 10%)</th><td class="num">{it_kw * 1.1:.1f} kW</td><td class="note">약 {it_kw * 1.1 / 3.517:.1f} RT — 항온항습기는 견적에 없음</td></tr>')
+            f'<tr class="tot"><th colspan="3">냉방 (IT 부하 + 10%)</th><td class="num">{it_kw * 1.1:.1f} kW</td><td class="note">약 {it_kw * 1.1 / 3.517:.1f} RT — 항온항습기는 기반시설(4-4) 1식에 포함, 용량 미기재</td></tr>')
     return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>장비</th><th style="text-align:center">수량</th><th class="r">대당 kW</th><th class="r">합계 kW</th><th>근거</th></tr></thead>'
             f'<tbody>{rows}</tbody><tfoot>{foot}</tfoot></table></div>')
 
@@ -822,7 +897,7 @@ SPACE_REQ = [
     ("서버실 면적", "3.4 × 5.4 m (약 18㎡) — 42U 랙 3대 + UPS·배터리 + 항온항습기, 전면 1.0m·후면 0.8m 작업공간", "가정 치수. {site} 실측 후 확정"),
     ("운영실 면적", "5.0 × 5.4 m (약 27㎡) — 표시장치 벽면, 운영 데스크 2석" + ", 스캔 장비 공간", "기업 실증 참관 인원에 따라 확대"),
     ("전기", "서버실 전용 분전반(3상 380V), 랙별 이중 PDU, UPS 경유 급전", "분전반·배선 공사는 견적에 없음"),
-    ("냉방", "IT 부하 약 9kW 상시 → 항온항습기 10kW급, 서버실 전용", "견적에 없음 — 별도 확보 필요"),
+    ("냉방", "IT 부하 약 9kW 상시 → 항온항습기 10kW급, 서버실 전용", "10/23 견적 기반시설 1식에 포함 — 용량 미기재, 10kW급인지 확인"),
     ("통신 인입", "건물 광 인입(중앙 Server·DCC 연계), 복도 상부 트레이로 Cell 캐비닛 이중 광{riser}", "건물 측 광 경로 확인"),
     ("이전", "'29년 메타팩토리 이전 시 랙 단위 이설 — 랙 3대·UPS를 그대로 옮기는 구성", "이설 비용·중단 기간 운영계획에 반영"),
 ]
@@ -848,7 +923,7 @@ def space_section(z):
     return f'''<section id="space">
   <p class="eyebrow">2. 로컬 관제 센터 공간 구성</p>
   <h2>서버실·운영실 2D 평면과 3D 배치, 연결 경로</h2>
-  <p class="note-box">견적서 항목2·3·4 장비를 (임시) {E(z["site"])}에 서버실 + 운영실로 설치하는 경우의 배치안. 랙 R1(네트워크·보안)·R2(데이터)·R3(DT·AI 연산)·UPS와 운영 데스크 1·2·벽면 표시장치는 1장 토폴로지의 서버실·운영실 구성과 같음. 치수·랙 실장·전력은 가정이며, 견적서에 없는 항온항습기·분전반 공사는 점선·비고로 표시함. 장비를 누르면 구성품 표의 해당 행으로 이동함.</p>
+  <p class="note-box">견적서 항목3·4 장비를 (임시) {E(z["site"])}에 서버실 + 운영실로 설치하는 경우의 배치안. 랙 R1(네트워크·보안)·R2(데이터)·R3(DT·AI 연산)·UPS와 운영 데스크 1·2·벽면 표시장치는 1장 토폴로지의 서버실·운영실 구성과 같음. 치수·랙 실장·전력은 가정이며, 견적서에 없는 분전반·배선 공사는 비고로 표시함(항온항습기는 10/23 견적 기반시설에 포함). 장비를 누르면 구성품 표의 해당 행으로 이동함.</p>
   <h3>2D 평면 (1칸 = 1m)</h3>
   <figure class="fig">{space_2d(z)}{legend_sp()}</figure>
   <h3>3D 배치 (아이소메트릭, 앞쪽 벽 생략)</h3>
@@ -891,7 +966,8 @@ SPACE_CSS = """<style>
 
 
 REFS = [
-    ("Q", "견적서", "이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 (10/15 최종)", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류"),
+    ("Q", "견적서", "이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 (10/23, 엑셀 — 이 페이지 기준)", "2026-10-23", "OneDrive Workspace / Customers / 이지로보틱스 / 2026-10-23"),
+    ("Q0", "견적서", "같은 견적서 10/15 최종본 (PDF 원본 — 5장 견적서 원본)", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류"),
     ("G1", "이메일", "유지연 팀장 「자체장비 심의시 질의&제안사항 공유 및 중장위 심의 준비(~10.21/수) 안내」 — 공통 제안의견·중장위 제출서류", "2026-10-18", "Outlook"),
     ("G2", "첨부", "26.10.16_자체장비심의 질의응답_제안사항.hwpx — 장비별 질의응답·심의요청서 작성 항목", "2026-10-16", "메일 첨부 · llm-wiki raw"),
     ("R", "계획서", "17. 연구개발계획서(협약용) — 1-1 제조 특화 메타팩토리 Zone별 Cell 구성·연차별 구축계획, OCS Cell 대상 품목·공정, 전용공간 확보 현황(Cell별 설치 위치)", "2026-08-27", "OneDrive Workspace / 피지컬AI 테스트베드"),
@@ -913,33 +989,35 @@ def quote_section(z):
     note = " 공개본은 공급사 담당자 연락처와 직인을 가렸음." if pub else ""
     return f'''<section id="quote">
   <p class="eyebrow">5. 견적서 원본</p>
-  <h2>{E(z["no"])} (2026.10.15)</h2>
-  <p class="note-box">기준 견적(10/15 최종) 원본 — 견적서 파일을 따로 골랐어도 이 원본은 바뀌지 않음. 이지로보틱스 「캠틱종합기술원 디지털 트윈 시뮬레이션 시스템 구축 견적서」 PDF 중 이 존 쪽. 업체·모델명이 그대로 있어 내부 대조용이며, 암호를 넣어야 열림(PDF·Word 저장본에는 넣지 않음).{note}</p>
+  <h2>{E(z["qno"])} (2026.10.15 최종)</h2>
+  <p class="note-box">10/15 최종 견적 원본 — 10/23 견적은 엑셀본만 받아 PDF 원본은 10/15 것을 둠(페이지 기준인 10/23 견적과 금액·구성이 다름). 견적서 파일을 따로 골랐어도 이 원본은 바뀌지 않음. 이지로보틱스 「캠틱종합기술원 디지털 트윈 시뮬레이션 시스템 구축 견적서」 PDF 중 이 존 쪽. 업체·모델명이 그대로 있어 내부 대조용이며, 암호를 넣어야 열림(PDF·Word 저장본에는 넣지 않음).{note}</p>
   <button type="button" class="qtoggle" aria-expanded="false" aria-controls="qpanel"><span class="tw" aria-hidden="true">▸</span> 견적서 원본 열기</button>
   <div id="qpanel" class="qpanel" hidden>
     <form class="qform"><label for="qpw">암호</label><input id="qpw" type="password" inputmode="numeric" autocomplete="off" required>
       <button type="submit">열기</button><span class="qmsg" role="status" aria-live="polite"></span></form>
-    <figure class="fig quote" hidden><img alt="{E(z["no"])} 견적서 원본"></figure>
+    <figure class="fig quote" hidden><img alt="{E(z["qno"])} 견적서 원본"></figure>
   </div>
   <script type="application/json" id="qdata">{data}</script>
 </section>'''
 
 
 def ql_base(z):
-    """quote_live.js용 기준 견적 — 품목 행(견적서 기재 품목·분류·수량·단가 + 표기), 로컬 HW 하위 구성품, 다른 존 품목(새 품목 표기 틀)"""
+    """quote_live.js용 기준 견적 — 품목 행(견적서 기재 품목·항목·분류·수량·단가 + 표기), 1식 품목의 하위 구성품(부모 key별), 다른 존 품목(새 품목 표기 틀)"""
     def rows_of(zz):
-        out, sub = [], []
-        for g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sb in zone_rows(zz):
+        out, sub, par = [], {}, None
+        zr = zone_rows(zz)
+        for i, (g, no, sym, nm, sp, q, unit, u, amt, lab, node, chk, sb) in enumerate(zr):
             o = {"sym": sym, "nm": nm, "sp": sp, "unit": unit, "node": node, "chk": chk, "lab": lab}
             if sb:
-                sub.append(dict(o, sfx=no[4:], q=q, sub=2 if sb == 2 else 1))
+                sub.setdefault(par, []).append(dict(o, sfx=no.rsplit("-", 1)[1], q=q, sub=1))
             else:
-                out.append({"g": int(g[2]), "cat": quote_cat(zz, g, sym, no), "label": lab, "q": q, "u": u, "o": o})
+                par = sym
+                out.append({"g": int(g[2]), "gt": g, "cat": row_cat(zz, zr, i), "label": lab, "q": q, "u": u, "o": o})
         return out, sub
     rows, sub = rows_of(z)
-    return {"zones": [{"id": z["id"], "slug": z["slug"], "short": z["short"], "no": z["no"], "date": "2026.10.15", "total": z["total"], "ga": z["ga"], "cmp": z["cmp"], "rows": rows}],
-            "sub": sub, "tmpl": [r for zz in ZONES for r in rows_of(zz)[0]], "gen": GEN, "nodes": NODE_NAME,
-            "chk": {c: list(v) for c, v in CHK.items()}, "chkNote": CHK_NOTE}
+    return {"zones": [{"id": z["id"], "slug": z["slug"], "short": z["short"], "no": z["no"], "date": "2026.10.23", "total": z["total"], "ga": z["ga"], "cmp": z["cmp"], "rows": rows}],
+            "sub": sub, "tmpl": [r for zz in ZONES for r in rows_of(zz)[0]], "gen": GEN, "nodes": NODE_NAME, "anch": list(ANCH), "subscr": list(SUBSCR),
+            "catOf": dict(CAT, SCN="스캐너"), "chk": {c: list(v) for c, v in CHK.items()}, "chkNote": CHK_NOTE}
 
 
 def page(z):
@@ -953,7 +1031,7 @@ def page(z):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{PZ_EXTRA}{EXTRA}{SPACE_CSS}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · <span id="ql-eb">10/15 최종 견적({E(z["no"])}) 기준</span> · 10/18 중장위 심의 준비 지침 적용 · 2026.10.19 작성 · 검토본</p>
+  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · <span id="ql-eb">10/23 견적({E(z["no"])}) 기준</span> · 10/18 중장위 심의 준비 지침 적용 · 2026.10.23 갱신 · 검토본</p>
   <h1>{E(z["name"])}</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
@@ -963,7 +1041,7 @@ def page(z):
 {ql.ocs_banner()}
 <section id="sum" style="margin-top:8px">
   <p class="eyebrow">결론 및 핵심 요약 (Executive Summary)</p>
-  <h2 id="ql-h2">견적 {won(z["total"])} · 견적서 6개 항목을 서버실·운영실·Cell 캐비닛에 배치</h2>
+  <h2 id="ql-h2">견적 {won(z["total"])} · 견적서 7개 항목을 서버실·운영실·Cell 캐비닛에 배치</h2>
   {f'<p class="note-box">{E(PUBLIC_NOTE)}</p>' if PUBLIC else ""}<div class="kpis" id="ql-kpis">{kp}</div>
   {summary_table(z)}
 </section>
@@ -971,7 +1049,7 @@ def page(z):
   <p class="eyebrow">1. 물리 연결 토폴로지</p>
   <h2>장비 설치·연결 구성</h2>
   <figure class="fig">{topo_svg(z)}{legend()}
-  <figcaption>견적서 항목2(OCS HW)·항목3(로컬 HW)·항목4(로컬 OCS·보안)를 설치 위치별로 나누고, 항목1(SW)은 탑재 장비에 묶어 그림. <b>장비 노드를 누르면 2장 구성품 표의 해당 행으로 이동함.</b>
+  <figcaption>견적서 항목3(연산 서버·운영 PC·모니터링)·항목4(로컬 서버·Edge Gateway·네트워크·기반시설·보안{"·스캐너" if z["scan"] else ""})를 설치 위치별로 나누고, SW 품목은 탑재 장비에 묶어 그림. <b>장비 노드를 누르면 2장 구성품 표의 해당 행으로 이동함.</b>
   서버실은 2장 평면·랙 실장도와 같은 R1~R3·UPS로 나눠 그렸고(랙 제목을 누르면 2장 평면으로 이동), 하단 Cell은 연구개발계획서(협약용) Zone Cell 구성(Cell ID·구축연도·설치 위치)을 따름. Cell 내부 장비는 계획서에 '장비 5종'만 있어 연결 대상을 예상해 적음.
   견적서에 수량·사양이 없는 로컬 HW 하위 품목(코어 이중화, 링크 속도, Cell별 Edge Gateway·영상 노드 1대씩)은 「로컬 OCS Zone 구성 - (예시) 정밀조립존」과 같은 구조로 가정해 그렸음 — 공급사 상세 사양 확정 후 갱신. 업체·모델명은 쓰지 않음.</figcaption></figure>
   <h3>주요 장비 용도·설치 위치</h3>
@@ -981,8 +1059,8 @@ def page(z):
 <section id="items">
   <p class="eyebrow">3. 구성품·사양·금액</p>
   <h2>견적서 항목 순서대로 구성품별 사양·금액</h2>
-  <p class="note-box">단위 천원. 번호는 견적서 항목 순서(항목1~6)를 따름 — 심의위원 제안대로 규격서·견적서·비교견적서의 구성 항목 순서를 이 순서에 맞추면 됨. 견적서 표지는 'VAT 포함', 참고사항은 '부가세 별도'로 엇갈림.
-  항목마다 견적서 '항목' 열 분류(DMWorks·유지보수·스캐너·연산 서버 등)를 소계와 함께 묶어 표시함. <b>지침 점검</b>: 적합 · 사양 보완(성능 수치 없음) · 기종 확인 · 기간 확인 · 범위 명시 · <b>금액 미구분</b>(총액만 제시 — 불인정 위험).</p>
+  <p class="note-box">단위 천원(VAT 포함 — 10/23 견적은 표지·참고사항 모두 '부가세 포함'). 번호는 견적서 항목 순서(항목1~7)와 항목 안 순번 — 심의위원 제안대로 규격서·견적서·비교견적서의 구성 항목 순서를 이 순서에 맞추면 됨.
+  항목마다 품목 분류(DMWorks·외산 구독·연산 서버·Local Server·네트워크 등)를 소계와 함께 묶고, 1식 품목은 견적서에 나열된 하위 구성품을 아래에 붙임. <b>지침 점검</b>: 적합 · 사양 보완(성능 수치 없음) · 기종 확인 · 기준 확인(AMC) · 구독 확인 · 제품 확인 · 무상 범위 · 세분 제안 · <b>금액 미구분</b>(총액만 제시 — 불인정 위험).</p>
   {table}
 </section>
 <section id="guide">
