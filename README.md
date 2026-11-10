@@ -11,7 +11,7 @@
 
 | 파일 | 내용 |
 |---|---|
-| `docs/ocs_precision.html` | 로컬 OCS Zone 구성 - (예시) 정밀조립존 — AAS 기반 수집–저장 공통 아키텍처, 물리 연결 토폴로지, 설치 배치, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록 |
+| `docs/ocs_precision.html` | 로컬 OCS Zone 구성 - (예시) 정밀조립존 — AAS 기반 수집–저장 공통 아키텍처, UNS(Unified Namespace) 설계 개념(11/9 FacOS UNS 검토 보고서 기준 — 중심 통로 MQTT 5·설비 접점 OPC UA, camtic/metafactory 토픽, 명령 4단계), 물리 연결 토폴로지, 설치 배치, 서버실·관제실 2D 평면·3D 배치·랙 실장도, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록 |
 | `docs/dmworks_zones.html` | DMWorks 존별 옵션 구성 — 이지로보틱스 10/23 견적 3건(1023-1~3, 엑셀, 정가×57.2%) 기준 존별 구매 필요성·해야 할 일·옵션, 품목별 검토(적합·확인), 10/15 최종 대비 변경, 정밀조립 1좌석 추정, 계약 전 쟁점 |
 | `docs/ocs_sim_fms.html` · `ocs_sim_adaptive.html` · `ocs_sim_qms.html` | 유연제조·적응가공·AI정밀검사 통합 OCS 시뮬레이션 Cell — 10/23 견적(항목1~7, 1식 품목 하위 구성품 포함) 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액(일반 명칭), 10/18 중장위 심의 지침 점검, 견적서 원본(10/23 엑셀 → 쪽 이미지, 암호) |
 

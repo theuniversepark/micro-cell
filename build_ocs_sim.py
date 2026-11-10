@@ -937,32 +937,7 @@ def space_section(z):
 </section>'''
 
 
-SPACE_CSS = """<style>
-.grid{stroke:var(--rule);stroke-width:.6}
-.rm{stroke:var(--ink);stroke-width:2.5} .rm.srv{fill:var(--cellbg)} .rm.ops{fill:var(--paper)}
-.rm-t{fill:var(--teal);font-size:12.5px;font-weight:700}
-.door{stroke:var(--paper);stroke-width:5} .aisle-c{fill:var(--aisle)} .aisle-ct{fill:var(--teal);font-size:10.5px}
-.sp{stroke:var(--ink);stroke-width:1.2} .sp.rack{fill:var(--navy2)} .sp.gpu{fill:var(--teal)} .sp.ups{fill:var(--amber)}
-.sp.ext{fill:none;stroke-dasharray:5 3;stroke:var(--muted)} .sp.screen{fill:var(--ink)} .sp.desk{fill:var(--grp)} .sp.scan{fill:var(--cam);fill-opacity:.35}
-.sp-t{fill:var(--ink);font-size:11px;font-weight:700;text-anchor:middle} .sp-t.v{fill:#fff}
-.sp-s{fill:var(--muted);font-size:10px;text-anchor:middle}
-.dim{stroke:var(--muted);stroke-width:1} .dim-t2{fill:var(--muted);font-size:11px;text-anchor:middle;font-family:var(--mono)}
-.lk.pw{stroke:var(--amber);stroke-width:2;stroke-dasharray:7 4}
-.lk.drop3{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 3}
-.fl.srv{fill:var(--cellbg);stroke:var(--ink);stroke-width:1.5} .fl.ops{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
-.wall{fill:var(--grp);fill-opacity:.55;stroke:var(--muted);stroke-width:1} .wall.part{fill-opacity:.35}
-.bx{stroke:var(--ink);stroke-width:.8;stroke-linejoin:round}
-.bx.rack{fill:var(--navy2)} .bx.gpu{fill:var(--teal)} .bx.ups{fill:var(--amber)} .bx.desk{fill:var(--muted)} .bx.screen{fill:var(--ink)}
-.bx.scan{fill:var(--cam)} .bx.ext{fill:var(--paper);stroke-dasharray:4 3}
-.bx.fT{fill-opacity:.55} .bx.fR{fill-opacity:.8} .bx.fL{fill-opacity:1}
-.ru{stroke:#fff;stroke-opacity:.35;stroke-width:.6}
-.iso-t{fill:var(--ink);font-size:11px;font-weight:700;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:4px}
-.rk{fill:var(--cellbg);stroke:var(--ink);stroke-width:2}
-.ru-b{stroke:var(--ink);stroke-width:.6} .ru-b.net{fill:var(--grp)} .ru-b.srv{fill:var(--navy2)} .ru-b.sto{fill:var(--eqline);fill-opacity:.6}
-.ru-b.gpu{fill:var(--teal)} .ru-b.opt{fill:none;stroke-dasharray:4 3;stroke:var(--muted)}
-.ru-t{fill:var(--ink);font-size:9.5px;text-anchor:middle;paint-order:stroke;stroke:var(--paper);stroke-width:3px}
-.u-n{fill:var(--muted);font-size:9px;text-anchor:end;font-family:var(--mono)}
-</style>"""
+SPACE_CSS = pz.SPACE_CSS   # 공간 구성 2D·3D 공용 스타일 — 로컬 OCS Zone 구성 페이지와 같이 씀
 
 
 REFS = [

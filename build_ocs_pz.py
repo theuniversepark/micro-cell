@@ -135,15 +135,15 @@ HW = [
     ("기반시설", "RACK", "서버 랙", "42U · 1,200mm 깊이 · 이중 PDU", N_RACK, 0, 0, "대",
      "Rack A 연산 · Rack B 네트워크·백업 · Rack C~ 스토리지", "존 서버실"),
     ("기반시설", "UPS", "UPS", "20kVA · 온라인 이중변환 · 30분 · 병렬 운전", N_UPS, 0, 0, "대",
-     "서버실 전원 보호 (부하 약 13kW)", "존 서버실"),
-    ("기반시설", "CRAC", "항온항습기", "냉방 15kW급 · 상부 취출", 1, 0, 0, "대",
+     f"서버실 전원 보호 (부하 약 {LOAD_KW:.0f}kW)", "존 서버실"),
+    ("기반시설", "CRAC", "항온항습기", "냉방 20kW급 · 인로우(랙 열 사이 설치)", 1, 0, 0, "대",
      "서버실 열부하 처리", "존 서버실"),
     ("기반시설", "KVM", "KVM·콘솔", "8포트 IP-KVM · 랙 콘솔", 1, 0, 0, "식", "서버 현장 유지보수", "존 서버실 Rack A"),
 ]
 
 SW = [
-    ("Edge Gateway SW", "OPCUA", "OPC UA Aggregation Server", "수집·정규화·AAS 매핑 · OPC UA Client/Server · PubSub", 5, 0, 0, "카피",
-     "필드장비 OPC UA 집약, 단위·명칭 정규화, AAS 서브모델 매핑"),
+    ("Edge Gateway SW", "OPCUA", "OPC UA Aggregation Server", "OPC UA 클라이언트(설비 접점) · NodeId–토픽 매핑 표 · Sparkplug B 엣지 노드 · cmd → OPC UA Method 역변환", 5, 0, 0, "카피",
+     "필드장비 OPC UA 집약, 단위·명칭 정규화, AAS 서브모델 매핑, UNS로 가는 유일한 발행 입구(게이트웨이 1곳 발행)"),
     ("Edge Gateway SW", "AASIM", "AAS 기반 OPC UA 정보모델", "OPC 30270(AAS Companion Spec) · 캠틱 정의 서브모델 · Semantic ID", 1, 0, 0, "식",
      "장비·공정·품질 데이터의 표준 정보모델 (존 공통, 셀별 인스턴스)"),
     ("Edge Gateway SW", "DRV", "필드장비 인터페이스 드라이버", "Modbus TCP · EtherNet/IP · 로봇 SDK · ROS2 브리지 · GigE Vision/RTSP", 3, 0, 0, "식",
@@ -169,8 +169,8 @@ SW = [
      "이상 판단·품질 판정·재계획 모델 추론 (이상 판단 10초 KPI)"),
     ("Local Server SW", "ETL", "AI Ready 변환 파이프라인", "워크플로 엔진 · 시간동기 정렬 · 정제 · AAS 매핑 · 품질검증(완전성·결측·시간정합성) · LeRobot/RLDS 변환", 1, 0, 0, "식",
      "원시데이터 → AI Ready 데이터셋 변환 후 중앙 전송"),
-    ("Local Server SW", "MQTT", "MQTT 브로커 클러스터 + REST 게이트웨이", "MQTT 5 · Sparkplug B · TLS · 브리지", 1, 0, 0, "식",
-     "중앙 Server 전송(MQTT 산업용 / REST 무선통신)"),
+    ("Local Server SW", "MQTT", "존 로컬 UNS 브로커 (MQTT 5) + 중앙 브리지 · REST 게이트웨이", "MQTT 5 · ISA-95 토픽(camtic/metafactory/main) · Sparkplug B 주 호스트 · ACL 6역할 · TLS 8883 · 중앙 브로커 브리지(store&forward)", 1, 0, 0, "식",
+     "FacOS UNS의 존 구간 — 셀 상태·명령·설비 요약 발행/구독, DCC 중앙 브로커와 브리지 + 중앙 Server 전송(REST 무선통신)"),
     ("Local Server SW", "CAT", "메타데이터 카탈로그·리니지", "데이터셋 ID·출처·수집조건·버전 추적", 1, 0, 0, "식",
      "order·cell_task·episode 공통 ID 추적, 데이터 재사용"),
     ("운영·DT SW", "OCS", "존 오케스트레이터 (OCS)", "Manufacturing Agent · Field Logistics Agent · Cell Agent API · 셀 재배정·HOLD", 1, 0, 0, "식",
@@ -225,8 +225,9 @@ def logical_svg():
                 ("추론용 AI", "Feature Store"), ("AI Inference", "Engine (GPU)")], cyl=True, h=70)
     boxes(256, [("AI Ready 변환 파이프라인", "동기화·정제·AAS 매핑·품질검증"), ("존 오케스트레이터 (OCS)", "Manufacturing·Field Logistics Agent"),
                 ("디지털트윈", "공정 검증 DT · 학습 DT"), ("카탈로그·모니터링", "공통 ID·리니지·알람")], h=56)
-    o.append('<text x="160" y="352" class="lys2">원시데이터 → 정제·동기화 → AI Ready 변환 → 중앙 전송 · DT는 TSDB·Data Lake를 읽어 리플레이·가상검증</text>')
-    arr(330, 430, 330, 378, "OPC UA 통신 (Client/Server · PubSub)", "d", "start", 10)
+    o.append('<rect x="150" y="320" width="740" height="24" rx="12" class="net"/><text x="520" y="336.5" class="net-t" font-size="12">UNS (L2 통합) — 존 로컬 브로커 MQTT 5 · camtic/metafactory ISA-95 토픽 · Sparkplug B · 명령 4단계 (FacOS 연계)</text>')
+    o.append('<text x="160" y="364" class="lys2">원시데이터 → 정제·동기화 → AI Ready 변환 → 중앙 전송 · DT는 TSDB·Data Lake를 읽어 리플레이·가상검증</text>')
+    arr(330, 430, 330, 378, "UNS — Sparkplug B 발행 · 명령 4단계 (MQTT 5)", "d", "start", 10)
     arr(700, 430, 700, 378, "대용량 원시데이터 업로드 (S3)", "d", "start", 10)
     arr(560, 378, 560, 430, "엣지 모델·GW 설정 배포", "c")
 
@@ -808,8 +809,8 @@ DEV = sum(P[k][2] for k in DEV_SYMS)
 ROLES = [
     ("LS-1 · LS-2 · LS-3", "LS", "3대 (한 묶음)",
      "같은 역할을 하는 Kubernetes HA 클러스터. 존 SW 약 20개를 세 대에 나눠 돌리고 1대가 고장 나면 나머지 2대로 자동 재배치",
-     "AAS Repository·Registry · Operational TSDB(Machbase) · MQTT 브로커 · 존 오케스트레이터(OCS) · Airflow 파이프라인 제어 · Feature Store · 카탈로그 · 모니터링 · 보안 · TTA Trace API",
-     "etcd 과반수 판단에 최소 3노드 필요. AAS·TSDB·MQTT는 3중 복제. 노드별 주 배치는 운영 시 LS-1 AAS·OCS / LS-2 TSDB·MQTT / LS-3 파이프라인·카탈로그·모니터링으로 둠(설계)"),
+     "AAS Repository·Registry · Operational TSDB(Machbase) · 존 로컬 UNS 브로커(Mosquitto) · 존 오케스트레이터(OCS) · Airflow 파이프라인 제어 · Feature Store · 카탈로그 · 모니터링 · 보안 · TTA Trace API",
+     "etcd 과반수 판단에 최소 3노드 필요. AAS·TSDB는 3중 복제, UNS 브로커는 Active-Standby(동시 발행 금지). 노드별 주 배치는 운영 시 LS-1 AAS·OCS / LS-2 TSDB·UNS 브로커 / LS-3 파이프라인·카탈로그·모니터링으로 둠(설계)"),
     ("GPU-1", "GPU", "1대",
      "실시간 추론. 셀 상태머신의 HOLD·재시도·격리 판단 모델, 결합 OK/NG 판정 모델, 재계획 모델 서비스",
      "Triton Inference Server (오픈소스)",
@@ -874,8 +875,9 @@ def summary_table():
     cap = N_STO * NODE_USABLE
     rows = [
         ("역할", "현장 데이터를 Edge Gateway에서 OPC UA로 모아 AAS로 매핑하고, Local Server에서 원시데이터·운영 시계열·AAS를 저장한 뒤 AI Ready 데이터로 바꿔 중앙 Server로 보냄 [D1]. 디지털트윈·존 오케스트레이터도 같은 Local Server 데이터를 씀 (설계) [W9]", ""),
-        ("계층 배치", "Local Server → 존 서버실 랙 3개(연산·네트워크·스토리지) · 방화벽 HA 쌍 · 코어 스위치 MLAG 2대 / Edge Gateway(OPC UA)·영상 수집 노드 → 셀 캐비닛 / 셀–서버실 10GbE 이중 광 + PTP 시간동기", ""),
-        ("수집 경로", "① 상태·공정값: OPC UA → Edge TSDB → Operational TSDB ② 영상·진동·오디오 대용량: OPC UA 우회 → S3 → Data Lake", "D1"),
+        ("계층 배치", f"Local Server → 존 서버실 랙 {N_RACK}개(연산 1·네트워크 1·스토리지 {N_RACK - 2}) · 방화벽 HA 쌍 · 코어 스위치 MLAG 2대 / Edge Gateway(OPC UA)·영상 수집 노드 → 셀 캐비닛 / 셀–서버실 10GbE 이중 광 + PTP 시간동기", ""),
+        ("수집 경로", "① 상태·공정값: 설비 OPC UA → Edge Gateway → UNS(Sparkplug B) → Operational TSDB·운영 SW (고속 시계열 원본은 Edge TSDB → Operational TSDB 묶음 전송) ② 영상·진동·오디오 대용량: UNS 우회 → S3 → Data Lake", "D1·U1"),
+        ("UNS (FacOS 연계)", "11/9 검토 보고서 기준 — 중심 통로는 MQTT 5 + Sparkplug B + ISA-95 토픽(camtic/metafactory/main/…), OPC UA는 설비–Edge Gateway 접점에만 둠. Local Server의 운영 SW는 설비에 직접 접속하지 않고 존 로컬 UNS 브로커로만 읽고, 명령은 cmd → ack → exec → done 4단계로 내림 (1-1절)", "U1"),
         ("실시간 제어", "OPC UA 지연(약 100ms) 때문에 로봇·서보 제어는 셀 PLC EtherCAT에 둠. OCS Cell은 수집·감독·재계획만 맡음", "W8"),
         ("산정 기준", f"셀당 협동로봇 10 · AMR 4 · AMMR 1 = 로봇 {N_ROBOT}대, 로봇별 카메라 3대(손목 D405·머리/가슴 D455) + 협동로봇 엑소센트릭 D455 = 셀당 {N_CAM}대, 월 {OPS_H}h 연속 기록", ""),
         ("데이터량", f"셀당 {SZ[0]['cam_mbps'] + SZ[0]['tel_mbps']:.0f}Mbps · 월 {SZ[0]['tot']:.1f}TB → 존 월 {MONTH_TB:,.0f}TB (카메라 영상 98%)", ""),
@@ -980,6 +982,543 @@ def price_summary(chw_tot, chw_new, csw_tot, csw_new):
             f'<tbody>{body}</tbody></table></div>')
 
 
+SPACE_CSS = """<style>
+.grid{stroke:var(--rule);stroke-width:.6}
+.rm{stroke:var(--ink);stroke-width:2.5} .rm.srv{fill:var(--cellbg)} .rm.ops{fill:var(--paper)}
+.rm-t{fill:var(--teal);font-size:12.5px;font-weight:700}
+.door{stroke:var(--paper);stroke-width:5} .aisle-c{fill:var(--aisle)} .aisle-ct{fill:var(--teal);font-size:10.5px}
+.sp{stroke:var(--ink);stroke-width:1.2} .sp.rack{fill:var(--navy2)} .sp.gpu{fill:var(--teal)} .sp.ups{fill:var(--amber)}
+.sp.ext{fill:none;stroke-dasharray:5 3;stroke:var(--muted)} .sp.screen{fill:var(--ink)} .sp.desk{fill:var(--grp)} .sp.scan{fill:var(--cam);fill-opacity:.35}
+.sp-t{fill:var(--ink);font-size:11px;font-weight:700;text-anchor:middle} .sp-t.v{fill:#fff}
+.sp-s{fill:var(--muted);font-size:10px;text-anchor:middle}
+.dim{stroke:var(--muted);stroke-width:1} .dim-t2{fill:var(--muted);font-size:11px;text-anchor:middle;font-family:var(--mono)}
+.lk.pw{stroke:var(--amber);stroke-width:2;stroke-dasharray:7 4}
+.lk.drop3{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 3}
+.fl.srv{fill:var(--cellbg);stroke:var(--ink);stroke-width:1.5} .fl.ops{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+.wall{fill:var(--grp);fill-opacity:.55;stroke:var(--muted);stroke-width:1} .wall.part{fill-opacity:.35}
+.bx{stroke:var(--ink);stroke-width:.8;stroke-linejoin:round}
+.bx.rack{fill:var(--navy2)} .bx.gpu{fill:var(--teal)} .bx.ups{fill:var(--amber)} .bx.desk{fill:var(--muted)} .bx.screen{fill:var(--ink)}
+.bx.scan{fill:var(--cam)} .bx.ext{fill:var(--paper);stroke-dasharray:4 3}
+.bx.fT{fill-opacity:.55} .bx.fR{fill-opacity:.8} .bx.fL{fill-opacity:1}
+.ru{stroke:#fff;stroke-opacity:.35;stroke-width:.6}
+.iso-t{fill:var(--ink);font-size:11px;font-weight:700;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+.rk{fill:var(--cellbg);stroke:var(--ink);stroke-width:2}
+.ru-b{stroke:var(--ink);stroke-width:.6} .ru-b.net{fill:var(--grp)} .ru-b.srv{fill:var(--navy2)} .ru-b.sto{fill:var(--eqline);fill-opacity:.6}
+.ru-b.gpu{fill:var(--teal)} .ru-b.opt{fill:none;stroke-dasharray:4 3;stroke:var(--muted)}
+.ru-t{fill:var(--ink);font-size:9.5px;text-anchor:middle;paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+.u-n{fill:var(--muted);font-size:9px;text-anchor:end;font-family:var(--mono)}
+</style>"""
+
+PZ_SPACE_CSS = """<style>
+.sp.crac{fill:var(--cyan);fill-opacity:.55} .bx.crac{fill:var(--cyan)}
+.sp.wallb{fill:var(--muted);stroke:var(--ink);stroke-width:1.2}
+.lk.l25b2{stroke:var(--teal);stroke-width:3;stroke-dasharray:7 4}
+</style>"""
+
+# ------------------------------------------------------------------ 서버실·관제실 공간 구성 (2D·3D) — 2026-11-11 추가
+# 좌표 mm. u(가로) = 존 주통로에서 멀어지는 방향, v(세로) = 부품 Supermarket 측 벽에서 계단 측 벽 방향.
+# 존 배치도(cells_data.ZONE)의 로컬 DCC 관제실 7.4×6.0m · 엣지 서버·네트워크실 4.8×6.0m를 그대로 씀. 벽 두께 0.5m, 장비 치수·위치는 가정
+_BLK = {b[5]: b for b in ZONE["blocks"]}
+SP_OPS = round(_BLK["로컬 DCC 관제실"][3] * 1000)                 # 관제실 길이 7400
+SP_WALL = round((_BLK["엣지 서버·네트워크실"][1] - _BLK["로컬 DCC 관제실"][1]) * 1000) - SP_OPS   # 두 실 사이 벽 500
+SP_SRV = round(_BLK["엣지 서버·네트워크실"][3] * 1000)            # 서버실 길이 4800
+SP_D = round(_BLK["로컬 DCC 관제실"][2] * 1000)                   # 두 실 공통 폭 6000
+SP_S0 = SP_OPS + SP_WALL                                           # 서버실 시작 u
+SP_W = SP_S0 + SP_SRV
+SP_TRAY_Z, SP_WH = 2300, 2700
+SP_RX, SP_RD, SP_RW = SP_S0 + 1800, 1200, 600                      # 랙 열: 전면(관제실 측) 1.8m, 랙 깊이 1.2m, 폭 0.6m
+SP_TU = SP_S0 + 2100                                               # 서버실 상부 트레이 u (존 통로 트레이 인입 위치)
+SP_DESKS = [("OWS-1", "존 전체 관제", "OWS"), ("OWS-2", "셀 알람 대응", "OWS"), ("DWS-1", "DMWorks 검증 DT", "DWS"), ("DWS-2", "Isaac 학습 DT", "DWS")]
+
+
+def sp_racks():
+    """랙 열 구성 — (기호, 이름, 설명, kind, 링크). 연산 A · 네트워크 B · 인로우 항온항습기 · 스토리지 C~"""
+    sto = [chr(ord("C") + i) for i in range(N_RACK - 2)]
+    row = [("A", "Rack A · 연산", "로컬 서버 3 · GPU 서버 2", "gpu", "RACK"), ("B", "Rack B · 네트워크·백업", "방화벽 · 코어 · PTP · 백업 NAS", "rack", "RACK"),
+           ("CRAC", "항온항습기 (인로우)", "20kW급", "crac", "CRAC")]
+    return row + [(c, f"Rack {c} · 스토리지", "Scale-out 스토리지 노드", "rack", "RACK") for c in sto]
+
+
+def sp_items():
+    """(기호, 이름, 설명, kind, x, y, w, d, h, z0, 링크)"""
+    it = []
+    row = sp_racks()
+    y0 = (SP_D - SP_RW * len(row)) / 2
+    for i, (sym, nm, sub, kind, ln) in enumerate(row):
+        it.append((sym, nm, sub, kind, SP_RX, y0 + i * SP_RW, SP_RD, SP_RW, 2000, 0, ln))
+    for j in range(N_UPS):
+        it.append((f"UPS-{j + 1}", f"UPS-{j + 1}", "20kVA · 배터리 30분", "ups", SP_W - 900, 300 + j * 1100, 800, 900, 1400, 0, "UPS"))
+    it.append(("VW", "관제 비디오월", "55″ 2×2", "screen", 2400, 0, 2600, 120, 1400, 800, "VW"))
+    for i, (sym, sub, ln) in enumerate(SP_DESKS):
+        it.append((sym, sym, sub, "desk", 800 + i * 1600, 2400, 1400, 800, 750, 0, ln))
+    return it
+
+
+def sp_links():
+    """(cls, [(u,v)...], label, (lu,lv)) — 2D·3D 공용. 3D는 천장 트레이 높이"""
+    row_end = (SP_D + SP_RW * len(sp_racks())) / 2
+    L = [
+        ("l25b", [(-700, -350), (SP_TU, -350), (SP_TU, 0)], f"통로 상부 트레이 — 셀 캐비닛 {N_CELL}개 이중 광 업링크(10G×2) → 서버실", (150, -450)),
+        ("l25a", [(SP_TU, 0), (SP_TU, row_end - 300)], "", None),
+        ("l10a", [(SP_TU, 1600), (1500, 1600)], "관제실 10GbE · 천장 트레이", (1650, 1500)),
+        ("l10a", [(4900, 1600), (4900, 120)], "", None),
+        ("l10", [(SP_S0 + 1500, SP_D), (SP_S0 + 1500, 2400), (SP_RX, 2400)], "건물 광 인입 → 중앙 Server (경로 가정)", None),
+        ("pw", [(SP_W - 900, 750), (SP_W - 1400, 750), (SP_W - 1400, row_end - 300)], "UPS → 랙 이중 PDU", (SP_RX + SP_RD + 80, row_end + 420)),
+    ]
+    for i in range(len(SP_DESKS)):
+        L.append(("l10a", [(1500 + i * 1600, 1600), (1500 + i * 1600, 2400)], "", None))
+    return L
+
+
+def space_2d():
+    s, ox, oy = 0.08, 96, 78
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    W, H = ox + SP_W * s + 56, oy + SP_D * s + 92
+    o = [f'<svg class="arch plan" viewBox="0 0 {W:.0f} {H:.0f}" role="img" aria-label="정밀조립존 서버실·관제실 2D 평면" style="max-width:{W:.0f}px">']
+    for gx in range(0, SP_W + 1, 1000):
+        x, _ = P(gx, 0)
+        o.append(f'<line x1="{x:.1f}" y1="{oy}" x2="{x:.1f}" y2="{oy + SP_D * s}" class="grid"/>')
+    for gy in range(0, SP_D + 1, 1000):
+        _, y = P(0, gy)
+        o.append(f'<line x1="{ox}" y1="{y:.1f}" x2="{ox + SP_W * s}" y2="{y:.1f}" class="grid"/>')
+    # 실
+    o.append(f'<rect x="{ox}" y="{oy}" width="{SP_OPS * s}" height="{SP_D * s}" class="rm ops"/>')
+    o.append(f'<rect x="{ox + SP_S0 * s}" y="{oy}" width="{SP_SRV * s}" height="{SP_D * s}" class="rm srv"/>')
+    for gx in range(1000, SP_W, 1000):   # 실 채움 위에 격자 다시
+        if SP_OPS <= gx <= SP_S0:
+            continue
+        x, _ = P(gx, 0)
+        o.append(f'<line x1="{x:.1f}" y1="{oy + 1.5}" x2="{x:.1f}" y2="{oy + SP_D * s - 1.5}" class="grid"/>')
+    for gy in range(1000, SP_D, 1000):
+        _, y = P(0, gy)
+        o.append(f'<line x1="{ox + 1.5}" y1="{y:.1f}" x2="{ox + SP_OPS * s - 1.5}" y2="{y:.1f}" class="grid"/>'
+                 f'<line x1="{ox + SP_S0 * s + 1.5}" y1="{y:.1f}" x2="{ox + SP_W * s - 1.5}" y2="{y:.1f}" class="grid"/>')
+    a, b = P(SP_OPS, 0)
+    o.append(f'<rect x="{a}" y="{b}" width="{SP_WALL * s}" height="{SP_D * s}" class="sp wallb"/>')
+    # 출입문: 통로 ↔ 관제실, 관제실 ↔ 서버실
+    a, b = P(0, 2400)
+    o.append(f'<line x1="{a}" y1="{b}" x2="{a}" y2="{b + 1200 * s}" class="door"/>')
+    a, b = P(SP_OPS, 4800)
+    o.append(f'<rect x="{a - 1.5}" y="{b}" width="{SP_WALL * s + 3}" height="{900 * s}" style="fill:var(--paper)"/>'
+             f'<text x="{a + SP_WALL * s / 2}" y="{b + 900 * s + 14}" class="sp-s">출입문</text>')
+    # 통로
+    a, b = P(-900, 0)
+    o.append(f'<rect x="{a}" y="{b}" width="{700 * s}" height="{SP_D * s}" class="aisle-c"/>')
+    cx, cy = a + 350 * s, b + SP_D * s / 2
+    o.append(f'<text x="{cx}" y="{cy}" class="aisle-ct" text-anchor="middle" transform="rotate(-90 {cx} {cy})" dy="4">존 주통로 (셀 5개 방향)</text>')
+    # 작업공간
+    a, b = P(SP_S0 + 120, 3350)
+    o.append(f'<text x="{a}" y="{b}" class="aisle-ct">전면 1.8m</text><text x="{a}" y="{b + 14}" class="aisle-ct">(콜드 아일)</text>')
+    a, b = P(SP_RX + SP_RD + 60, 5450)
+    o.append(f'<text x="{a}" y="{b}" class="aisle-ct">후면 0.9m (핫 아일)</text>')
+    # 장비
+    for sym, nm, sub, kind, x, y, w, d, h, z0, ln in sp_items():
+        a, b = P(x, y)
+        o.append(f'<a href="#hw-{ln}" class="nlink"><g id="sp-{sym}"><rect x="{a}" y="{b}" width="{w * s}" height="{d * s}" rx="2" class="sp {kind}"/>')
+        if kind in ("rack", "gpu", "crac", "ups"):
+            o.append(f'<text x="{a + w * s / 2}" y="{b + d * s / 2 + 4}" class="sp-t{"" if kind == "crac" else " v"}">{E(sym if kind != "rack" and kind != "gpu" else "Rack " + sym)}</text>')
+        elif kind == "screen":
+            o.append(f'<text x="{a + w * s / 2}" y="{b + 28}" class="sp-t">{E(nm)} ({E(sub)})</text>')
+        else:
+            o.append(f'<text x="{a + w * s / 2}" y="{b + d * s / 2 - 2}" class="sp-t">{E(nm)}</text>'
+                     f'<text x="{a + w * s / 2}" y="{b + d * s / 2 + 12}" class="sp-s">{E(sub)}</text>')
+        o.append("</g></a>")
+    # 연결
+    for cls, pts, lab, lp in sp_links():
+        d = " ".join(f"{P(x, y)[0]:.1f},{P(x, y)[1]:.1f}" for x, y in pts)
+        o.append(f'<polyline points="{d}" class="lk {cls}"/>')
+        if lab and lp:
+            a, b = P(*lp)
+            o.append(f'<text x="{a}" y="{b}" class="lkt">{E(lab)}</text>')
+    a, b = P(SP_S0 + 1500, SP_D)
+    o.append(f'<text x="{a + 6}" y="{b + 16}" class="lkt">건물 광 인입 → 중앙 Server (경로 가정)</text>')
+    # 실 이름·치수
+    a, b = P(0, SP_D)
+    o.append(f'<line x1="{a}" y1="{b + 30}" x2="{a + SP_OPS * s}" y2="{b + 30}" class="dim"/>'
+             f'<text x="{a + SP_OPS * s / 2}" y="{b + 48}" class="rm-t" text-anchor="middle">로컬존 DCC 관제실 · {SP_OPS / 1000:.1f} × {SP_D / 1000:.1f} m ({SP_OPS * SP_D / 1e6:.1f}㎡)</text>')
+    a, b = P(SP_S0, SP_D)
+    o.append(f'<line x1="{a}" y1="{b + 30}" x2="{a + SP_SRV * s}" y2="{b + 30}" class="dim"/>'
+             f'<text x="{a + SP_SRV * s / 2}" y="{b + 48}" class="rm-t" text-anchor="middle">엣지 서버·네트워크실 · {SP_SRV / 1000:.1f} × {SP_D / 1000:.1f} m ({SP_SRV * SP_D / 1e6:.1f}㎡)</text>')
+    a, b = P(SP_W, 0)
+    o.append(f'<line x1="{a + 18}" y1="{b}" x2="{a + 18}" y2="{b + SP_D * s}" class="dim"/>'
+             f'<text x="{a + 34}" y="{b + SP_D * s / 2}" class="dim-t2" transform="rotate(-90 {a + 34} {b + SP_D * s / 2})">{SP_D / 1000:.1f} m</text>')
+    a, b = P(0, SP_D)
+    o.append(f'<text x="{a}" y="{b + 74}" class="sp-s" style="text-anchor:start">위쪽 벽 = 부품 Supermarket 측 · 아래쪽 벽 = 계단·출입 측 · 랙 600×1200(42U) · 장비 치수·위치는 가정(실측 후 확정)</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def space_3d():
+    import math
+    C, S, OX, OY = math.cos(math.pi / 6), 0.062, 372, 222
+
+    def P(x, y, h=0):
+        return (OX + (x - y) * C * S, OY + (x + y) * 0.5 * S - h * S)
+
+    def poly(pts, cls):
+        return f'<polygon points="{" ".join(f"{a:.1f},{b:.1f}" for a, b in pts)}" class="{cls}"/>'
+
+    o = ['<svg class="arch plan" viewBox="0 0 1100 850" role="img" aria-label="정밀조립존 서버실·관제실 3D 배치" style="max-width:1100px">']
+    mid = SP_OPS + SP_WALL / 2
+    o.append(poly([P(0, 0), P(mid, 0), P(mid, SP_D), P(0, SP_D)], "fl ops"))
+    o.append(poly([P(mid, 0), P(SP_W, 0), P(SP_W, SP_D), P(mid, SP_D)], "fl srv"))
+    for gx in range(0, SP_W + 1, 1000):
+        a, b = P(gx, 0)
+        c, d = P(gx, SP_D)
+        o.append(f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}" class="grid"/>')
+    for gy in range(0, SP_D + 1, 1000):
+        a, b = P(0, gy)
+        c, d = P(SP_W, gy)
+        o.append(f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}" class="grid"/>')
+    o.append(poly([P(0, 0), P(0, SP_D), P(0, SP_D, SP_WH), P(0, 0, SP_WH)], "wall"))
+    o.append(poly([P(0, 0), P(SP_W, 0), P(SP_W, 0, SP_WH), P(0, 0, SP_WH)], "wall"))
+    o.append(poly([P(mid, 0), P(mid, 4800), P(mid, 4800, SP_WH), P(mid, 0, SP_WH)], "wall part"))
+    lab = []
+
+    def box(x, y, w, d, h, z0, kind, link=None):
+        x1, y1, z1 = x + w, y + d, z0 + h
+        top = [P(x, y, z1), P(x1, y, z1), P(x1, y1, z1), P(x, y1, z1)]
+        fr = [P(x1, y, z0), P(x1, y1, z0), P(x1, y1, z1), P(x1, y, z1)]
+        fl = [P(x, y1, z0), P(x1, y1, z0), P(x1, y1, z1), P(x, y1, z1)]
+        g = f'<a href="#hw-{link}" class="nlink"><g>' if link else "<g>"
+        g += poly(fl, f"bx {kind} fL") + poly(fr, f"bx {kind} fR") + poly(top, f"bx {kind} fT")
+        if kind in ("rack", "gpu"):
+            for k_ in range(1, 8):
+                zz = z0 + h * k_ / 8
+                a, b = P(x1, y, zz)
+                c, dd = P(x1, y1, zz)
+                g += f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{dd:.1f}" class="ru"/>'
+        return g + ("</g></a>" if link else "</g>")
+
+    for sym, nm, sub, kind, x, y, w, d, h, z0, ln in sorted(sp_items(), key=lambda r: (r[4] + r[6] / 2) + (r[5] + r[7] / 2)):
+        o.append(box(x, y, w, d, h, z0, kind, ln))
+        if kind == "desk":
+            o.append(box(x + 200, y + 100, w - 400, 60, 420, h, "screen"))
+        lab.append((P(x + w / 2, y + d / 2, z0 + h + (560 if kind == "desk" else 160)), sym if kind in ("crac", "ups", "desk") else "Rack " + sym, kind))
+    for cls, pts, lb, lp in sp_links():
+        zz = 2100 if cls == "pw" else SP_TRAY_Z
+        d = " ".join(f"{P(x, y, zz)[0]:.1f},{P(x, y, zz)[1]:.1f}" for x, y in pts)
+        o.append(f'<polyline points="{d}" class="lk {cls}"/>')
+    drops = [(1500 + i * 1600, 2400, 1170) for i in range(len(SP_DESKS))] + [(4900, 120, 2200), (SP_RX, 2400, 2000)]
+    for x, y, zt in drops:
+        a, b = P(x, y, SP_TRAY_Z)
+        c, d = P(x, y, zt)
+        o.append(f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}" class="lk drop3"/>')
+    a, b = P(-700, -350, SP_TRAY_Z)
+    o.append(f'<text x="{a + 4:.0f}" y="{b - 10:.0f}" class="lkt">존 통로 트레이 → 셀 캐비닛 {N_CELL}개</text>')
+    a, b = P(SP_S0 + 1500, SP_D, SP_TRAY_Z)
+    o.append(f'<text x="{a - 8:.0f}" y="{b + 18:.0f}" class="lkt" text-anchor="end">건물 광 인입 → 중앙 Server</text>')
+    for (a, b), nm, kind in lab:
+        if kind != "screen":
+            o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t">{E(nm)}</text>')
+    a, b = P(3700, 0, 2420)
+    o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t">관제 비디오월 (55″ 2×2)</text>')
+    a, b = P(SP_OPS / 2, SP_D + 700, 0)
+    o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t" font-size="13">로컬존 DCC 관제실</text>')
+    a, b = P(SP_S0 + SP_SRV / 2, SP_D + 700, 0)
+    o.append(f'<text x="{a:.0f}" y="{b:.0f}" class="iso-t" font-size="13">엣지 서버·네트워크실</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+def sp_rack_units():
+    """랙별 실장 — (제목, [(상단 U, U수, 이름, kind)])"""
+    n_sr = N_RACK - 2
+    per = -(-N_STO // n_sr)
+    racks = [
+        ("Rack A · 연산", [(42, 2, "광·UTP 패치패널", "net"), (38, 2, "로컬 서버 LS-1", "srv"), (36, 2, "로컬 서버 LS-2", "srv"), (34, 2, "로컬 서버 LS-3", "srv"),
+                          (30, 4, "GPU 서버 GPU-1 (실시간 추론)", "gpu"), (26, 4, "GPU 서버 GPU-2 (배치)", "gpu"), (20, 1, "KVM 콘솔", "net")]),
+        ("Rack B · 네트워크·백업", [(42, 2, "광·UTP 패치패널", "net"), (39, 1, "방화벽 FW-1", "net"), (38, 1, "방화벽 FW-2", "net"), (36, 1, "코어 스위치 CORE-1", "net"),
+                                   (35, 1, "코어 스위치 CORE-2", "net"), (33, 1, "관리망 스위치", "net"), (31, 1, "PTP 그랜드마스터", "net"), (28, 2, "백업 NAS", "sto")]),
+    ]
+    n = 0
+    for i in range(n_sr):
+        cnt = min(per, N_STO - n)
+        units = [(42, 2, "광·UTP 패치패널", "net")] + [(38 - 2 * j, 2, f"스토리지 노드 STO-{n + j + 1:02d}", "sto") for j in range(cnt)]
+        racks.append((f"Rack {chr(ord('C') + i)} · 스토리지 ({cnt}노드)", units))
+        n += cnt
+    return racks
+
+
+def sp_rack_svg():
+    UH, W, gap, top = 11, 240, 40, 34
+    racks = sp_rack_units()
+    tw = len(racks) * W + (len(racks) - 1) * gap + 60
+    o = [f'<svg class="arch plan" viewBox="0 0 {tw} {top + 42 * UH + 30}" role="img" aria-label="정밀조립존 서버실 랙 실장도" style="max-width:{tw}px">']
+    for i, (title, units) in enumerate(racks):
+        x = 40 + i * (W + gap)
+        o.append(f'<a href="#hw-RACK" class="nlink"><text x="{x + W / 2}" y="{top - 12}" class="dvt" font-size="12.5">{E(title)}</text></a>')
+        o.append(f'<rect x="{x}" y="{top}" width="{W}" height="{42 * UH}" class="rk"/>')
+        if i == 0:
+            for u in range(6, 43, 6):
+                o.append(f'<text x="{x - 6}" y="{top + (42 - u) * UH + 3}" class="u-n">{u}</text>')
+        for ut, n, nm, kind in units:
+            yy = top + (42 - ut) * UH
+            o.append(f'<rect x="{x + 6}" y="{yy + 1}" width="{W - 12}" height="{n * UH - 2}" rx="1.5" class="ru-b {kind}"/>'
+                     f'<text x="{x + W / 2}" y="{yy + n * UH / 2 + 3.5}" class="ru-t">{E(nm)} · {n}U</text>')
+        o.append(f'<text x="{x + W / 2}" y="{top + 42 * UH + 18}" class="sp-s">사용 {sum(n for _, n, _, _ in units)}U / 42U</text>')
+    o.append("</svg>")
+    return "".join(o)
+
+
+SP_POWER = [("로컬 서버 노드 (LS-1~3)", 3, 0.8, "2U 2소켓 (추정)"), ("GPU 서버 (GPU-1·2)", 2, 2.0, "RTX PRO 6000 ×4 탑재 평상 부하 (추정) — 8장 증설 시 재산정"),
+            ("Scale-out 스토리지 노드", N_STO, 0.5, "12베이 HDD 노드 (추정)"), ("네트워크·보안·시간동기·백업", 1, 1.3, "방화벽 ×2 · 코어 ×2 · 관리망 · PTP · KVM · 백업 NAS (추정)")]
+
+
+def sp_power_table():
+    it_kw = sum(q * kw for _, q, kw, _ in SP_POWER)
+    rows = "".join(f'<tr><td class="nm">{E(n)}</td><td class="q">{q}</td><td class="num">{kw:.1f}</td><td class="num">{q * kw:.1f}</td><td class="note">{E(b)}</td></tr>' for n, q, kw, b in SP_POWER)
+    foot = (f'<tr class="tot strong"><th colspan="3">서버실 IT 부하</th><td class="num">{it_kw:.1f} kW</td><td class="note">UPS 수량 산정에 쓴 값과 같음</td></tr>'
+            f'<tr class="tot"><th colspan="3">UPS (부하율 80% 이하)</th><td class="num">{it_kw / 0.8:.1f} kW↑</td><td class="note">20kVA(16kW) × {N_UPS}대 병렬 = {N_UPS * 16}kW, 부하율 {it_kw / (N_UPS * 16) * 100:.0f}%</td></tr>'
+            f'<tr class="tot"><th colspan="3">냉방 (IT 부하 + 10%)</th><td class="num">{it_kw * 1.1:.1f} kW</td><td class="note">약 {it_kw * 1.1 / 3.517:.1f} RT — 인로우 항온항습기 20kW급 1대 여유 {20 - it_kw * 1.1:.1f}kW, 이중화 없음</td></tr>')
+    return ('<div class="tbl-wrap"><table class="bom"><thead><tr><th>장비</th><th style="text-align:center">수량</th><th style="text-align:right">대당 kW</th><th style="text-align:right">합계 kW</th><th>근거</th></tr></thead>'
+            f'<tbody>{rows}</tbody><tfoot>{foot}</tfoot></table></div>')
+
+
+def sp_req_table():
+    row_len = SP_RW * len(sp_racks()) / 1000
+    rows = [
+        ("서버실 면적", f"{SP_SRV / 1000:.1f} × {SP_D / 1000:.1f} m ({SP_SRV * SP_D / 1e6:.1f}㎡) — 42U 랙 {N_RACK}대 + 인로우 항온항습기 1대를 한 열({row_len:.1f}m)로, UPS {N_UPS}대는 후면 벽 쪽. 전면 1.8m · 후면 0.9m 작업공간",
+         "존 배치도 치수 기준. 랙 열 양 끝 통로 각 " + f"{(SP_D / 1000 - row_len) / 2:.1f}m"),
+        ("관제실 면적", f"{SP_OPS / 1000:.1f} × {SP_D / 1000:.1f} m ({SP_OPS * SP_D / 1e6:.1f}㎡) — 비디오월 벽면 + 운영 데스크 4석(OWS 2 · DWS 2)", "뒤쪽 약 2.8m는 참관·협의 공간으로 비워 둠"),
+        ("스토리지 증설 여유", f"스토리지 랙 {N_RACK - 2}대에 {N_STO}노드({N_STO * 2}U). 보관 기간이 늘어 랙을 더 세우면 한 열 최대 8칸(4.8m, 양 끝 통로 0.6m)까지 가능", f"원시 1개월 보관이면 6노드·랙 {2 + -(-(6 * 2) // 36)}대로 줄어듦(쟁점 참조)"),
+        ("전기", "서버실 전용 분전반(3상 380V), 랙별 이중 PDU, UPS 병렬 경유 급전", "분전반·배선 공사는 품목에 없음"),
+        ("냉방", f"IT 부하 약 {LOAD_KW:.0f}kW 상시 → 인로우 20kW급 1대, 랙 열 가운데 설치", "1대 고장 시 대체 냉방 없음 — 건물 공조 보조 여부 확인"),
+        ("바닥 하중", "스토리지 랙은 2U 12베이 노드 9~10대 만재 — 랙당 약 0.5t (추정)", "2층 설치라 구조 검토 필요(쟁점 '서버실 여건')"),
+        ("통신 인입", f"존 주통로 상부 트레이가 부품 Supermarket 측 벽을 따라 서버실로 들어옴(셀 캐비닛 {N_CELL}개 이중 광). 중앙 Server 연계 광은 건물 인입 경로 가정", "건물 측 광 경로·PTP 옥상 안테나 배선 확인"),
+    ]
+    body = "".join(f'<tr><th scope="row">{E(a)}</th><td>{E(b)}</td><td class="note">{E(c)}</td></tr>' for a, b, c in rows)
+    return f'<div class="tbl-wrap"><table class="bom issuetbl"><thead><tr><th>항목</th><th>구성</th><th>비고</th></tr></thead><tbody>{body}</tbody></table></div>'
+
+
+SP_LEGEND = [("l25b", f"셀 캐비닛 이중 광 업링크 (통로 상부 트레이)"), ("l25a", "랙 간 25GbE · 서버실 상부 트레이"), ("l10a", "관제실 10GbE (데스크·비디오월)"),
+             ("l10", "건물 광 인입 (중앙 Server)"), ("pw", "UPS 전원")]
+
+
+def sp_legend():
+    return '<ul class="lg">' + "".join(
+        f'<li><svg width="34" height="10" aria-hidden="true"><line x1="0" y1="5" x2="34" y2="5" class="lk {c}"/></svg>{E(t)}</li>' for c, t in SP_LEGEND) + "</ul>"
+
+
+def space_section():
+    return f'''<section id="space">
+  <p class="eyebrow">3-1. 서버실·관제실 공간 구성</p>
+  <h2>서버실·관제실 2D 평면과 3D 배치, 연결 경로</h2>
+  <p class="note-box">위 존 배치도의 엣지 서버·네트워크실({SP_SRV / 1000:.1f} × {SP_D / 1000:.1f} m)과 로컬존 DCC 관제실({SP_OPS / 1000:.1f} × {SP_D / 1000:.1f} m) 안에 존 HW를 놓은 배치안임. 랙 {N_RACK}대(연산 A · 네트워크 B · 스토리지 {N_RACK - 2}대) · UPS {N_UPS}대 · 인로우 항온항습기 1대와 관제실 OWS 2 · DWS 2 · 비디오월은 존 HW 목록 수량과 같음. 실 크기는 존 배치도 값이고 장비 치수·위치·랙 실장·전력은 가정임(실측 후 확정). 장비를 누르면 존 HW 표의 해당 행으로 이동함.</p>
+  <h3>2D 평면 (1칸 = 1m)</h3>
+  <figure class="fig">{space_2d()}{sp_legend()}</figure>
+  <h3>3D 배치 (아이소메트릭, 앞쪽 벽 생략)</h3>
+  <figure class="fig">{space_3d()}{sp_legend()}
+  <figcaption>존 주통로 상부 트레이(높이 2.3m)가 서버실로 들어와 랙 열 위를 지나고, 같은 높이의 트레이가 벽을 넘어 관제실 데스크 4석과 비디오월로 내려감. UPS 전원은 랙 후면을 따라 이중 PDU로 들어감.</figcaption></figure>
+  <h3>랙 실장도 (42U)</h3>
+  <figure class="fig">{sp_rack_svg()}<figcaption>스토리지 노드는 랙당 36U 이내로 나눠 실음. 나머지 칸은 증설·배선 여유임.</figcaption></figure>
+  <h3>공간·전력·냉방 요건</h3>
+  {sp_req_table()}
+  {sp_power_table()}
+</section>'''
+
+
+# ------------------------------------------------------------------ UNS 설계 개념
+# 기준: [U1] 「UNS 기반 FacOS의 통신 방식 검토: OPC UA와 MQTT의 역할 분담 및 병행 구성」(캠틱, 2026-11-09, 메타팩토리 1.0.88)
+#       토픽 트리는 메타팩토리 js/uns.js(camtic/metafactory, 존 코드 main = 정밀조립)와 같게 씀. 셀 ID 표기(A-3-5)는 이 페이지 예시
+UNS_CSS = """<style>
+.unst{fill:var(--ink);font-family:var(--mono);font-size:11.5px;white-space:pre}
+.unsc{fill:var(--teal);font-family:var(--font);font-size:10.5px}
+.fl-m{stroke:var(--muted);stroke-width:1.8;fill:none;stroke-dasharray:3 4}
+table.unstbl td.tp{font-family:var(--mono);font-size:12px;white-space:nowrap;color:var(--navy2)}
+table.unstbl td{min-width:0!important}
+</style>"""  # 이 페이지 전용(EXTRA는 OCS 시뮬레이션 Cell 3종과 공유)
+UNS_ROOT = "camtic/metafactory"
+UNS_Z = f"{UNS_ROOT}/main"          # Area = 정밀조립존
+UNS_SP = "spBv1.0/metafactory"      # Sparkplug B 영역
+N_MOBILE = (dict(ROBOTS)["AMR"] + dict(ROBOTS)["AMMR 양팔로봇"]) * 5
+
+
+def uns_svg():
+    o = ['<svg class="arch plan" viewBox="0 0 1140 600" role="img" aria-label="FacOS 연계 존 로컬 UNS 브로커 중심 발행·구독 구성도" style="max-width:1140px">',
+         '<defs><marker id="um1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--cyan)"/></marker>'
+         '<marker id="um2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9DB8E8"/></marker></defs>']
+
+    def box(x, y, w, h, t, s):
+        o.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="5" class="box"/>')
+        o.append(f'<text x="{x + w / 2}" y="{y + h / 2 - 3}" class="boxt">{E(t)}</text><text x="{x + w / 2}" y="{y + h / 2 + 13}" class="boxs">{E(s)}</text>')
+
+    def flow(x1, x2, y, t, cls="fl-d", both=False):
+        mk = "um1" if cls == "fl-d" else "um2"
+        o.append(f'<line x1="{x1}" y1="{y}" x2="{x2}" y2="{y}" class="{cls}" marker-end="url(#{mk})"' + (f' marker-start="url(#{mk})"' if both else "") + "/>")
+        o.append(f'<text x="{(x1 + x2) / 2}" y="{y - 7}" class="fl-t" text-anchor="middle" font-size="10.5">{E(t)}</text>')
+
+    # 중앙 (L3·L4)
+    o.append('<rect x="400" y="8" width="340" height="50" rx="6" class="ly ly1"/><text x="570" y="30" class="lyt" text-anchor="middle">DCC — FacOS 코어 · UNS 중앙 브로커</text>'
+             '<text x="570" y="48" class="lys" text-anchor="middle">L3·L4 · Fac Hub · MES (D-1-1 · D-2-1)</text>')
+    o.append('<line x1="530" y1="122" x2="530" y2="62" class="fl-d" marker-end="url(#um1)"/><text x="520" y="96" class="fl-t" text-anchor="end">존 상태·KPI·품질 (브리지 · store&amp;forward)</text>')
+    o.append('<line x1="610" y1="62" x2="610" y2="122" class="fl-c" marker-end="url(#um2)"/><text x="620" y="96" class="fl-t">_facos 결정·오더 · cmd/request</text>')
+
+    # 설비 접점
+    o.append('<rect x="0" y="130" width="290" height="254" rx="6" class="ly ly3"/><text x="14" y="154" class="lyt">발행 — 설비 접점 (셀)</text>')
+    for i, (t, s, lab, both) in enumerate([("Edge Gateway ×5 (L1.5 · FacOS F1)", "설비 OPC UA 구독 → 매핑 표 → Sparkplug B", "DDATA ↑ · cmd ↓", True),
+                                           ("영상 수집 노드 ×5", "비전 결과·에피소드 메타 (원본은 Class E)", "결과·메타", False),
+                                           (f"AMR·AMMR ×{N_MOBILE} (5G·Wi-Fi)", "ROS2·VDA5050 브리지 → _field/{로봇}", "status·detect", False)]):
+        box(10, 166 + i * 72, 270, 60, t, s)
+        flow(292, 392, 196 + i * 72, lab, both=both)
+    o.append('<rect x="0" y="400" width="290" height="94" rx="6" class="ly ly1"/><text x="14" y="424" class="lyt">의미 기준</text>')
+    box(10, 432, 270, 52, "AAS Repository·Registry", "NodeId–토픽 매핑 표 · Semantic ID · 단위")
+    o.append('<line x1="292" y1="458" x2="392" y2="458" class="fl-m"/><text x="342" y="451" class="fl-t" text-anchor="middle" font-size="10.5">opcua/json · 매핑</text>')
+
+    # 존 로컬 브로커 (L2 통합)
+    o.append('<rect x="400" y="130" width="340" height="364" rx="6" class="ly ly2"/><text x="414" y="154" class="lyt">존 로컬 UNS 브로커</text>'
+             '<text x="726" y="154" class="lys" text-anchor="end">L2 통합 · Mosquitto 2 (MQTT 5)</text>')
+    o.append('<rect x="412" y="166" width="316" height="290" rx="5" class="box"/>')
+    tree = [(f"{UNS_ROOT}/", "Enterprise / Site"),
+            (" ├ _facos/…", "공장 결정·오더 (중앙)"),
+            (" ├ main/", "Area = 정밀조립존"),
+            (" │  ├ _zone/state · kpi · quality", ""),
+            (" │  ├ A-3-5/state", "셀 OCS 상태 7종"),
+            (" │  ├ A-3-5/telemetry", "설비 요약"),
+            (" │  ├ A-3-5/edge", "EGW 생존 (retain)"),
+            (" │  ├ A-3-5/cmd · ack · exec · done", ""),
+            (" │  └ _field/{로봇}/status …", "AMR·AMMR"),
+            (f"{UNS_SP}/…", "Sparkplug B (EGW)"),
+            ("opcua/json/…", "AAS PubSub JSON")]
+    for i, (t, c) in enumerate(tree):
+        y = 190 + i * 24
+        o.append(f'<text x="424" y="{y}" class="unst" xml:space="preserve">{E(t).replace(" ", chr(160))}</text>')
+        if c:
+            o.append(f'<text x="718" y="{y}" class="unsc" text-anchor="end">{E(c)}</text>')
+    o.append('<text x="570" y="478" class="lys2" text-anchor="middle">상태 = retain + 변화 보고 · 명령 = correlationId 4단계</text>')
+    o.append('<rect x="394" y="124" width="352" height="376" rx="10" class="own"/>')
+    o.append('<text x="570" y="518" class="owntag" text-anchor="middle">정밀조립존 UNS 구간 — FacOS F2 데이터 패브릭 (존 로컬 브로커)</text>')
+
+    # 운영 계층 L3
+    o.append('<rect x="850" y="130" width="290" height="364" rx="6" class="ly ly3"/><text x="864" y="154" class="lyt">구독 — 운영 계층 L3 (Local Server)</text>')
+    for i, (t, s, lab, both) in enumerate([("Sparkplug 주 호스트", "spBv1.0 → {셀}/telemetry · edge 변환", "DDATA", False),
+                                           ("존 오케스트레이터 (OCS)", "Manufacturing Agent · cmd 발행(zone 역할)", "state ↔ cmd", True),
+                                           ("Operational TSDB", "전 토픽 구독 → 이력 적재", "전체", False),
+                                           ("디지털트윈 (검증·학습 DT)", "실시간 미러 · 리플레이 트리거", "state·telemetry", False),
+                                           ("품질 · KPI · AI 추론", "quality · kpi 구독 · 이상 판단 입력", "quality·kpi", False),
+                                           ("검증 연계 Trace API (TTA)", "cmd 4단계 · 상태 전이 Trace 수집", "cmd·state", False)]):
+        box(860, 164 + i * 54, 270, 46, t, s)
+        flow(748, 848, 187 + i * 54, lab, both=both)
+
+    # UNS 미경유
+    o.append('<rect x="0" y="530" width="1140" height="62" rx="6" class="ly ly4"/><text x="14" y="557" class="lyt">UNS 미경유</text><text x="14" y="575" class="lys" style="fill:#fff">FacOS 비경유 경로</text>')
+    for i, (t, s) in enumerate([("고속 시계열 원본 (관절 100Hz · F/T 1kHz)", "Edge TSDB → Operational TSDB 묶음 전송"),
+                                ("영상 · Depth · LiDAR 원본 (Class E)", "영상 수집 노드 → S3 → Data Lake"),
+                                ("로봇 · 서보 실시간 제어", "TSN · 셀 PLC EtherCAT (안전 정지는 안전 PLC)")]):
+        box(150 + i * 330, 538, 320, 46, t, s)
+    o.append("</svg>")
+    return "".join(o)
+
+
+# ① 계층 대응 — [U1] 표 5-1 계층 ↔ 이 페이지 구성요소. FacOS F1~F4는 네트워크 구성안 [U2]의 제안 매핑
+UNS_LAYERS = [
+    ("L4 공장·외부", "MES · ERP · 클라우드 · 외부 브로커", "중앙 Server(D-1-1) · DCC(D-2-1)", "F4 업무 앱", "MQTT 5 구독 · 브리지"),
+    ("L3 운영", "FacOS · 존 오케스트레이터 · 품질 · KPI · AIOS", "DCC의 FacOS 코어 / Local Server의 존 오케스트레이터(OCS) · 품질·KPI · AI 추론 · DT · Trace API", "F3 지능화 · F4", "MQTT 5 발행·구독"),
+    ("L2 통합 = UNS", "브로커 · ACL 6역할 · LWT", "존 로컬 UNS 브로커(Local Server, Active-Standby) ↔ DCC 중앙 브로커 브리지", "F2 데이터 패브릭", "MQTT 5"),
+    ("L1.5 엣지 게이트웨이", "OPC UA 클라이언트 · 매핑 표 · Sparkplug 엣지 노드", f"Edge Gateway 셀별 1대(운용 {N_CELL}대 + 예비 1대)", "F1 설비 연결", "OPC UA ↔ Sparkplug B"),
+    ("L1 설비", "로봇 제어기 · PLC · 너트러너 등", "셀 PLC · 협동로봇 · 공정설비(OPC UA 서버) / 이동체는 ROS2·VDA5050 브리지", "F1 설비 연결", "OPC UA 서버"),
+]
+
+# ② 허용·제외 규칙 — [U1] 표 4-2
+UNS_RULES = [
+    ("운영 SW의 설비 데이터 읽기", "UNS 토픽 구독", "설비 OPC UA 서버 직접 접속", "OCS·DT·TSDB·AI는 존 로컬 브로커만 구독. 서버실 → 설비 OPC UA(4840/tcp)는 방화벽에서 막고 Edge Gateway → 설비 방향만 허용"),
+    ("FacOS · 존 → 셀 명령", "cmd → ack → exec → done (MQTT 5)", "Local Server에서 OPC UA Method 직접 호출", "HOLD·재개·재배정은 존 오케스트레이터가 cmd로 내리고 Edge Gateway가 Method로 역변환. 결정·승인·기록 경로를 우회하지 않음"),
+    ("외부 시스템 → 존 명령", "cmd/request + Response Topic", "브로커 임의 토픽 쓰기", "operator · zone 역할 계정만 cmd/request 가능. 권한 밖 쓰기는 MQTT 5 사유 0x87로 거부"),
+    ("설비 값 → UNS", "게이트웨이 1곳에서 변환 발행", "같은 값을 두 게이트웨이가 발행", "셀마다 Edge Gateway 1대만 발행. 예비 1대는 냉예비로 두고 교체 시에만 기동(동시 발행 금지)"),
+    ("데이터 형식", "토픽 영역별 단일 형식", "Sparkplug B와 PubSub JSON을 한 토픽에 혼합", f"{UNS_SP}/… = Sparkplug B / {UNS_ROOT}/… = ISA-95 JSON / opcua/json/… = AAS PubSub JSON"),
+]
+
+# ③ 토픽 이름공간 — 메타팩토리 1.0.88 js/uns.js 트리
+UNS_TOPICS = [
+    (f"{UNS_ROOT}/_facos/order/{{오더}}", "retain", "FacOS (중앙)", "존 오케스트레이터", "오더(ISA-95 OperationsRequest 꼴). 존에는 브리지로 내려옴"),
+    (f"{UNS_ROOT}/_facos/decision/{{종류}}", "이벤트", "FacOS (중앙)", "존 오케스트레이터 · Trace API", "공장 결정 — 대상·권한자·버전·제약·재개 조건"),
+    (f"{UNS_Z}/_zone/state", "retain", "존 오케스트레이터", "FacOS · DCC", "존 상태 — 셀 수, 셀 OCS 상태별 대수, 오더 대조"),
+    (f"{UNS_Z}/_zone/kpi · quality", "이벤트", "품질·KPI", "FacOS · DCC · TSDB", "OEE, 제품 1개 판정마다 품질 표본"),
+    (f"{UNS_Z}/A-3-5/state", "retain", "셀 OCS", "존 오케스트레이터 · DT · TSDB", "셀 OCS 상태 7종: IDLE · READY · RUN · DONE · HOLD · RECOVER · SAFE-STOP"),
+    (f"{UNS_Z}/A-3-5/telemetry", "이벤트", "Sparkplug 주 호스트", "DT · AI 추론 · TSDB", "설비 요약(체결 토크·판정, 로봇 상태 등) — Sparkplug DDATA를 변환해 실음"),
+    (f"{UNS_Z}/A-3-5/edge", "retain", "Sparkplug 주 호스트", "모니터링 · 존 오케스트레이터", "Edge Gateway 생존(online). 단절 시 NDEATH → offline"),
+    (f"{UNS_Z}/A-3-5/cmd · cmd/ack · cmd/exec · cmd/done", "이벤트", "존 오케스트레이터 → Edge Gateway", "Edge Gateway · Trace API", "명령 4단계. 같은 correlationId로 묶음"),
+    (f"{UNS_Z}/A-3-5/cmd/request", "이벤트", "외부(operator · zone 계정)", "존 오케스트레이터", "외부 명령 요청 + Response Topic · Message Expiry"),
+    (f"{UNS_Z}/_field/{{로봇}}/status · detect · done", "status만 retain", "AMR · AMMR(브리지)", "존 오케스트레이터 · DT", "이동체 현장 이벤트(5G·Wi-Fi 업링크)"),
+    (f"{UNS_SP}/NBIRTH · NDATA · NDEATH/{{EGW}}", "Sparkplug B", "Edge Gateway(edge 역할)", "Sparkplug 주 호스트", "엣지 노드 탄생·데이터·단절(LWT)"),
+    (f"{UNS_SP}/DBIRTH · DDATA · DDEATH/{{EGW}}/{{설비}}", "Sparkplug B", "Edge Gateway(edge 역할)", "Sparkplug 주 호스트", "설비별 메타데이터(단위·범위)와 변화분, seq 증가"),
+    ("opcua/json/…", "PubSub JSON", "AAS Repository · Edge Gateway", "DT · 외부 기관", "AAS·Companion Spec 의미를 그대로 넘기는 교환에만 사용"),
+]
+
+# ④ 데이터·명령 왕복 경로 — [U1] 표 6-1 (A-3-5 ST3 체결 → HOLD 예)
+UNS_TRIP = [
+    ("①", "설비 → Edge Gateway", "너트러너 토크·각도, PLC STEP, 로봇 상태 + StatusCode · SourceTimestamp", "OPC UA 구독"),
+    ("②", "Edge Gateway → UNS", "NBIRTH/DBIRTH 후 변화분 DDATA, seq 증가", "Sparkplug B"),
+    ("③④", "UNS → 존 오케스트레이터 · FacOS · DT · TSDB", f"{UNS_Z}/A-3-5/state · telemetry, _zone/quality", "MQTT 5 구독"),
+    ("⑤", "FacOS · MES → UNS", "cmd/request + Correlation Data · Response Topic · Message Expiry", "MQTT 5"),
+    ("⑥", "UNS → Edge Gateway", "A-3-5/cmd (HOLD) — operator · zone 역할만 쓰기", "MQTT 5 + ACL"),
+    ("⑦", "Edge Gateway → 설비", "셀 PLC Method 호출 · 쓰기, 동기 결과", "OPC UA"),
+    ("⑧", "Edge Gateway → UNS", "cmd/ack → cmd/exec → cmd/done (같은 correlationId). 접수 ACK만으로 재개하지 않음", "MQTT 5"),
+    ("⑨", "UNS → FacOS", "Response Topic 회신, FacOS 기록 저장 · TTA Trace 수집", "MQTT 5"),
+]
+
+# ⑤ 정합 규칙 — [U1] 표 7-1
+UNS_MAP = [
+    ("이름", "NodeId · BrowsePath", "ISA-95 토픽 · Sparkplug metric 이름", "Edge Gateway 매핑 표 1개로 관리. 표의 원본은 AAS 서브모델(Semantic ID)에 두고 설비 교체 시 표만 갱신"),
+    ("데이터 형식", "Built-in DataType", "Sparkplug DataType", "형식 대응표 고정. 미지원 형식은 String + 단위 메타데이터"),
+    ("품질", "StatusCode", "quality 속성 · 품질 토픽", "Good / Uncertain / Bad 3단으로 축약, 원 코드는 속성에 보존"),
+    ("시각", "SourceTimestamp · ServerTimestamp", "Sparkplug timestamp(ms)", "SourceTimestamp 우선. 존 PTP 그랜드마스터와 동기"),
+    ("메타데이터", "단위 · 범위 · EngineeringUnits", "DBIRTH metric 속성 · _meta 토픽", "BIRTH 때 1회 발행, 바뀌면 rebirth"),
+    ("명령", "Method(동기)", "cmd 4단계(비동기 · correlationId)", "Method 결과 → cmd/done, 시간 초과 → done(실패 사유)"),
+    ("보안", "X.509 인증서 · 사용자 토큰", "ACL 역할 · 비밀번호 · TLS", "Edge Gateway 계정 = edge 역할. 설비 인증서는 Edge Gateway만 보유(보안 스택 PKI에서 발급)"),
+    ("기준 데이터", "설비 서버가 원천", "UNS 현재값(retain)이 상위 기준", "Local Server·DCC는 UNS로만 읽음"),
+]
+
+# ⑥ 데이터 종류별 경로
+UNS_PATHS = [
+    ("셀 상태 · 존 상태 · 오더", "올림 (retain)", f"셀 OCS → {UNS_Z}/{{셀}}/state → 존 오케스트레이터 · FacOS · DT · TSDB", "여러 시스템이 동시에 소비하고 새 구독자가 마지막 값을 바로 받아야 함"),
+    ("설비 값 · 공정 결과 (변화분)", "올림", f"설비 OPC UA → Edge Gateway → Sparkplug B DDATA → {{셀}}/telemetry", "변화분만 보내도 되는 값. Class D(50~1,000ms) 수집 경로"),
+    ("품질 표본 · KPI", "올림", f"품질·KPI → {UNS_Z}/_zone/quality · kpi", "FacOS·DCC·TSDB가 같은 값을 씀"),
+    ("명령(HOLD · 재개 · 재배정) · 결정", "올림 (cmd 4단계)", "존 오케스트레이터 → UNS → Edge Gateway → OPC UA Method", "결정·승인·기록 경로 유지. TTA Expected ↔ Actual Trace 비교에도 같은 기록을 씀"),
+    ("고속 시계열 원본 (관절 100Hz · F/T 1kHz · 20ms 등급)", "요약만", "원본: Edge TSDB → Operational TSDB 묶음 전송 / UNS: 변화분·요약",
+     "건별 발행은 브로커 부하가 크고 운영 SW는 원본이 필요 없음. Edge Gateway 저장분을 복제하는 것이라 설비 직접 접속이 아니며, 현재값 기준은 UNS"),
+    ("영상 · Depth · LiDAR 원본", "결과·메타만", "원본: 영상 수집 노드 → S3 → Data Lake(Class E) / UNS: 비전 결과·에피소드 메타데이터",
+     f"존 월 {MONTH_TB:,.0f}TB의 98%가 영상. 메타데이터 토픽 이름은 기준 네임스페이스에 아직 없어 추가 정의 필요"),
+    ("AAS·정보모델 교환", "별도 영역", "AAS Repository ↔ opcua/json/… ↔ DT · 외부 기관", "의미 체계를 손실 없이 넘겨야 하는 경로에 한정(OPC UA PubSub over MQTT)"),
+    ("로봇 · 서보 실시간 제어 · 안전 정지", "올리지 않음", "TSN · 셀 PLC EtherCAT · 안전 PLC", "FacOS는 UNS 위에서 명령을 요청만 하고 최종 제어 권한이 없음 [W8]"),
+]
+
+# ⑦ 종전 대비 변경
+UNS_DIFF = [
+    ("Local Server ↔ Edge Gateway 통신", "OPC UA 통신(Client/Server · PubSub) [D1]", "UNS(MQTT 5) — Sparkplug B 발행·명령 4단계. OPC UA는 설비–Edge Gateway 접점에만 둠"),
+    ("브로커", "MQTT 브로커 클러스터(RabbitMQ 3노드), 중앙 전송용", "존 로컬 UNS 브로커(Mosquitto 2 · MQTT 5, Active-Standby) + DCC 중앙 브로커 브리지. RabbitMQ는 보존 메시지가 클러스터에 복제되지 않아 제외"),
+    ("Edge Gateway SW", "OPC UA 수집 → AAS 매핑 → Edge TSDB", "OPC UA 클라이언트 + NodeId–토픽 매핑 표 + Sparkplug B 엣지 노드 + cmd → Method 역변환 추가. Edge TSDB는 그대로"),
+    ("존 오케스트레이터 · DT · AI 입력", "TSDB 조회 또는 서비스별 개별 연동", "UNS 구독으로 통일. 이력이 필요할 때만 TSDB·Data Lake 조회"),
+    ("권한", "IAM·SSO · OPC UA 인증서", "브로커 ACL 6역할(observer · operator · zone · edge · host · admin) 추가. 존 계정은 zone-main"),
+    ("HW · 금액", "로컬 서버 3대에 브로커 탑재", "변동 없음(설계 추정). 존당 수백 msg/s · 1Mbps 미만이라 2 vCPU · 4GB면 충분 [U2]"),
+]
+
+# 단계별 적용 — [U1] 표 9-1
+UNS_STAGE = [
+    ("S1 정비", "표기", "메타팩토리 패킷 덤프 MQTT 5 형식 반영", "화면·테스트 일치", "이 페이지와 무관(메타팩토리 앱 작업)"),
+    ("S2 시험", "게이트웨이 시제", "OPC UA 시뮬레이터 서버 → Edge Gateway → Sparkplug 발행", "BIRTH · DDATA · 품질 · 시각 변환 일치", "Edge Gateway 1대로 시제. 미통과 시 PubSub JSON만으로 우선 연결"),
+    ("S3 명령", "Method 역변환", "cmd → Method 호출 → cmd/done, 시간 초과 처리", "4단계 전 구간 correlationId 일치", "미통과 시 명령은 존 오케스트레이터 시뮬레이션 유지"),
+    ("S4 실장비", "실제 설비 1개 셀", "매핑 표 작성, 인증서 · ACL 정합", "1개 셀 상태 · 명령 왕복 확인", "A-3-5를 대상 셀로 제안(1차년도 구축 셀). 세부1과 확정 필요"),
+]
+
+# Fac 규약 v0.1 토픽 대응 — 미합의(제안)
+UNS_FAC = [
+    ("jbnu/v1/devices/{deviceId}/data/{group}", f"{UNS_SP}/DDATA/{{EGW}}/{{설비}} · {UNS_Z}/{{셀}}/telemetry", "설비 중심 ↔ 장소 중심. 존 브로커에서 병행 발행(변환)"),
+    ("jbnu/v1/devices/{deviceId}/info · info/tags", "AAS Repository · Sparkplug DBIRTH", "장비 정보(ID·위치·수행 가능 명령·토픽)를 AAS에서 생성"),
+    ("jbnu/v1/control/req · control/resp", f"{UNS_Z}/{{셀}}/cmd/request → cmd · ack · exec · done", "요청·응답 2단 ↔ 명령 4단계. correlationId로 대응"),
+    ("jbnu/v1/sys/status", f"{UNS_Z}/{{셀}}/edge · {UNS_SP}/NDEATH", "게이트웨이 생존 상태"),
+    ("deviceId", "AAS ID ↔ Sparkplug 설비 ID ↔ 토픽 설비 이름", "설비 ID 대장 1개로 관리"),
+]
+
+
+def uns_table(rows, head, mono=()):
+    th = "".join(f"<th>{E(h)}</th>" for h in head)
+    body = "".join("<tr>" + "".join(
+        (f'<th scope="row">{E(c)}</th>' if i == 0 and 0 not in mono else f'<td class="tp">{E(c)}</td>' if i in mono else f"<td>{E(c)}</td>")
+        for i, c in enumerate(r)) + "</tr>" for r in rows)
+    return f'<div class="tbl-wrap"><table class="bom issuetbl unstbl"><thead><tr>{th}</tr></thead><tbody>{body}</tbody></table></div>'
+
+
 ISSUES = [
     ("예산", "예산 출처", "협약 계획에 정밀조립존 OCS Cell 품목이 없음. 금액은 상용 장비·라이선스 기준", "편성 근거가 없으면 구매 불가", "예산 편성 근거 마련, NIPA 협의"),
     ("예산", "견적 미확보 품목", "[추정] 단가 다수. 금액 영향이 큰 것은 Thor 산업용 엣지(MIC-743) 55대, KTNF 서버·스토리지 12대, 방화벽·PTP·항온항습기", "총액 오차가 큼", "제조사가 다른 비교견적 2건 확보"),
@@ -990,8 +1529,11 @@ ISSUES = [
     ("데이터", "보관 정책", f"원시데이터 {RET_M}개월 + AI Ready {AIR_RET}개월 로컬 보관(필요 {NEED_TB:,.0f}TB, 스토리지 {N_STO}노드). 9/21 회의는 원시 약 1개월 언급", f"1개월이면 약 {NEED_1M:,.0f}TB·6노드로 감소", "보관 기간 결정"),
     ("기술", "장비 통신 방식", "OPC UA 수집을 오픈소스(open62541·PLC4X)로 자체 구성, Kepware 미사용", "고유 프로토콜 장비가 많으면 드라이버 개발 부담 증가", "셀 장비 발주 사양에 'OPC UA 서버 내장 또는 Modbus·EtherNet/IP 지원' 명시, 예외 장비는 Kepware 1~2카피로 보완"),
     ("데이터", "데이터량 가정", "카메라 비트레이트·Depth 기록·운용 중 연속 기록·검사 카메라 제외를 가정", f"Depth를 기록하지 않으면 월 약 {tb_month(N_CAM * 4 + SZ[0]['tel_mbps']) * len(SZ):,.0f}TB, 지금 가정은 {MONTH_TB:,.0f}TB로 가정에 따라 크게 변동", "카메라 설정·기록 정책 확정 후 재산정"),
+    ("연계", "UNS 토픽 규약 정합", "이 페이지는 캠틱 안(camtic/metafactory/main/…, 11/9 검토 보고서)을 따름. 세부1 Fac 규약 v0.1(jbnu/v1/devices/…)과 체계가 다르고, 존별 로컬 브로커 + 중앙 브리지 구조·Sparkplug B 채택도 합의 전", "규약이 갈리면 FacOS 이식 때 Edge Gateway·브리지 재작업", "세부1과 규약 확장 협의, 합의 전까지 두 체계 병행 발행(1-1절 ⑧)"),
+    ("기술", "UNS 게이트웨이 미구현 3건", "OPC UA 클라이언트(게이트웨이) · NodeId–토픽 매핑 표 · Method 역변환이 메타팩토리 1.0.88 기준 미구현. 일정은 실장비 확보 시점에 확정", "Edge Gateway가 UNS 입구 역할을 못 하면 셀 상태·명령 왕복 불가", "S2 게이트웨이 시제 → S3 명령 역변환 → S4 실장비 1개 셀(A-3-5 제안) 순서로 검증, 매핑 표 담당 지정"),
+    ("연계", "표준 아키텍처 표기 변경", "원안 [D1]의 Local Server–Edge Gateway “OPC UA 통신”을 이 페이지는 UNS(MQTT 5)로 바꿔 그렸음", "다른 실증 존 구성과 표기 불일치", "공통 아키텍처 개정 여부를 총괄 회의에서 확인"),
     ("연계", "중앙 연계", "중앙 Server(AAS 통합서버 D-1-1)가 GPU를 뺀 스토리지 컨셉으로 재견적 중(10/7)", "추론 역할 중복·공백", "로컬 GPU 서버(추론)와 역할 경계 합의"),
-    ("설치", "서버실 여건", f"존 서버실 28.8㎡에 랙 3개·UPS·항온항습기, 부하 약 {2.4 + 4.0 + N_STO * 0.5 + 1.3:.0f}kW", "전력·하중 부족 시 위치 변경", "전력·하중·층고 실측"),
+    ("설치", "서버실 여건", f"존 서버실 28.8㎡에 랙 {N_RACK}개·UPS {N_UPS}대·항온항습기, 부하 약 {LOAD_KW:.0f}kW(배치안은 3-1절)", "전력·하중 부족 시 위치 변경", "전력·하중·층고 실측"),
 ]
 
 
@@ -1008,6 +1550,11 @@ REFS = [
      "2026-09-17 · 09-21 · 09-22", "llm-wiki concepts", "실시간 제어 분리, AAS 태그 수, 자체 개발 인력 리스크"),
     ("W9", "llm-wiki", "피지컬AI 의사결정 미팅 — \"OCS 셀 = 존 오케스트레이터 겸 로컬 서버\" · 정밀조립 Zone 운영 시나리오 수정 v3 — 로컬 오케스트레이터 = Manufacturing Agent, DT 검증 계층",
      "2026-10-06", "llm-wiki sources", "요약표 역할(디지털트윈·존 오케스트레이터)"),
+    ("U1", "내부 자료", "[검토 보고서] UNS 기반 FacOS의 통신 방식 검토: OPC UA와 MQTT의 역할 분담 및 병행 구성 (캠틱, 메타팩토리 1.0.88 기준)", "2026-11-09", "FacOS_UNS_OPCUA_MQTT_검토.docx",
+     "1-1절 전체(계층·허용/제외 규칙·왕복 경로·정합 규칙·단계), 논리 구성도 UNS 표기, 요약표"),
+    ("U2", "내부 자료", "피지컬AI 테스트베드 5G 유·무선 통합 네트워크 구성(안) — FacOS × UNS 연계 장 · 메타팩토리 UNS 네임스페이스(js/uns.js)", "2026-11-10 판", "네트워크 구성안 pptx · meta-factory 저장소",
+     "FacOS F1~F4 대응, 토픽 트리, 존 로컬·중앙 브로커 구성, 브로커 사양 추정"),
+    ("U3", "총괄1-세부1 자료", "FacOS Fac 규약 v0.1 발표자료 — UNS 인터페이스(AsyncAPI 토픽 7종)", "2026-10-02", "FacOS_Fac_규약_v0.1_261002.pptx", "1-1절 ⑧ Fac 규약 토픽 대응"),
     ("-", "작업 산출물", "셀 구성·현장 장비 수: 셀 구성 계획(내부 작업본, 웹 미공개)", "2026-10-07", "저장소 build_page.py · cells_data.py", "존 배치도, 셀별 공정설비 수"),
 ]
 
@@ -1032,13 +1579,13 @@ def page():
     return f'''<title>로컬 OCS Zone 구성 - (예시) 정밀조립존</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
-{CSS}{EXTRA}
+{CSS}{EXTRA}{UNS_CSS}{SPACE_CSS}{PZ_SPACE_CSS}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 · A-3 정밀조립(Micro) Zone · 피지컬AI 제조 데이터 구축(2-2) 수집–저장 표준 아키텍처 적용 · 2026.10.07 작성 · 2026.10.09 갱신 · 설계 추정본</p>
+  <p class="eyebrow">총괄5-세부1 · A-3 정밀조립(Micro) Zone · 피지컬AI 제조 데이터 구축(2-2) 수집–저장 표준 아키텍처 적용 · 2026.10.07 작성 · 2026.10.09 갱신 · 2026.11.11 UNS 설계 개념 보완 · 설계 추정본</p>
   <h1>로컬 OCS Zone 구성 - (예시) 정밀조립존</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
-  <a href="#sum">요약</a><a href="#logic">논리 구성도</a><a href="#topo">연결 토폴로지</a><a href="#floor">설치 배치</a>
+  <a href="#sum">요약</a><a href="#logic">논리 구성도</a><a href="#uns">UNS</a><a href="#topo">연결 토폴로지</a><a href="#floor">설치 배치</a><a href="#space">공간 구성 2D·3D</a>
   <a href="#size">데이터량</a><a href="#price">총액</a><a href="#hw">존 HW</a><a href="#sw">존 SW</a><a href="#chw">셀 HW</a><a href="#csw">셀 SW</a><a href="#issues">확인 필요</a><a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
@@ -1053,7 +1600,34 @@ def page():
 <section id="logic">
   <p class="eyebrow">1. 논리 구성</p>
   <h2>AAS 기반 수집–저장 공통 아키텍처</h2>
-  <figure class="fig">{logical_svg()}<figcaption>바탕은 「2-2. 피지컬AI 제조 데이터 구축 — AAS 기반 데이터 수집-저장 표준 아키텍처(안)」. 모든 실증 존이 같은 계층 구조로 존마다 OCS Cell(주황 테두리: Local Server + Edge Gateway)을 두고 중앙 Server와 TTA 검증 영역에 연계함. 초록 테두리는 현장(실증 존별 셀)임. 청록 강조는 이 페이지의 예시인 정밀조립 존임. 아래 연결 토폴로지·설치 배치·데이터량·HW·SW 목록은 이 공통 구조를 정밀조립존에 적용한 예시임.</figcaption></figure>
+  <figure class="fig">{logical_svg()}<figcaption>바탕은 「2-2. 피지컬AI 제조 데이터 구축 — AAS 기반 데이터 수집-저장 표준 아키텍처(안)」. 모든 실증 존이 같은 계층 구조로 존마다 OCS Cell(주황 테두리: Local Server + Edge Gateway)을 두고 중앙 Server와 TTA 검증 영역에 연계함. 초록 테두리는 현장(실증 존별 셀)임. 청록 강조는 이 페이지의 예시인 정밀조립 존임. 아래 연결 토폴로지·설치 배치·데이터량·HW·SW 목록은 이 공통 구조를 정밀조립존에 적용한 예시임. 원안 [D1]의 Local Server–Edge Gateway 구간 “OPC UA 통신”은 11/9 검토 보고서 [U1] 기준에 따라 UNS(MQTT 5)로 바꿔 그렸고, OPC UA는 설비–Edge Gateway 접점에 둠(1-1절).</figcaption></figure>
+</section>
+
+<section id="uns">
+  <p class="eyebrow">1-1. UNS 설계 개념 — FacOS 연계</p>
+  <h2>UNS(Unified Namespace) — 중심 통로는 MQTT 5, 설비 접점은 OPC UA</h2>
+  <p class="note-box">기준은 「UNS 기반 FacOS의 통신 방식 검토: OPC UA와 MQTT의 역할 분담 및 병행 구성」(캠틱, 2026-11-09) [U1]임. <b>FacOS UNS의 중심 통로는 MQTT 5 + Sparkplug B + ISA-95 토픽, OPC UA는 설비 접점</b>에 둠. 정밀조립존에서는 Edge Gateway가 설비 OPC UA를 읽어 UNS로 올리는 유일한 입구(L1.5)가 되고, Local Server의 운영 SW는 설비에 직접 접속하지 않고 존 로컬 UNS 브로커만 구독함. 토픽은 메타팩토리와 같은 <b>camtic/metafactory/main/…</b> 트리를 씀(셀 ID 표기는 예시). 이 절은 설계안이며 세부1(FacOS)과 합의된 사양이 아님.</p>
+  <figure class="fig">{uns_svg()}<figcaption>주황 테두리가 정밀조립존의 UNS 구간(존 로컬 브로커)임. 실선(청록)은 상태·데이터 흐름, 점선은 명령·결정과 의미 조회임. Edge Gateway 화살표는 양방향으로, 올라갈 때는 Sparkplug B DDATA, 내려올 때는 cmd를 받아 OPC UA Method로 바꿈. 맨 아래 세 경로는 UNS(FacOS)를 거치지 않음.</figcaption></figure>
+  <h3>① 계층 대응</h3>
+  {uns_table(UNS_LAYERS, ("계층 [U1]", "검토 보고서 구성요소", "정밀조립존 OCS 구성요소", "FacOS 계층 [U2]", "통신 방식"))}
+  <p class="note-box">FacOS 계층(F1 설비 연결 · F2 데이터 패브릭 · F3 지능화 · F4 업무 앱) 대응은 네트워크 구성안 [U2]의 제안 매핑임. 로봇·서보 제어 경로(TSN·EtherCAT)는 FacOS를 거치지 않음.</p>
+  <h3>② 경로별 허용·제외 규칙</h3>
+  {uns_table(UNS_RULES, ("대상", "허용 경로", "제외 경로", "정밀조립존 적용"))}
+  <h3>③ 토픽 이름공간 — ISA-95 트리 · Sparkplug B · PubSub JSON 영역 분리</h3>
+  {uns_table(UNS_TOPICS, ("토픽", "성격", "발행", "구독", "내용"), mono=(0,))}
+  <p class="note-box">상태는 값이 바뀔 때만 발행(Report by Exception)하고 retain으로 마지막 값을 남김. 이벤트는 retain 없이 그때그때 발행함. 모든 본문에 ts를 넣고 기준 시계는 PTP 그랜드마스터임. 토픽 금지 문자(+ # / 공백)는 _로 바꿈.</p>
+  <h3>④ 데이터·명령 왕복 경로</h3>
+  {uns_table(UNS_TRIP, ("단계", "구간", "전달 내용 (A-3-5 ST3 체결 → HOLD 예)", "규약"))}
+  <h3>⑤ OPC UA – UNS 정합 규칙</h3>
+  {uns_table(UNS_MAP, ("항목", "OPC UA 쪽", "UNS 쪽 (MQTT · Sparkplug)", "변환 규칙"))}
+  <h3>⑥ 데이터 종류별 경로 — UNS에 올리는 것과 올리지 않는 것</h3>
+  {uns_table(UNS_PATHS, ("데이터", "UNS", "경로", "이유"))}
+  <h3>⑦ 종전 구성에서 바뀌는 것과 적용 단계</h3>
+  {uns_table(UNS_DIFF, ("항목", "종전 안", "변경 후"))}
+  {uns_table(UNS_STAGE, ("단계 [U1]", "대상", "내용", "통과 기준", "정밀조립존 적용"))}
+  <h3>⑧ Fac 규약 v0.1 토픽 대응 (협의 대상)</h3>
+  <p class="note-box">세부1 Fac 규약 v0.1 [U3]의 토픽은 설비 중심·단일 브로커 기준이라 위 장소 중심 트리와 체계가 다름. 합의 전까지 존 브로커에서 두 체계를 병행 발행하는 안이며, 아래 대응은 이 페이지의 제안임.</p>
+  {uns_table(UNS_FAC, ("Fac 규약 v0.1", "이 페이지 UNS", "대응 방법"), mono=(0, 1))}
 </section>
 
 <section id="topo">
@@ -1072,8 +1646,10 @@ def page():
   <ul class="lg"><li><svg width="16" height="12"><rect width="16" height="12" class="cabf"/></svg>셀 캐비닛</li>
   <li><svg width="16" height="12"><circle cx="6" cy="6" r="6" class="apf"/></svg>Wi-Fi 6E AP</li><li><svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" class="tray-l" style="stroke-width:6"/></svg>케이블 트레이</li>
   <li><svg width="16" height="12"><rect width="16" height="12" class="rackf"/></svg>서버 랙 A·B</li></ul>
-  <figcaption>존 배치도(셀 구성 계획 내부 작업본)의 엣지 서버·네트워크실과 로컬존 DCC 관제실을 OCS Cell 설치 공간으로 씀(주황 테두리). 랙·트레이 경로는 실측 후 확정함.</figcaption></figure>
+  <figcaption>존 배치도(셀 구성 계획 내부 작업본)의 엣지 서버·네트워크실과 로컬존 DCC 관제실을 OCS Cell 설치 공간으로 씀(주황 테두리). 랙·트레이 경로는 실측 후 확정함. 서버실·관제실 내부 배치는 아래 3-1절 2D·3D 배치도에 따로 그렸음.</figcaption></figure>
 </section>
+
+{space_section()}
 
 <section id="size">
   <p class="eyebrow">4. 데이터량 산정</p>
@@ -1099,7 +1675,7 @@ def page():
 <section id="sw">
   <p class="eyebrow">6. 존 SW</p>
   <h2>존 SW 품목·수량·용도·Use Case·추천 제품·가격</h2>
-  <p class="note-box">상용 라이선스(Machbase·DMWorks·HIWARE)만 금액을 잡았음. 오픈소스 기반 개발·구축 항목(open62541·PLC4X·RKE2·Triton·RabbitMQ 등)은 연구 인력 자체 개발(인건비 처리)로 0원임. 연 구독형 SW는 없음.</p>
+  <p class="note-box">상용 라이선스(Machbase·DMWorks·HIWARE)만 금액을 잡았음. 오픈소스 기반 개발·구축 항목(open62541·PLC4X·RKE2·Triton·Mosquitto 등)은 연구 인력 자체 개발(인건비 처리)로 0원임. 연 구독형 SW는 없음.</p>
   {item_table(SW, with_loc=False)}
 </section>
 
