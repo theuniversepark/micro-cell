@@ -14,5 +14,5 @@ if [ "${NO_DOCS:-}" = "1" ]; then
 else
   uv run --quiet --with python-docx --with beautifulsoup4 python export_docs.py
 fi
-# DMWorks 존별 옵션 구성 페이지·PDF·Word를 암호화(암호 입력 화면으로 바꿈). 암호(.quote_pw)가 없으면 빌드 실패
+# DMWorks 존별 옵션 구성·OCS 시뮬레이션 Cell 3종 페이지·PDF·Word를 암호화(암호 입력 화면으로 바꿈). 암호(.quote_pw)가 없으면 빌드 실패
 uv run --quiet --with cryptography python lock_page.py

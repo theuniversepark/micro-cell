@@ -1,13 +1,16 @@
-"""docs/dmworks_zones.html(DMWorks 존별 옵션 구성)을 암호 입력 화면으로 바꿈 — 본문·PDF·Word를 AES-256-GCM으로 암호화하고 브라우저에서 암호를 넣어야 복호화됨.
+"""docs/의 DMWorks 존별 옵션 구성·OCS 시뮬레이션 Cell 3종 페이지를 암호 입력 화면으로 바꿈 — 본문·PDF·Word를 AES-256-GCM으로 암호화하고 브라우저에서 암호를 넣어야 복호화됨.
 
 암호는 prep_quotes.py와 같은 곳(.quote_pw 파일 또는 QUOTE_PW 환경변수, 저장소 제외)에서 읽음. 암호가 없으면 평문이 공개되지 않도록 빌드를 실패로 끝냄.
-web_wrap.py·export_docs.py 뒤에 실행함(PDF·Word는 평문 HTML로 만든 뒤 암호화). 같은 내용·같은 암호면 결과가 같도록 salt는 고정, IV는 평문의 HMAC에서 만듦.
+web_wrap.py·export_docs.py 뒤에 실행함(PDF·Word는 평문 HTML로 만든 뒤 암호화). 같은 내용·같은 암호면 결과가 같도록 salt는 페이지별 고정, IV는 평문의 HMAC에서 만듦.
+한 번 맞게 넣은 암호는 탭을 닫을 때까지 기억(sessionStorage)해 네 페이지를 오갈 때 다시 묻지 않음.
 실행: uv run --with cryptography python lock_page.py"""
 import base64
 import hashlib
 import hmac
+import html
 import json
 import os
+import re
 import sys
 
 from cryptography.hazmat.primitives import hashes
@@ -16,10 +19,14 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 import web_wrap
 
-PAGE = "dmworks_zones"
-TITLE = "DMWorks 존별 옵션 구성"
+PAGES = ("dmworks_zones", "ocs_sim_fms", "ocs_sim_adaptive", "ocs_sim_qms")
 ITER = 600000
-SALT = hashlib.sha256(b"micro-cell/lock_page/" + PAGE.encode()).digest()[:16]
+
+
+def salt(page):
+    return hashlib.sha256(b"micro-cell/lock_page/" + page.encode()).digest()[:16]
+
+
 MIME = {"pdf": "application/pdf", "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
 
 GATE = """<title>%(title)s</title>
@@ -52,7 +59,7 @@ main{padding:28px 20px 56px}
 <header class="mast"><div class="wrap"><p class="eb">암호 필요</p><h1>%(title)s</h1></div></header>
 <main><div class="wrap">
 <form class="lock" id="lk">
-<p>업체 견적 단가가 들어 있어 암호를 넣어야 열림. 암호는 어디에도 전송되지 않고 이 브라우저 안에서만 확인함.</p>
+<p>업체 견적 내용이 들어 있어 암호를 넣어야 열림. 암호는 어디에도 전송되지 않고 이 브라우저 안에서만 확인함.</p>
 <label for="lkpw">암호</label>
 <div class="row"><input id="lkpw" type="password" inputmode="numeric" autocomplete="off" required autofocus><button id="lkgo">열기</button></div>
 <p id="lkmsg" role="status" aria-live="polite"></p>
@@ -61,7 +68,7 @@ main{padding:28px 20px 56px}
 <script id="lkdata" type="application/json">%(data)s</script>
 <script>
 (function(){
-  var d = JSON.parse(document.getElementById('lkdata').textContent), SK = 'lock:%(page)s';
+  var d = JSON.parse(document.getElementById('lkdata').textContent), SK = 'lock:micro-cell';
   var form = document.getElementById('lk'), pw = document.getElementById('lkpw'), go = document.getElementById('lkgo'), msg = document.getElementById('lkmsg');
   function b64(s){ var b = atob(s), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
   function store(v){ try { if (v === null) sessionStorage.removeItem(SK); else sessionStorage.setItem(SK, v); } catch (e) {} }
@@ -128,16 +135,16 @@ def seal(key, data):
     return iv, AESGCM(key).encrypt(iv, data, None)
 
 
-def main():
-    html_path = f"docs/{PAGE}.html"
+def lock(page, pw):
+    html_path = f"docs/{page}.html"
     s = open(html_path, encoding="utf-8").read()
     if 'id="lkdata"' in s:
         sys.exit(f"{html_path} 가 이미 암호 화면임 — ./build.sh 로 평문부터 다시 만들어야 함")
-    key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=SALT, iterations=ITER).derive(password().encode())
+    key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt(page), iterations=ITER).derive(pw.encode())
     b = lambda x: base64.b64encode(x).decode()
 
     for ext in MIME:
-        src = f"docs/{PAGE}.{ext}"
+        src = f"docs/{page}.{ext}"
         if os.path.exists(src):
             iv, ct = seal(key, open(src, "rb").read())
             open(src + ".enc", "wb").write(iv + ct)
@@ -146,10 +153,17 @@ def main():
             print(f"주의: {src} 없음 — {ext.upper()} 저장 버튼이 동작하지 않음")
 
     iv, ct = seal(key, s.encode("utf-8"))
-    data = json.dumps({"iter": ITER, "salt": b(SALT), "iv": b(iv), "ct": b(ct), "mime": MIME})
-    bar = web_wrap.bar(f"{PAGE}.html").replace(web_wrap.dl(f"{PAGE}.html"), "")
-    open(html_path, "w", encoding="utf-8").write(web_wrap.HEAD + GATE % {"title": TITLE, "bar": bar, "data": data, "page": PAGE})
+    data = json.dumps({"iter": ITER, "salt": b(salt(page)), "iv": b(iv), "ct": b(ct), "mime": MIME})
+    title = html.escape(html.unescape(re.search(r"<title>(.*?)</title>", s, re.S).group(1).strip()))
+    bar = web_wrap.bar(f"{page}.html").replace(web_wrap.dl(f"{page}.html"), "")
+    open(html_path, "w", encoding="utf-8").write(web_wrap.HEAD + GATE % {"title": title, "bar": bar, "data": data, "page": page})
     print("locked", html_path)
+
+
+def main():
+    pw = password()
+    for page in PAGES:
+        lock(page, pw)
 
 
 if __name__ == "__main__":
