@@ -65,7 +65,7 @@ main{padding:28px 20px 56px}
 .card:hover{border-color:var(--teal)}
 a.open{display:flex;flex-direction:column;gap:6px;color:var(--ink);text-decoration:none;flex:1}
 .save{display:flex;gap:8px;margin:0}.save a{font-size:13px;font-weight:700;color:var(--teal);border:1px solid var(--teal);border-radius:4px;padding:2px 10px;text-decoration:none}
-.save a:hover{background:var(--teal);color:var(--paper)}
+.save a:hover{background:var(--teal);color:var(--paper)}.save.lk{color:var(--muted);font-size:13px}
 .card b{font-size:17px}.card span{color:var(--muted);font-size:14px}.card em{font-style:normal;color:var(--teal);font-size:13px;font-weight:700;margin-top:auto}
 .foot{margin-top:28px;color:var(--muted);font-size:13px}
 .ref{margin-top:36px}.ref h2{font-size:18px;margin:2px 0 12px;color:var(--ink)}.eb2{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--teal);margin:0;letter-spacing:.06em}
@@ -77,7 +77,7 @@ a.open{display:flex;flex-direction:column;gap:6px;color:var(--ink);text-decorati
 <main><div class="wrap">
 <div class="cards">
 <div class="card"><a class="open" href="ocs_precision.html"><b>로컬 OCS Zone 구성 - (예시) 정밀조립존</b><span>AAS 기반 수집–저장 아키텍처, 장비 설치·연결 토폴로지, 데이터량·저장 용량 산정, 존/셀 HW·SW 목록</span><em>열기 →</em></a><p class="save"><a href="ocs_precision.pdf" download>PDF 저장</a><a href="ocs_precision.docx" download>Word 저장</a></p></div>
-<div class="card"><a class="open" href="dmworks_zones.html"><b>DMWorks 존별 옵션 구성</b><span>이지로보틱스 10/23 견적 3건(정가×57.2%) 기준, 존별 구매 필요성·해야 할 일·옵션, 품목별 검토, 계약 전 쟁점</span><em>열기 →</em></a><p class="save"><a href="dmworks_zones.pdf" download>PDF 저장</a><a href="dmworks_zones.docx" download>Word 저장</a></p></div>
+<div class="card"><a class="open" href="dmworks_zones.html"><b>DMWorks 존별 옵션 구성</b><span>이지로보틱스 10/23 견적 3건(정가×57.2%) 기준, 존별 구매 필요성·해야 할 일·옵션, 품목별 검토, 계약 전 쟁점</span><em>암호 입력 후 열기 →</em></a><p class="save lk">PDF·Word 저장은 암호를 넣고 연 페이지 상단에서 가능</p></div>
 <div class="card"><a class="open" href="ocs_sim_fms.html"><b>유연제조(FMS) 통합 OCS 시뮬레이션 Cell</b><span>10/23 견적(항목1~7) 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액, 10/18 중장위 심의 지침 점검</span><em>열기 →</em></a><p class="save"><a href="ocs_sim_fms.pdf" download>PDF 저장</a><a href="ocs_sim_fms.docx" download>Word 저장</a></p></div>
 <div class="card"><a class="open" href="ocs_sim_adaptive.html"><b>적응가공(Adaptive) 통합 OCS 시뮬레이션 Cell</b><span>10/23 견적(항목1~7) 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액, 10/18 중장위 심의 지침 점검</span><em>열기 →</em></a><p class="save"><a href="ocs_sim_adaptive.pdf" download>PDF 저장</a><a href="ocs_sim_adaptive.docx" download>Word 저장</a></p></div>
 <div class="card"><a class="open" href="ocs_sim_qms.html"><b>AI 정밀검사(QMS) 통합 OCS 시뮬레이션 Cell</b><span>10/23 견적(항목1~7) 기반 장비 설치·연결 토폴로지, 구성품별 사양·금액, 10/18 중장위 심의 지침 점검</span><em>열기 →</em></a><p class="save"><a href="ocs_sim_qms.pdf" download>PDF 저장</a><a href="ocs_sim_qms.docx" download>Word 저장</a></p></div>
