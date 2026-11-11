@@ -85,13 +85,13 @@ def subs(sym, z):
     n, nr = len(z["cells"]), len(remote_cells(z))
     riser = f" · 층간 수직 광(라이저) {2 * nr}회선(타 층 Cell {nr}개)" if nr else ""
     return {
-        "LSV": [("DPS", "로컬 서버 노드", "견적서에 사양·수량 없음 — 운영 시계열 DB·인증·SW 라이선스 서버 탑재(추정)", "1", "split"),
+        "LSV": [("DPS", "로컬 서버 노드", "견적서에 사양·수량 없음 — 운영 시계열 DB·인증·SW 라이선스 서버·존 로컬 UNS 브로커(MQTT 5) 탑재(추정)", "1", "split"),
                 ("LGPU", "로컬 GPU 서버", "견적서에 사양 없음 — 항목3 DT·AI 연산 서버와 역할 구분 필요", "1", "split"),
                 ("NAS", "Scale-out 스토리지 노드", "견적서에 용량·노드 수 없음", "1", "split"),
                 ("BAK", "백업 NAS", "견적서에 용량 없음", "1", "split"),
                 ("TSDB", "운영 시계열 DB (클러스터)", "분산형 시계열 DBMS·클러스터 라이선스(코디네이터·브로커·웨어하우스·룩업), 로봇·검사장비·PLC 상태·측정결과·공정 이벤트 저장·조회, "
                  "TAG·LOG 데이터 모델·SQL·SDK, 복제·장애 대응·보존·집계 — 10/15엔 별도 49,500", "1", "split")],
-        "EGW": [("EGWS", "Edge Gateway 서버", f"Cell 상태·이벤트 OPC UA 수집·AAS 매핑 — 견적 수량 1, Cell {n}개면 Cell별 1대인지 확인", "1", "split"),
+        "EGW": [("EGWS", "Edge Gateway 서버", f"설비 OPC UA 수집·AAS 매핑 → UNS(Sparkplug B) 발행·명령 역변환(설계) — 견적 수량 1, Cell {n}개면 Cell별 1대인지 확인", "1", "split"),
                 ("VNODE", "영상 수집 노드", "영상 버퍼·전처리 — 사양 없음", "1", "split"),
                 ("CAB", "Cell 네트워크 캐비닛", f"Cell 현장 함체(스위치·AP·게이트웨이 실장) — 견적 수량 1, Cell {n}개", "1", "split")],
         "NET": [("NET", "코어 스위치 (L3)", f"25GbE(SFP28) 24포트 이상 + 100GbE 2포트 이상 · 2대 이중화(MLAG) · PTP 중계(Boundary Clock). 대당 소요 약 {13 + n}포트 · 제안 2대", "1", "prop"),
@@ -383,7 +383,7 @@ def topo_svg(z):
     o.append('<text x="380" y="482" class="lkt">25GbE (가정)</text><text x="640" y="482" class="lkt">운영실 10GbE</text>')
     # R1 네트워크·보안
     rack(30, 200, "R1", "R1 · 네트워크·보안")
-    link([(390, 66), (390, 86), (214, 86), (214, 168)], "l10", "↑ AI Ready·AAS · ↓ 명령 (TLS)", 240, 101)
+    link([(390, 66), (390, 86), (214, 86), (214, 168)], "l10", "↑ UNS 브리지·AAS · ↓ 결정·오더 (TLS)", 240, 101)
     link([(130, 202), (130, 214)], "l10a")
     link([(40, 190), (34, 190), (34, 268), (40, 268)], "l10b")
     link([(200, 242), (200, 254)], "l100")
@@ -399,7 +399,7 @@ def topo_svg(z):
     dev(252, 168, 200, 40, "로컬 서버 노드", "수량·사양 미기재", "dv", 12, "DPS")
     dev(252, 216, 200, 40, "로컬 GPU 서버", "사양 미기재", "dv", 12, "LGPU")
     o.append('<text x="352" y="276" class="dvs" font-size="9.5">탑재: 운영 시계열 DB·인증·접근통제</text>'
-             '<text x="352" y="289" class="dvs" font-size="9.5">SW 라이선스 서버 (추정)</text>')
+             '<text x="352" y="289" class="dvs" font-size="9.5">SW 라이선스 서버·UNS 브로커 (추정)</text>')
     dev(252, 300, 200, 40, "Scale-out 스토리지 노드", "용량 미기재", "dv", 12, "NAS")
     dev(252, 350, 200, 34, "백업 NAS", "", "dv3", 11.5, "BAK")
     # R3 DT·AI 연산
@@ -467,13 +467,13 @@ def topo_svg(z):
         link([(x + cw - 30, ty + 16), (x + cw - 30, y0)], "l25a")
         link([(x + cw - 16, ty + 16), (x + cw - 16, y0)], "l25b")
         bw = (cw - 30) / 2
-        dev(round(x + 10), y0 + 46, round(bw), 42, "Edge Gateway", "OPC UA 수집·AAS 매핑", "dv", 11.5, "EGW")
+        dev(round(x + 10), y0 + 46, round(bw), 42, "Edge Gateway", "OPC UA → UNS 발행", "dv", 11.5, "EGW")
         dev(round(x + 20 + bw), y0 + 46, round(bw), 42, "영상 수집 노드", "영상 버퍼·전처리", "dv", 11.5, "VNODE")
         dev(round(x + 10), y0 + 98, round(bw), 32, "TSN 스위치", "", "dv2", 11, "NET")
         dev(round(x + 20 + bw), y0 + 98, round(bw), 32, "AP", "", "dv2", 11, "NET")
         link([(x + 10 + bw / 2, y0 + 88), (x + 10 + bw / 2, y0 + 98)], "l10")
         link([(x + 20 + bw * 1.5, y0 + 88), (x + 20 + bw * 1.5, y0 + 98)], "l10")
-        o.append(f'<text x="{mid:.0f}" y="{y0 + 152}" class="lkt" text-anchor="middle">OPC UA·AAS ↑상태·이벤트 · ↓명령·레시피·프로그램</text>')
+        o.append(f'<text x="{mid:.0f}" y="{y0 + 152}" class="lkt" text-anchor="middle">설비 접점 OPC UA ↑상태·이벤트 · ↓명령·레시피</text>')
         for j, d in enumerate(fdev):
             fx = x + 10 + (j % 2) * (bw + 10)
             fy = y0 + 166 + (j // 2) * 54
@@ -590,6 +590,8 @@ def summary_table(z):
         ("Zone Cell 구성", f"{z['zone'].split(' (')[0]} {z['plan'][0]} = 이 OCS Cell({z['id']}, '26 · 4종) + "
                            + " · ".join(f"{c[0]} {c[1]}('{c[2][1:]} · {c[3]})" for c in z["cells"])
                            + " — 각 Cell 장비의 제어기·PLC를 Edge Gateway에 OPC UA·AAS로 연결. 장비 단위 엣지는 구매 제외"),
+        ("UNS (FacOS 연계)", f"11/9 검토 보고서 [U1] 기준 — 중심 통로는 MQTT 5 + Sparkplug B + ISA-95 토픽({uns_zone(z)[1]}/…), OPC UA는 설비–Edge Gateway 접점에만 둠. 운영 SW는 설비에 직접 접속하지 않고 로컬 서버의 존 로컬 UNS 브로커로만 읽고, 명령은 cmd → ack → exec → done 4단계로 내림. "
+                             "10/23 견적에는 브로커·Sparkplug B·명령 역변환이 없어 규격서 반영과 공급사 확인 필요 (1-1절)"),
     ]
     ids = {"견적": "ql-s-quote", "구성 (견적서 7개 항목)": "ql-s-comp", "SW 라이선스": "ql-s-lic"}
     body = "".join(f'<tr><th scope="row">{E(a)}</th><td{f" id={chr(34)}{ids[a]}{chr(34)}" if a in ids else ""}>{E(b)}</td></tr>' for a, b in rows)
@@ -601,9 +603,9 @@ def roles_table(z):
              "Zone 운영실"),
             ("DT 모니터링 시스템", "MON", "모니터링 모듈로 Cell 운영 정보(생산량·진행률·사이클타임)와 가상모델 동작을 표시", "Zone 운영실"),
             ("DT·AI 연산 서버", "GPU", "학습 DT(OpenUSD 씬) 호스팅, 다중 시나리오 연산·합성데이터 생성·정책 추론 검증 (모델 학습은 외부 국가 GPU 인프라)", "서버실 R3"),
-            ("로컬 서버 (서버 노드·GPU 서버)", "DPS", "운영 시계열 DB 클러스터, 통합 인증·접근통제, SW 라이선스 서버, OCS 연계 서비스, 로컬 추론 (구성·수량은 견적서에 없음 — 공급사 협의)", "서버실 R2"),
+            ("로컬 서버 (서버 노드·GPU 서버)", "DPS", "운영 시계열 DB 클러스터, 존 로컬 UNS 브로커(MQTT 5)·Sparkplug 주 호스트(설계), 통합 인증·접근통제, SW 라이선스 서버, OCS 연계 서비스, 로컬 추론 (구성·수량은 견적서에 없음 — 공급사 협의)", "서버실 R2"),
             ("Scale-out 스토리지 · 백업 NAS", "NAS", "DT 모델·프로젝트·스캔 점군·Raw 운영 데이터 단기 보존, 백업", "서버실 R2"),
-            ("Edge Gateway · 영상 수집 노드", "EGW", "Cell 상태·이벤트 수집, 명령·레시피·프로그램 전달, Actual Trace 생성, 영상 버퍼·전처리", "각 Cell 캐비닛"),
+            ("Edge Gateway · 영상 수집 노드", "EGW", "설비 OPC UA로 Cell 상태·이벤트 수집 → UNS(Sparkplug B) 발행, UNS 명령(cmd 4단계)을 받아 설비에 명령·레시피·프로그램 전달, Actual Trace 생성, 영상 버퍼·전처리", "각 Cell 캐비닛"),
             ("네트워크 (코어·TSN·PoE·방화벽·PTP·AP·배선)", "NET", "Zone 백본, OT/IT 경계 보호, 가상·실측 데이터 시간동기, AMR·이동 로봇 무선", "서버실 R1 · 각 Cell 캐비닛 · 통로 트레이")]
     if z["scan"]:
         rows.insert(2, (z["scan"][0].split(" (")[0], "SCN", "현장·제품 3D 스캔 → 점군 처리 모듈로 가상 작업장·검사모델 구성", "Zone 운영실 · " + z["scan"][2]))
@@ -940,12 +942,124 @@ def space_section(z):
 SPACE_CSS = pz.SPACE_CSS   # 공간 구성 2D·3D 공용 스타일 — 로컬 OCS Zone 구성 페이지와 같이 씀
 
 
+# ------------------------------------------------------------------ UNS 설계 개념 (FacOS 연계) — 11/9 검토 보고서 [U1] 기준, 그림·규칙은 로컬 OCS Zone 구성 페이지(build_ocs_pz)와 공용
+UNS_AREA = {"fms": ("flex", "유연생산"), "adaptive": ("adapt", "적응가공"), "qms": ("insp", "정밀검사")}   # 메타팩토리 js/uns.js UNS_AREAS
+UNS_FIELD = {"fms": ("AMR·AGV (A-1-3 · 무선)", "ROS2·VDA5050 브리지 → _field/{로봇}", "AMR·AGV"),
+             "adaptive": ("팔레트 AMR (A-2-1 · A-2-3 · 무선)", "ROS2·VDA5050 브리지 → _field/{로봇}", "AMR"),
+             "qms": ("4족 보행 로봇·드론·AMR (무선)", "ROS2 브리지 → _field/{로봇}", "4족 보행·드론·AMR")}
+
+
+def uns_zone(z):
+    code = UNS_AREA[z["slug"]][0]
+    return code, f"{pz.UNS_ROOT}/{code}", z["zone"].split(" (")[0], z["cells"][0][0]
+
+
+def uns_svg(z):
+    code, _, area, cell = uns_zone(z)
+    n = len(z["cells"])
+    ft, fs, fl = UNS_FIELD[z["slug"]]
+    return pz.uns_svg({
+        "code": code, "area": area, "cell": cell, "field": fl, "down": "_facos 결정·오더",
+        "top": ("중앙 Server — FacOS 코어 · UNS 중앙 브로커", "L3·L4 · AAS 통합서버 · DCC 통합관제 (총괄1 · 구매범위 아님)"),
+        "pubs": [(f"Edge Gateway ×{n} (L1.5 · Cell 캐비닛)", "설비 OPC UA 구독 → 매핑 표 → Sparkplug B", "DDATA ↑ · cmd ↓", True),
+                 (f"영상 수집 노드 ×{n}", "비전·검사 결과 메타 (원본은 스토리지)", "결과·메타", False),
+                 (ft, fs, "status·detect", False)],
+        "aas": ("AAS (중앙 AAS 통합서버)", "NodeId–토픽 매핑 표 · Semantic ID · 단위"),
+        "broker": "L2 통합 · MQTT 5 브로커 (이중화)",
+        "own": f"{area} UNS 구간 — 존 로컬 브로커 (로컬 서버 노드 탑재 · 설계)",
+        "subt": "구독 — 운영 계층 L3 (로컬 서버 · 운영실)",
+        "subs": [("Sparkplug 주 호스트 (로컬 서버)", "spBv1.0 → {셀}/telemetry · edge 변환", "DDATA", False),
+                 ("존 오케스트레이터 (OCS 연계 서비스)", "Cell 상태 취합 · cmd 발행(zone 역할)", "state ↔ cmd", True),
+                 ("운영 시계열 DB (클러스터)", "전 토픽 구독 → 이력 적재", "전체", False),
+                 ("DT 모니터링 시스템", "Cell 운영 정보 · 가상모델 동작 표시", "state·kpi", False),
+                 ("공정 시뮬레이션 SW (운영 PC)", "실측 사이클타임 · 가상–실측 비교", "telemetry", False),
+                 ("DT·AI 연산 서버", "학습 DT 미러 · 추론 검증 입력", "state·telemetry", False)],
+        "bypass": [("고속 시계열 원본 (진동 · 관절 · 측정 파형)", "Edge Gateway 버퍼 → 운영 시계열 DB 묶음 전송"),
+                   ("영상 · 스캔 점군 원본", "영상 수집 노드 · 스캐너 → Scale-out 스토리지"),
+                   ("로봇 · 서보 실시간 제어", "TSN · Cell PLC (안전 정지는 안전 PLC)")],
+    })
+
+
+def uns_parts(z):
+    """견적 구성품 ↔ UNS 역할 (구성품, 계층, 역할, 10/23 견적, 조치)"""
+    n = len(z["cells"])
+    has = {l[1] for l in z["lines"]}
+    rows = [
+        ("Edge Gateway 서버 (항목4)", "L1.5 엣지 게이트웨이", "설비(로봇 제어기·PLC·CNC·측정기) OPC UA를 구독해 NodeId–토픽 매핑 표로 바꾸고 Sparkplug B로 발행. 내려온 cmd는 OPC UA Method·쓰기로 역변환해 ack → exec → done 회신",
+         "Edge Gateway 1식 — SW 기능·수량 없음", f"규격서에 OPC UA 클라이언트 · Sparkplug B 엣지 노드 · 매핑 표 · 명령 역변환 기능 기재. 같은 값은 1곳에서만 발행하므로 Cell별 1대({n}대)인지 확인"),
+        ("로컬 서버 노드 (항목4)", "L2 통합 = UNS", "존 로컬 UNS 브로커(MQTT 5 · ACL 6역할 · LWT), Sparkplug 주 호스트, 중앙 브로커 브리지(단절 시 저장 후 전송), 존 오케스트레이터(OCS 연계 서비스)",
+         "브로커 없음 · 노드 수량 없음", "브로커는 공개 SW로 탑재 가능(금액 영향 없음 — 설계 추정). 주·예비 이중화가 되도록 노드 2대 이상인지 확인"),
+        ("운영 시계열 DB (항목4)", "L3 운영", "존 브로커 전 토픽 구독 → 이력 적재. 현재값 기준은 UNS(retain), 이력 조회만 DB",
+         "클러스터 라이선스 — 수집 방식 없음", "MQTT 구독 수집(커넥터·SDK) 지원 여부 확인"),
+    ]
+    if "DMON" in has:
+        rows.append(("DT 모니터링 시스템 · 모니터링 모듈 (항목1·3)", "L3 운영", "{셀}/state · telemetry, _zone/kpi 구독 → 생산량·진행률·사이클타임·가상모델 동작 표시",
+                     "'설비 실시간 연동' — 연동 규약 없음", "MQTT 5 구독 지원 여부 확인. 미지원이면 기능 확장 개발 키트(API)로 구독 어댑터 개발 — 범위·비용 서면 확인"))
+    rows += [
+        ("공정 시뮬레이션 SW · PLC 가상 시운전 (항목1·2)", "L3 운영 (엔지니어링)", "운영 중 실측값(사이클타임·상태)은 UNS 구독으로 받음. PLC 가상 시운전의 OPC UA 직접 연결은 시운전 구간에만 둠",
+         "PLC 연동 OPC UA", "운영 SW의 설비 직접 접속 제외 규칙에서 시운전을 예외로 둘 범위(기간·대상 PLC·망 분리) 지정 — [U1]에 없는 항목(제안)"),
+        ("DT·AI 연산 서버 (항목3)", "L3 운영", "학습 DT 미러 입력을 UNS 구독으로 받음. OpenUSD 씬·합성데이터는 UNS 미경유", "해당 없음", "추가 조치 없음"),
+        ("산업용 방화벽 (항목4)", "경계", "존 ↔ 중앙은 MQTT 5(TLS) 브리지만 허용. 서버실·운영실 → 설비 OPC UA(4840/tcp) 차단, Edge Gateway → 설비 방향만 허용",
+         "산업 프로토콜 검사(제안 사양)", "방화벽 정책에 반영"),
+        ("중앙 Server (구매범위 밖)", "L3 · L4", "FacOS 코어 · UNS 중앙 브로커 · AAS 통합서버 — 존 상태·KPI·품질을 받고 _facos 결정·오더를 내림", "총괄1 구축", "토픽·계정·브리지 방식 세부1과 합의 필요"),
+    ]
+    return rows
+
+
+def uns_topics(z):
+    _, zt, area, _ = uns_zone(z)
+    cells = " · ".join(c[0] for c in z["cells"])
+    sp = pz.UNS_SP
+    return [
+        (f"{pz.UNS_ROOT}/_facos/order/{{오더}} · decision/{{종류}}", "retain · 이벤트", "FacOS (중앙)", "존 오케스트레이터", "오더와 공장 결정. 존에는 브리지로 내려옴"),
+        (f"{zt}/_zone/state", "retain", "존 오케스트레이터", "FacOS · 중앙 관제", f"{area} 상태 — Cell 수, Cell OCS 상태별 대수, 오더 대조"),
+        (f"{zt}/_zone/kpi · quality", "이벤트", "존 오케스트레이터 · 검사 SW", "FacOS · 모니터링 · 시계열 DB", "OEE, 제품 1개 판정마다 품질 표본"),
+        (f"{zt}/{{셀}}/state", "retain", "Cell OCS", "존 오케스트레이터 · 모니터링 · 시계열 DB", f"{{셀}} = {cells}. OCS 상태 7종: IDLE · READY · RUN · DONE · HOLD · RECOVER · SAFE-STOP"),
+        (f"{zt}/{{셀}}/telemetry", "이벤트", "Sparkplug 주 호스트", "모니터링 · 시뮬레이션 SW · 연산 서버 · 시계열 DB", "설비 요약 — Sparkplug DDATA를 변환해 실음"),
+        (f"{zt}/{{셀}}/edge", "retain", "Sparkplug 주 호스트", "모니터링 · 존 오케스트레이터", "Edge Gateway 생존(online). 단절 시 NDEATH → offline"),
+        (f"{zt}/{{셀}}/cmd · cmd/ack · cmd/exec · cmd/done", "이벤트", "존 오케스트레이터 → Edge Gateway", "Edge Gateway · 시계열 DB", "명령 4단계(레시피·프로그램 전달 지시 포함). 같은 correlationId로 묶음. 접수 ACK만으로 재개하지 않음"),
+        (f"{zt}/_field/{{로봇}}/status · detect · done", "status만 retain", "이동체(브리지)", "존 오케스트레이터 · 모니터링", f"{UNS_FIELD[z['slug']][2]} 현장 이벤트(무선 업링크)"),
+        (f"{sp}/NBIRTH · NDATA · NDEATH/{{EGW}}", "Sparkplug B", "Edge Gateway(edge 역할)", "Sparkplug 주 호스트", "엣지 노드 탄생·데이터·단절(LWT)"),
+        (f"{sp}/DBIRTH · DDATA · DDEATH/{{EGW}}/{{설비}}", "Sparkplug B", "Edge Gateway(edge 역할)", "Sparkplug 주 호스트", "설비별 메타데이터(단위·범위)와 변화분, seq 증가"),
+        ("opcua/json/…", "PubSub JSON", "AAS · Edge Gateway", "DT · 외부 기관", "AAS·Companion Spec 의미를 그대로 넘기는 교환에만 사용"),
+    ]
+
+
+def uns_rules(z):
+    n = len(z["cells"])
+    app = ["운영 PC·모니터링·시계열 DB·연산 서버는 존 로컬 브로커만 구독. 서버실·운영실 → 설비 OPC UA는 방화벽에서 차단(PLC 가상 시운전은 예외 범위 지정)",
+           "HOLD·재개·레시피·프로그램 전달 지시는 존 오케스트레이터가 cmd로 내리고 Edge Gateway가 Method로 역변환",
+           "메타팩토리 1.0.88은 외부 cmd/request를 정밀조립존(main)만 받음 — 이 존은 FacOS 결정·오더를 받아 존 오케스트레이터가 cmd를 발행",
+           f"Cell마다 Edge Gateway 1대만 발행({n}대). 견적 수량 1이 Cell별 1대가 아니면 한 대가 {n}개 Cell을 모두 맡는 구성인지 확인"]
+    return [(a, b, c, app[i] if i < len(app) else d) for i, (a, b, c, d) in enumerate(pz.UNS_RULES)]
+
+
+def uns_section(z):
+    code, zt, area, _ = uns_zone(z)
+    return f"""<section id="uns">
+  <p class="eyebrow">1-1. UNS 설계 개념 — FacOS 연계</p>
+  <h2>UNS(Unified Namespace) — 중심 통로는 MQTT 5, 설비 접점은 OPC UA</h2>
+  <p class="note-box">기준은 「UNS 기반 FacOS의 통신 방식 검토: OPC UA와 MQTT의 역할 분담 및 병행 구성」(캠틱, 2026-11-09) [U1]이며 「로컬 OCS Zone 구성 - (예시) 정밀조립존」 1-1절과 같은 구조임. <b>FacOS UNS의 중심 통로는 MQTT 5 + Sparkplug B + ISA-95 토픽, OPC UA는 설비 접점</b>에 둠. {E(area)}에서는 각 Cell 캐비닛의 Edge Gateway가 설비 OPC UA를 읽어 UNS로 올리는 유일한 입구(L1.5)가 되고, 운영실·서버실의 운영 SW는 설비에 직접 접속하지 않고 로컬 서버의 존 로컬 UNS 브로커만 구독함. 토픽은 메타팩토리와 같은 <b>{E(zt)}/…</b> 트리를 씀(존 코드 {E(code)}는 메타팩토리 기준, Cell ID 표기는 예시). 이 절은 설계안이며 10/23 견적에는 반영되지 않았고 세부1(FacOS)과 합의된 사양도 아님.</p>
+  <figure class="fig">{uns_svg(z)}<figcaption>주황 테두리가 {E(area)}의 UNS 구간(존 로컬 브로커)임. 실선(청록)은 상태·데이터 흐름, 점선은 명령·결정과 의미 조회임. Edge Gateway 화살표는 양방향으로, 올라갈 때는 Sparkplug B DDATA, 내려올 때는 cmd를 받아 OPC UA Method로 바꿈. 맨 아래 세 경로는 UNS(FacOS)를 거치지 않음. 브로커 제품은 정하지 않았음.</figcaption></figure>
+  <h3>① 견적 구성품의 UNS 역할과 견적 반영 여부</h3>
+  {pz.uns_table(uns_parts(z), ("구성품", "계층 [U1]", "UNS 역할 (설계)", "10/23 견적", "조치"))}
+  <h3>② 경로별 허용·제외 규칙</h3>
+  {pz.uns_table(uns_rules(z), ("대상", "허용 경로", "제외 경로", f"{area} 적용"))}
+  <h3>③ 토픽 이름공간 — ISA-95 트리 · Sparkplug B · PubSub JSON 영역 분리</h3>
+  {pz.uns_table(uns_topics(z), ("토픽", "성격", "발행", "구독", "내용"), mono=(0,))}
+  <p class="note-box">상태는 값이 바뀔 때만 발행하고 retain으로 마지막 값을 남김. 이벤트는 retain 없이 그때그때 발행함. 기준 시계는 존 PTP 시간동기 장치임. 계층 대응·데이터와 명령 왕복 경로·OPC UA–UNS 정합 규칙 8항목·적용 단계(S1~S4)·Fac 규약 v0.1 토픽 대응은 「로컬 OCS Zone 구성 - (예시) 정밀조립존」 1-1절 ①·④·⑤·⑦·⑧과 같음.</p>
+</section>
+"""
+
+
 REFS = [
     ("Q", "견적서", "이지로보틱스 존별 디지털 트윈 시뮬레이션 시스템 구축 견적서 (10/23, 엑셀 — 이 페이지 기준)", "2026-10-23", "OneDrive Workspace / Customers / 이지로보틱스 / 2026-10-23"),
     ("Q0", "견적서", "같은 견적서 10/15 최종본 (PDF) — 1015-1~3", "2026-10-15", "피지컬AI 3본부 / 04.장비심의 / 장비별 구비서류"),
     ("G1", "이메일", "유지연 팀장 「자체장비 심의시 질의&제안사항 공유 및 중장위 심의 준비(~10.21/수) 안내」 — 공통 제안의견·중장위 제출서류", "2026-10-18", "Outlook"),
     ("G2", "첨부", "26.10.16_자체장비심의 질의응답_제안사항.hwpx — 장비별 질의응답·심의요청서 작성 항목", "2026-10-16", "메일 첨부 · llm-wiki raw"),
     ("R", "계획서", "17. 연구개발계획서(협약용) — 1-1 제조 특화 메타팩토리 Zone별 Cell 구성·연차별 구축계획, OCS Cell 대상 품목·공정, 전용공간 확보 현황(Cell별 설치 위치)", "2026-08-27", "OneDrive Workspace / 피지컬AI 테스트베드"),
+    ("U1", "검토 보고서", "UNS 기반 FacOS의 통신 방식 검토: OPC UA와 MQTT의 역할 분담 및 병행 구성 (캠틱, 메타팩토리 1.0.88 기준) — 1-1절 UNS 설계 개념의 기준", "2026-11-09", "FacOS_UNS_OPCUA_MQTT_검토.docx"),
+    ("U2", "내부 자료", "메타팩토리 UNS 네임스페이스(js/uns.js) — 토픽 트리·존 코드·명령 4단계", "1.0.88", "meta-factory 저장소"),
     ("P", "발표자료", "1-3. 발표자료_이형수 — 유연제조·적응가공·AI정밀검사 OCS 시뮬레이션 Cell (Cell 구성·설치장소·계층 구성·단계 도입)", "2026-10-16", "피지컬AI 3본부 / 04.장비심의 / 심의순서별 발표자료"),
 ]
 
@@ -1004,13 +1118,13 @@ def page(z):
     return f'''<title>{E(z["short"])} OCS 시뮬레이션 Cell</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
-{CSS}{PZ_EXTRA}{EXTRA}{SPACE_CSS}
+{CSS}{PZ_EXTRA}{EXTRA}{pz.UNS_CSS}{SPACE_CSS}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · <span id="ql-eb">10/23 견적({E(z["no"])}) 기준</span> · 10/18 중장위 심의 준비 지침 적용 · 2026.10.23 갱신 · 검토본</p>
+  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · <span id="ql-eb">10/23 견적({E(z["no"])}) 기준</span> · 10/18 중장위 심의 준비 지침 적용 · 2026.10.23 갱신 · 2026.11.11 UNS 설계 개념 보완 · 검토본</p>
   <h1>{E(z["name"])}</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
-  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a>{'<a href="#quote">견적서 원본</a>' if qsec else ""}<a href="#refs">근거</a>
+  <a href="#sum">요약</a><a href="#topo">연결 토폴로지</a><a href="#uns">UNS 설계 개념</a><a href="#space">공간 구성 2D·3D</a><a href="#items">구성품·사양·금액</a><a href="#guide">지침 점검</a>{'<a href="#quote">견적서 원본</a>' if qsec else ""}<a href="#refs">근거</a>
 </div></nav>
 <main class="wrap">
 {ql.ocs_banner()}
@@ -1026,11 +1140,11 @@ def page(z):
   <figure class="fig">{topo_svg(z)}{legend()}
   <figcaption>견적서 항목3(연산 서버·운영 PC·모니터링)·항목4(로컬 서버·Edge Gateway·네트워크·기반시설·보안{"·스캐너" if z["scan"] else ""})를 설치 위치별로 나누고, SW 품목은 탑재 장비에 묶어 그림. <b>장비 노드를 누르면 2장 구성품 표의 해당 행으로 이동함.</b>
   서버실은 2장 평면·랙 실장도와 같은 R1~R3·UPS로 나눠 그렸고(랙 제목을 누르면 2장 평면으로 이동), 하단 Cell은 연구개발계획서(협약용) Zone Cell 구성(Cell ID·구축연도·설치 위치)을 따름. Cell 내부 장비는 계획서에 '장비 5종'만 있어 연결 대상을 예상해 적음.
-  견적서에 수량·사양이 없는 로컬 HW 하위 품목(코어 이중화, 링크 속도, Cell별 Edge Gateway·영상 노드 1대씩)은 「로컬 OCS Zone 구성 - (예시) 정밀조립존」과 같은 구조로 가정해 그렸음 — 공급사 상세 사양 확정 후 갱신. 업체·모델명은 쓰지 않음.</figcaption></figure>
+  견적서에 수량·사양이 없는 로컬 HW 하위 품목(코어 이중화, 링크 속도, Cell별 Edge Gateway·영상 노드 1대씩)은 「로컬 OCS Zone 구성 - (예시) 정밀조립존」과 같은 구조로 가정해 그렸음 — 공급사 상세 사양 확정 후 갱신. 업체·모델명은 쓰지 않음. Cell 설비와 Edge Gateway 사이는 OPC UA, Edge Gateway 위쪽(로컬 서버·운영실·중앙)은 UNS(MQTT 5)로 잇는 구성이며 1-1절에 정리함.</figcaption></figure>
   <h3>주요 장비 용도·설치 위치</h3>
   {roles_table(z)}
 </section>
-{space_section(z)}
+{uns_section(z)}{space_section(z)}
 <section id="items">
   <p class="eyebrow">3. 구성품·사양·금액</p>
   <h2>견적서 항목 순서대로 구성품별 사양·금액</h2>

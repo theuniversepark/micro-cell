@@ -1334,7 +1334,28 @@ UNS_SP = "spBv1.0/metafactory"      # Sparkplug B 영역
 N_MOBILE = (dict(ROBOTS)["AMR"] + dict(ROBOTS)["AMMR 양팔로봇"]) * 5
 
 
-def uns_svg():
+def uns_svg(c=None):
+    """c: 존별 표기 덮어쓰기 — OCS 시뮬레이션 Cell 3종(build_ocs_sim)이 같은 그림을 존 코드·구성품 이름만 바꿔 씀"""
+    cf = {"code": "main", "area": "정밀조립존", "cell": "A-3-5",
+         "top": ("DCC — FacOS 코어 · UNS 중앙 브로커", "L3·L4 · Fac Hub · MES (D-1-1 · D-2-1)"),
+         "pubs": [("Edge Gateway ×5 (L1.5 · FacOS F1)", "설비 OPC UA 구독 → 매핑 표 → Sparkplug B", "DDATA ↑ · cmd ↓", True),
+                  ("영상 수집 노드 ×5", "비전 결과·에피소드 메타 (원본은 Class E)", "결과·메타", False),
+                  (f"AMR·AMMR ×{N_MOBILE} (5G·Wi-Fi)", "ROS2·VDA5050 브리지 → _field/{로봇}", "status·detect", False)],
+         "aas": ("AAS Repository·Registry", "NodeId–토픽 매핑 표 · Semantic ID · 단위"),
+         "broker": "L2 통합 · Mosquitto 2 (MQTT 5)", "field": "AMR·AMMR", "down": "_facos 결정·오더 · cmd/request",
+         "own": "정밀조립존 UNS 구간 — FacOS F2 데이터 패브릭 (존 로컬 브로커)",
+         "subt": "구독 — 운영 계층 L3 (Local Server)",
+         "subs": [("Sparkplug 주 호스트", "spBv1.0 → {셀}/telemetry · edge 변환", "DDATA", False),
+                  ("존 오케스트레이터 (OCS)", "Manufacturing Agent · cmd 발행(zone 역할)", "state ↔ cmd", True),
+                  ("Operational TSDB", "전 토픽 구독 → 이력 적재", "전체", False),
+                  ("디지털트윈 (검증·학습 DT)", "실시간 미러 · 리플레이 트리거", "state·telemetry", False),
+                  ("품질 · KPI · AI 추론", "quality · kpi 구독 · 이상 판단 입력", "quality·kpi", False),
+                  ("검증 연계 Trace API (TTA)", "cmd 4단계 · 상태 전이 Trace 수집", "cmd·state", False)],
+         "bypass": [("고속 시계열 원본 (관절 100Hz · F/T 1kHz)", "Edge TSDB → Operational TSDB 묶음 전송"),
+                    ("영상 · Depth · LiDAR 원본 (Class E)", "영상 수집 노드 → S3 → Data Lake"),
+                    ("로봇 · 서보 실시간 제어", "TSN · 셀 PLC EtherCAT (안전 정지는 안전 PLC)")],
+         **(c or {})}
+    cell = cf["cell"]
     o = ['<svg class="arch plan" viewBox="0 0 1140 600" role="img" aria-label="FacOS 연계 존 로컬 UNS 브로커 중심 발행·구독 구성도" style="max-width:1140px">',
          '<defs><marker id="um1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--cyan)"/></marker>'
          '<marker id="um2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9DB8E8"/></marker></defs>']
@@ -1349,35 +1370,33 @@ def uns_svg():
         o.append(f'<text x="{(x1 + x2) / 2}" y="{y - 7}" class="fl-t" text-anchor="middle" font-size="10.5">{E(t)}</text>')
 
     # 중앙 (L3·L4)
-    o.append('<rect x="400" y="8" width="340" height="50" rx="6" class="ly ly1"/><text x="570" y="30" class="lyt" text-anchor="middle">DCC — FacOS 코어 · UNS 중앙 브로커</text>'
-             '<text x="570" y="48" class="lys" text-anchor="middle">L3·L4 · Fac Hub · MES (D-1-1 · D-2-1)</text>')
+    o.append(f'<rect x="400" y="8" width="340" height="50" rx="6" class="ly ly1"/><text x="570" y="30" class="lyt" text-anchor="middle">{E(cf["top"][0])}</text>'
+             f'<text x="570" y="48" class="lys" text-anchor="middle">{E(cf["top"][1])}</text>')
     o.append('<line x1="530" y1="122" x2="530" y2="62" class="fl-d" marker-end="url(#um1)"/><text x="520" y="96" class="fl-t" text-anchor="end">존 상태·KPI·품질 (브리지 · store&amp;forward)</text>')
-    o.append('<line x1="610" y1="62" x2="610" y2="122" class="fl-c" marker-end="url(#um2)"/><text x="620" y="96" class="fl-t">_facos 결정·오더 · cmd/request</text>')
+    o.append(f'<line x1="610" y1="62" x2="610" y2="122" class="fl-c" marker-end="url(#um2)"/><text x="620" y="96" class="fl-t">{E(cf["down"])}</text>')
 
     # 설비 접점
     o.append('<rect x="0" y="130" width="290" height="254" rx="6" class="ly ly3"/><text x="14" y="154" class="lyt">발행 — 설비 접점 (셀)</text>')
-    for i, (t, s, lab, both) in enumerate([("Edge Gateway ×5 (L1.5 · FacOS F1)", "설비 OPC UA 구독 → 매핑 표 → Sparkplug B", "DDATA ↑ · cmd ↓", True),
-                                           ("영상 수집 노드 ×5", "비전 결과·에피소드 메타 (원본은 Class E)", "결과·메타", False),
-                                           (f"AMR·AMMR ×{N_MOBILE} (5G·Wi-Fi)", "ROS2·VDA5050 브리지 → _field/{로봇}", "status·detect", False)]):
+    for i, (t, s, lab, both) in enumerate(cf["pubs"]):
         box(10, 166 + i * 72, 270, 60, t, s)
         flow(292, 392, 196 + i * 72, lab, both=both)
     o.append('<rect x="0" y="400" width="290" height="94" rx="6" class="ly ly1"/><text x="14" y="424" class="lyt">의미 기준</text>')
-    box(10, 432, 270, 52, "AAS Repository·Registry", "NodeId–토픽 매핑 표 · Semantic ID · 단위")
+    box(10, 432, 270, 52, *cf["aas"])
     o.append('<line x1="292" y1="458" x2="392" y2="458" class="fl-m"/><text x="342" y="451" class="fl-t" text-anchor="middle" font-size="10.5">opcua/json · 매핑</text>')
 
     # 존 로컬 브로커 (L2 통합)
     o.append('<rect x="400" y="130" width="340" height="364" rx="6" class="ly ly2"/><text x="414" y="154" class="lyt">존 로컬 UNS 브로커</text>'
-             '<text x="726" y="154" class="lys" text-anchor="end">L2 통합 · Mosquitto 2 (MQTT 5)</text>')
+             f'<text x="726" y="154" class="lys" text-anchor="end">{E(cf["broker"])}</text>')
     o.append('<rect x="412" y="166" width="316" height="290" rx="5" class="box"/>')
     tree = [(f"{UNS_ROOT}/", "Enterprise / Site"),
             (" ├ _facos/…", "공장 결정·오더 (중앙)"),
-            (" ├ main/", "Area = 정밀조립존"),
+            (f" ├ {cf['code']}/", f"Area = {cf['area']}"),
             (" │  ├ _zone/state · kpi · quality", ""),
-            (" │  ├ A-3-5/state", "셀 OCS 상태 7종"),
-            (" │  ├ A-3-5/telemetry", "설비 요약"),
-            (" │  ├ A-3-5/edge", "EGW 생존 (retain)"),
-            (" │  ├ A-3-5/cmd · ack · exec · done", ""),
-            (" │  └ _field/{로봇}/status …", "AMR·AMMR"),
+            (f" │  ├ {cell}/state", "셀 OCS 상태 7종"),
+            (f" │  ├ {cell}/telemetry", "설비 요약"),
+            (f" │  ├ {cell}/edge", "EGW 생존 (retain)"),
+            (f" │  ├ {cell}/cmd · ack · exec · done", ""),
+            (" │  └ _field/{로봇}/status …", cf["field"]),
             (f"{UNS_SP}/…", "Sparkplug B (EGW)"),
             ("opcua/json/…", "AAS PubSub JSON")]
     for i, (t, c) in enumerate(tree):
@@ -1387,24 +1406,17 @@ def uns_svg():
             o.append(f'<text x="718" y="{y}" class="unsc" text-anchor="end">{E(c)}</text>')
     o.append('<text x="570" y="478" class="lys2" text-anchor="middle">상태 = retain + 변화 보고 · 명령 = correlationId 4단계</text>')
     o.append('<rect x="394" y="124" width="352" height="376" rx="10" class="own"/>')
-    o.append('<text x="570" y="518" class="owntag" text-anchor="middle">정밀조립존 UNS 구간 — FacOS F2 데이터 패브릭 (존 로컬 브로커)</text>')
+    o.append(f'<text x="570" y="518" class="owntag" text-anchor="middle">{E(cf["own"])}</text>')
 
     # 운영 계층 L3
-    o.append('<rect x="850" y="130" width="290" height="364" rx="6" class="ly ly3"/><text x="864" y="154" class="lyt">구독 — 운영 계층 L3 (Local Server)</text>')
-    for i, (t, s, lab, both) in enumerate([("Sparkplug 주 호스트", "spBv1.0 → {셀}/telemetry · edge 변환", "DDATA", False),
-                                           ("존 오케스트레이터 (OCS)", "Manufacturing Agent · cmd 발행(zone 역할)", "state ↔ cmd", True),
-                                           ("Operational TSDB", "전 토픽 구독 → 이력 적재", "전체", False),
-                                           ("디지털트윈 (검증·학습 DT)", "실시간 미러 · 리플레이 트리거", "state·telemetry", False),
-                                           ("품질 · KPI · AI 추론", "quality · kpi 구독 · 이상 판단 입력", "quality·kpi", False),
-                                           ("검증 연계 Trace API (TTA)", "cmd 4단계 · 상태 전이 Trace 수집", "cmd·state", False)]):
+    o.append(f'<rect x="850" y="130" width="290" height="364" rx="6" class="ly ly3"/><text x="864" y="154" class="lyt">{E(cf["subt"])}</text>')
+    for i, (t, s, lab, both) in enumerate(cf["subs"]):
         box(860, 164 + i * 54, 270, 46, t, s)
         flow(748, 848, 187 + i * 54, lab, both=both)
 
     # UNS 미경유
     o.append('<rect x="0" y="530" width="1140" height="62" rx="6" class="ly ly4"/><text x="14" y="557" class="lyt">UNS 미경유</text><text x="14" y="575" class="lys" style="fill:#fff">FacOS 비경유 경로</text>')
-    for i, (t, s) in enumerate([("고속 시계열 원본 (관절 100Hz · F/T 1kHz)", "Edge TSDB → Operational TSDB 묶음 전송"),
-                                ("영상 · Depth · LiDAR 원본 (Class E)", "영상 수집 노드 → S3 → Data Lake"),
-                                ("로봇 · 서보 실시간 제어", "TSN · 셀 PLC EtherCAT (안전 정지는 안전 PLC)")]):
+    for i, (t, s) in enumerate(cf["bypass"]):
         box(150 + i * 330, 538, 320, 46, t, s)
     o.append("</svg>")
     return "".join(o)
