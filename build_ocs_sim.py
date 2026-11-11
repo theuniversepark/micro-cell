@@ -1120,7 +1120,7 @@ def page(z):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {CSS}{PZ_EXTRA}{EXTRA}{pz.UNS_CSS}{SPACE_CSS}
 <header class="mast"><div class="wrap">
-  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · <span id="ql-eb">10/23 견적({E(z["no"])}) 기준</span> · 10/18 중장위 심의 준비 지침 적용 · 2026.10.23 갱신 · 2026.11.11 UNS 설계 개념 보완 · 검토본</p>
+  <p class="eyebrow">총괄5-세부1 · {E(z["id"])} · <span id="ql-eb">10/23 견적({E(z["no"])}) 기준</span> · 10/18 중장위 심의 준비 지침 적용</p>
   <h1>{E(z["name"])}</h1>
 </div></header>
 <nav class="toc" aria-label="바로가기"><div class="wrap">
